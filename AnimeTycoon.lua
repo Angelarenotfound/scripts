@@ -14,13 +14,12 @@ frame.Size = UDim2.new(0, 500, 0, 300)
 frame.Position = UDim2.new(0.5, -250, 0.5, -150)
 frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-frame.BackgroundTransparency = 0.1
+frame.BackgroundTransparency = 0 -- Cambié esto a 0 para que sea visible
 frame.ClipsDescendants = true
 frame.BorderSizePixel = 2
 frame.Parent = screenGui
 frame.Active = true
 frame.Draggable = true
-frame.BorderRadius = UDim.new(0, 10)
 
 local title = Instance.new("TextLabel")
 title.Text = "Angelarenotfound's GUI"
@@ -28,10 +27,10 @@ title.Size = UDim2.new(1, -30, 0, 50)
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 24
-title.BackgroundTransparency = 1
-title.BorderRadius = UDim.new(0, 10)
+title.BackgroundTransparency = 0.5 -- Ahora el fondo será parcialmente visible
 title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 title.Parent = frame
+
 local closeButton = Instance.new("TextButton")
 closeButton.Text = "X"
 closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -42,9 +41,6 @@ closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.SourceSansBold
 closeButton.TextSize = 18
 closeButton.Parent = frame
-closeButton.BorderRadius = UDim.new(0, 5)
-closeButton.Active = true
-closeButton.Draggable = true
 
 closeButton.MouseButton1Click:Connect(function()
     isGuiVisible = not isGuiVisible
@@ -58,7 +54,6 @@ sideBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 sideBar.BorderSizePixel = 2
 sideBar.BorderColor3 = Color3.fromRGB(0, 0, 0)
 sideBar.Parent = frame
-sideBar.BorderRadius = UDim.new(0, 10)
 
 local tabs = {"Player", "Game", "Discord"}
 local buttons = {}
@@ -72,17 +67,18 @@ for i, tab in ipairs(tabs) do
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Parent = sideBar
     table.insert(buttons, button)
-    button.BorderRadius = UDim.new(0, 10)
-    
+
     button.MouseButton1Click:Connect(function()
         currentTab = tab
         updateTabContent()
     end)
 end
+
 local contentArea = Instance.new("Frame")
 contentArea.Size = UDim2.new(1, -100, 1, -50)
 contentArea.Position = UDim2.new(0, 100, 0, 50)
-contentArea.BackgroundTransparency = 1
+contentArea.BackgroundTransparency = 0.5 -- Cambié esto para que sea parcialmente visible
+contentArea.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Agregué color de fondo
 contentArea.Parent = frame
 
 local function updateTabContent()

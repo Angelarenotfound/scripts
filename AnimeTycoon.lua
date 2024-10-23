@@ -1,84 +1,112 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
--- Crear ventana principal
-local Window = OrionLib:MakeWindow({Name = "Adonis Except", HidePremium = false, SaveConfig = true, ConfigFolder = "AdonisConfig", IntroEnabled = true, IntroText = "Adonis Except"})
+local Window = OrionLib:MakeWindow({Name = "Adonis Except", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
 
--- Tab Player
-local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998"})
+-- Sección Player
+local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
--- Speed y Jumppower con input y persistencia
-PlayerTab:AddSlider({
-	Name = "Speed",
-	Min = 0,
-	Max = 200,
-	Default = 16,
-	Color = Color3.fromRGB(255, 0, 0),
-	Increment = 1,
-	ValueName = "Speed",
-	Callback = function(Value)
-		local char = game.Players.LocalPlayer.Character
-		char.Humanoid.WalkSpeed = Value
-		-- Persistencia
-		char.Humanoid.Died:Connect(function()
-			char.Humanoid.WalkSpeed = Value
-		end)
-	end
+-- Inputs de Speed y Jumppower
+PlayerTab:AddTextbox({
+    Name = "Speed",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(Value)
+    end    
 })
 
-PlayerTab:AddSlider({
-	Name = "Jumppower",
-	Min = 0,
-	Max = 200,
-	Default = 50,
-	Color = Color3.fromRGB(255, 255, 0),
-	Increment = 1,
-	ValueName = "Jumppower",
-	Callback = function(Value)
-		local char = game.Players.LocalPlayer.Character
-		char.Humanoid.JumpPower = Value
-		-- Persistencia
-		char.Humanoid.Died:Connect(function()
-			char.Humanoid.JumpPower = Value
-		end)
-	end
+PlayerTab:AddTextbox({
+    Name = "Jump Power",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = tonumber(Value)
+    end    
 })
 
--- Botón para coordenadas
+-- Botón para obtener coordenadas
 PlayerTab:AddButton({
-	Name = "Get Coordinates",
-	Callback = function()
-		local position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-		local coords = "X: " .. math.floor(position.X) .. ", Y: " .. math.floor(position.Y) .. ", Z: " .. math.floor(position.Z)
-		OrionLib:MakeNotification({Name = "Coordinates", Content = coords, Time = 5})
-		setclipboard(coords)
-	end
+    Name = "Get Coordinates",
+    Callback = function()
+        local position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        local coords = "X: " .. math.floor(position.X) .. ", Y: " .. math.floor(position.Y) .. ", Z: " .. math.floor(position.Z)
+        OrionLib:MakeNotification({
+            Name = "Coordinates",
+            Content = coords,
+            Time = 5
+        })
+        setclipboard(coords) -- Copiar al portapapeles
+    end
 })
 
--- Tab Game
-local GameTab = Window:MakeTab({Name = "Game", Icon = "rbxassetid://4483345998"})
-
--- Teleport a otro jugador
-GameTab:AddTextbox({
-	Name = "TP to Player",
-	Default = "",
-	TextDisappear = true,
-	Callback = function(PlayerName)
-		local found = false
-		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-			if player.Name:lower():find(PlayerName:lower()) then
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-				OrionLib:MakeNotification({Name = "Teleported", Content = "Teleported to: " .. player.DisplayName, Time = 5})
-				found = true
-				break
-			end
-		end
-		if not found then
-			OrionLib:MakeNotification({Name = "Error", Content = "Player not found", Time = 5})
-		end
-	end
+-- Script de TP a un jugador
+PlayerTab:AddTextbox({
+    Name = "TP to Player",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(input)
+        local found = false
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player.Name:lower():find(input:lower()) or player.DisplayName:lower():find(input:lower()) then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                OrionLib:MakeNotification({
+                    Name = "Teleported",
+                    Content = "Teleported to: " .. player.DisplayName,
+                    Time = 5
+                })
+                found = true
+                break
+            end
+        end
+        if not found then
+            OrionLib:MakeNotification({
+                Name = "Error",
+                Content = "Player not found",
+                Time = 5
+            })
+        end
+    end
 })
 
--- Auto collect con teletransporte cada 5 minutos
+-- Sección Game
+local GameTab = Window:MakeTab({Name = "Game", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+
+-- Botón TP Home
+GameTab:AddButton({
+    Name = "TP Home",
+    Callback = function()
+        local team = game.Players.LocalPlayer.Team.Name
+        local locations = {
+            ["Goku"] = Vector3.new(-83, 6, -206),
+            ["Deku"] = Vector3.new(-185, 6, -125),
+            ["Luffy"] = Vector3.new(-224, 6, -2),
+            ["Gon"] = Vector3.new(-183, 6, 120),
+            ["Sasuke"] = Vector3.new(-72, 6, 201),
+            ["Vegeta"] = Vector3.new(66, 6, 199),
+            ["Todoroki"] = Vector3.new(169, 6, 120),
+            ["Zoro"] = Vector3.new(207, 6, -4),
+            ["Gojo"] = Vector3.new(166, 6, -127),
+            ["Naruto"] = Vector3.new(55, 6, -207)
+        }
+        local position = locations[team]
+        if position then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+            OrionLib:MakeNotification({
+                Name = "Teleported",
+                Content = "Teleported to: " .. team .. " Home",
+                Time = 5
+            })
+        else
+            OrionLib:MakeNotification({
+                Name = "Error",
+                Content = "Team not recognized",
+                Time = 5
+            })
+        end
+    end
+})
+
+-- Auto Collect (con 2 minutos de espera)
 local autoCollect = false
 local collectLocations = {
     Todoroki = Vector3.new(186, 6, 104),
@@ -93,35 +121,65 @@ local collectLocations = {
     Zoro = Vector3.new(212, 6, -26)
 }
 
-local teamNames = {"Todoroki", "Vegeta", "Sasuke", "Gon", "Luffy", "Deku", "Goku", "Naruto", "Gojo", "Zoro"}
+local timeLeft = 120 -- 2 minutos
+local timeLabel = GameTab:AddLabel("Time until next TP: " .. timeLeft .. " seconds")
 
-GameTab:AddToggle({
-	Name = "Auto Collect",
-	Default = false,
-	Callback = function(Value)
-		autoCollect = Value
-		if autoCollect then
-			while autoCollect do
-				local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-				local playerTeam = tostring(game.Players.LocalPlayer.Team)
-
-				for _, team in ipairs(teamNames) do
-					if playerTeam == team then
-						local location = collectLocations[team]
-						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
-						wait(1)
-						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
-						wait(300) -- Esperar 5 minutos
-						break
-					end
-				end
-			end
-		end
-	end
+GameTab:AddButton({
+    Name = "Auto Collect",
+    Callback = function()
+        autoCollect = not autoCollect
+        if autoCollect then
+            OrionLib:MakeNotification({Name = "Auto Collect", Content = "Enabled", Time = 5})
+            spawn(function()
+                while autoCollect do
+                    timeLeft = 120 -- Reiniciar el temporizador
+                    while timeLeft > 0 do
+                        timeLabel:Set("Time until next TP: " .. timeLeft .. " seconds")
+                        wait(1)
+                        timeLeft = timeLeft - 1
+                    end
+                    local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                    for _, location in pairs(collectLocations) do
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
+                        wait(1)
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+                        wait(120) -- Esperar 2 minutos
+                    end
+                end
+            end)
+        else
+            OrionLib:MakeNotification({Name = "Auto Collect", Content = "Disabled", Time = 5})
+            timeLabel:Set("Auto Collect Disabled")
+        end
+    end
 })
 
--- Tab Discord (Vacío)
-Window:MakeTab({Name = "Discord", Icon = "rbxassetid://4483345998"})
+-- Sección Teleports
+local TeleportsTab = Window:MakeTab({Name = "Teleports", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
--- Inicializar Orion
+local teleportLocations = {
+    ["Naruto"] = Vector3.new(55, 6, -207),
+    ["Goku"] = Vector3.new(-83, 6, -206),
+    ["Deku"] = Vector3.new(-185, 6, -125),
+    ["Sasuke"] = Vector3.new(-72, 6, 201),
+    ["Vegeta"] = Vector3.new(66, 6, 199),
+    ["Todoroki"] = Vector3.new(169, 6, 120),
+    ["Zoro"] = Vector3.new(207, 6, -4),
+    ["Gojo"] = Vector3.new(166, 6, -127)
+}
+
+for name, position in pairs(teleportLocations) do
+    TeleportsTab:AddButton({
+        Name = name,
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+            OrionLib:MakeNotification({
+                Name = "Teleported",
+                Content = "Teleported to: " .. name,
+                Time = 5
+            })
+        end
+    })
+end
+
 OrionLib:Init()

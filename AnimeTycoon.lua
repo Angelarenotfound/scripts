@@ -1,11 +1,9 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "Adonis Except", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Window = OrionLib:MakeWindow({Name = "Adonis Except", HidePremium = false, SaveConfig = true, ConfigFolder = "AdonisExcept"})
 
--- Sección Player
 local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
--- Inputs de Speed y Jumppower
 PlayerTab:AddTextbox({
     Name = "Speed",
     Default = "",
@@ -24,7 +22,6 @@ PlayerTab:AddTextbox({
     end    
 })
 
--- Botón para obtener coordenadas
 PlayerTab:AddButton({
     Name = "Get Coordinates",
     Callback = function()
@@ -35,11 +32,10 @@ PlayerTab:AddButton({
             Content = coords,
             Time = 5
         })
-        setclipboard(coords) -- Copiar al portapapeles
+        setclipboard(coords)
     end
 })
 
--- Script de TP a un jugador
 PlayerTab:AddTextbox({
     Name = "TP to Player",
     Default = "",
@@ -68,10 +64,8 @@ PlayerTab:AddTextbox({
     end
 })
 
--- Sección Game
 local GameTab = Window:MakeTab({Name = "Game", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
--- Botón TP Home
 GameTab:AddButton({
     Name = "TP Home",
     Callback = function()
@@ -106,7 +100,6 @@ GameTab:AddButton({
     end
 })
 
--- Auto Collect (con 2 minutos de espera)
 local autoCollect = false
 local collectLocations = {
     Todoroki = Vector3.new(186, 6, 104),
@@ -121,7 +114,7 @@ local collectLocations = {
     Zoro = Vector3.new(212, 6, -26)
 }
 
-local timeLeft = 120 -- 2 minutos
+local timeLeft = 120
 local timeLabel = GameTab:AddLabel("Time until next TP: " .. timeLeft .. " seconds")
 
 GameTab:AddButton({
@@ -132,7 +125,7 @@ GameTab:AddButton({
             OrionLib:MakeNotification({Name = "Auto Collect", Content = "Enabled", Time = 5})
             spawn(function()
                 while autoCollect do
-                    timeLeft = 120 -- Reiniciar el temporizador al comenzar
+                    timeLeft = 120
                     while timeLeft > 0 do
                         timeLabel:Set("Time until next TP: " .. timeLeft .. " seconds")
                         wait(1)
@@ -143,9 +136,9 @@ GameTab:AddButton({
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
                         wait(1)
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
-                        wait(120) -- Esperar 2 minutos
+                        wait(120)
                     end
-                    timeLeft = 120 -- Reiniciar el temporizador después de teletransportarse
+                    timeLeft = 120
                 end
             end)
         else
@@ -155,7 +148,6 @@ GameTab:AddButton({
     end
 })
 
--- Sección Teleports
 local TeleportsTab = Window:MakeTab({Name = "Teleports", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 local teleportLocations = {

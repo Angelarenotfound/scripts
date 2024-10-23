@@ -1,96 +1,84 @@
--- GUI Code with improved design and functionality for Mobile compatibility
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local CloseButton = Instance.new("TextButton")
-local Sidebar = Instance.new("Frame")
-local PlayerButton = Instance.new("TextButton")
-local GameButton = Instance.new("TextButton")
-local DiscordButton = Instance.new("TextButton")
-local MainLabel = Instance.new("TextLabel")
-local AutoCollectButton = Instance.new("TextButton")
-local GetCoordsButton = Instance.new("TextButton")
-local TPButton = Instance.new("TextButton")
-local PlayerInput = Instance.new("TextBox")
-local NotificationLabel = Instance.new("TextLabel")
+-- Crear ventana principal
+local Window = OrionLib:MakeWindow({Name = "Adonis Except", HidePremium = false, SaveConfig = true, ConfigFolder = "AdonisConfig", IntroEnabled = true, IntroText = "Adonis Except"})
 
--- Setting up the ScreenGui
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- Tab Player
+local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998"})
 
--- Main Frame (Responsive for Mobile)
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0) -- Adjusted for better mobile display
-MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
-MainFrame.Active = true
-MainFrame.Draggable = true
--- Close Button
-CloseButton.Name = "CloseButton"
-CloseButton.Parent = ScreenGui
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-CloseButton.Size = UDim2.new(0, 40, 0, 40)
-CloseButton.Position = UDim2.new(1, -60, 0, 40)
-CloseButton.Text = "X"
-CloseButton.Draggable = true
+-- Speed y Jumppower con input y persistencia
+PlayerTab:AddSlider({
+	Name = "Speed",
+	Min = 0,
+	Max = 200,
+	Default = 16,
+	Color = Color3.fromRGB(255, 0, 0),
+	Increment = 1,
+	ValueName = "Speed",
+	Callback = function(Value)
+		local char = game.Players.LocalPlayer.Character
+		char.Humanoid.WalkSpeed = Value
+		-- Persistencia
+		char.Humanoid.Died:Connect(function()
+			char.Humanoid.WalkSpeed = Value
+		end)
+	end
+})
 
-CloseButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+PlayerTab:AddSlider({
+	Name = "Jumppower",
+	Min = 0,
+	Max = 200,
+	Default = 50,
+	Color = Color3.fromRGB(255, 255, 0),
+	Increment = 1,
+	ValueName = "Jumppower",
+	Callback = function(Value)
+		local char = game.Players.LocalPlayer.Character
+		char.Humanoid.JumpPower = Value
+		-- Persistencia
+		char.Humanoid.Died:Connect(function()
+			char.Humanoid.JumpPower = Value
+		end)
+	end
+})
 
--- Sidebar (responsive positioning)
-Sidebar.Name = "Sidebar"
-Sidebar.Parent = MainFrame
-Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Sidebar.Size = UDim2.new(0, 100, 1, 0)
+-- Botón para coordenadas
+PlayerTab:AddButton({
+	Name = "Get Coordinates",
+	Callback = function()
+		local position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+		local coords = "X: " .. math.floor(position.X) .. ", Y: " .. math.floor(position.Y) .. ", Z: " .. math.floor(position.Z)
+		OrionLib:MakeNotification({Name = "Coordinates", Content = coords, Time = 5})
+		setclipboard(coords)
+	end
+})
 
--- Player Button
-PlayerButton.Name = "PlayerButton"
-PlayerButton.Parent = Sidebar
-PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-PlayerButton.Size = UDim2.new(1, 0, 0, 50)
-PlayerButton.Text = "Player"
-PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
--- Game Button
-GameButton.Name = "GameButton"
-GameButton.Parent = Sidebar
-GameButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-GameButton.Size = UDim2.new(1, 0, 0, 50)
-GameButton.Position = UDim2.new(0, 0, 0, 50)
-GameButton.Text = "Game"
-GameButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Tab Game
+local GameTab = Window:MakeTab({Name = "Game", Icon = "rbxassetid://4483345998"})
 
--- Discord Button
-DiscordButton.Name = "DiscordButton"
-DiscordButton.Parent = Sidebar
-DiscordButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-DiscordButton.Size = UDim2.new(1, 0, 0, 50)
-DiscordButton.Position = UDim2.new(0, 0, 0, 100)
-DiscordButton.Text = "Discord"
-DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Teleport a otro jugador
+GameTab:AddTextbox({
+	Name = "TP to Player",
+	Default = "",
+	TextDisappear = true,
+	Callback = function(PlayerName)
+		local found = false
+		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+			if player.Name:lower():find(PlayerName:lower()) then
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+				OrionLib:MakeNotification({Name = "Teleported", Content = "Teleported to: " .. player.DisplayName, Time = 5})
+				found = true
+				break
+			end
+		end
+		if not found then
+			OrionLib:MakeNotification({Name = "Error", Content = "Player not found", Time = 5})
+		end
+	end
+})
 
--- Navigation functionality
-PlayerButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Player Menu"
-end)
-
-GameButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Game Menu"
-end)
-
-DiscordButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Join us on Discord!"
-end)
--- Auto Collect functionality (Teams with coordinates and quick teleport)
-AutoCollectButton.Name = "AutoCollectButton"
-AutoCollectButton.Parent = MainFrame
-AutoCollectButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-AutoCollectButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-AutoCollectButton.Position = UDim2.new(0.3, 0, 0.5, 0)
-AutoCollectButton.Text = "Auto Collect OFF"
-AutoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
+-- Auto collect con teletransporte cada 5 minutos
 local autoCollect = false
 local collectLocations = {
     Todoroki = Vector3.new(186, 6, 104),
@@ -105,76 +93,35 @@ local collectLocations = {
     Zoro = Vector3.new(212, 6, -26)
 }
 
-AutoCollectButton.MouseButton1Click:Connect(function()
-    autoCollect = not autoCollect
-    if autoCollect then
-        AutoCollectButton.Text = "Auto Collect ON"
-        while autoCollect do
-            local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-            for _, location in pairs(collectLocations) do
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
-                wait(1) -- Quick teleport
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
-                wait(300) -- 5 minutes (300 seconds)
-            end
-        end
-    else
-        AutoCollectButton.Text = "Auto Collect OFF"
-    end
-end)
--- Get Coordinates and copy to clipboard
-GetCoordsButton.Name = "GetCoordsButton"
-GetCoordsButton.Parent = MainFrame
-GetCoordsButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-GetCoordsButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-GetCoordsButton.Position = UDim2.new(0.3, 0, 0.65, 0)
-GetCoordsButton.Text = "Show Coordinates"
-GetCoordsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+local teamNames = {"Todoroki", "Vegeta", "Sasuke", "Gon", "Luffy", "Deku", "Goku", "Naruto", "Gojo", "Zoro"}
 
-local function getCoordinates()
-    local position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-    return "X: " .. math.floor(position.X) .. ", Y: " .. math.floor(position.Y) .. ", Z: " .. math.floor(position.Z)
-end
+GameTab:AddToggle({
+	Name = "Auto Collect",
+	Default = false,
+	Callback = function(Value)
+		autoCollect = Value
+		if autoCollect then
+			while autoCollect do
+				local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+				local playerTeam = tostring(game.Players.LocalPlayer.Team)
 
-GetCoordsButton.MouseButton1Click:Connect(function()
-    local coords = getCoordinates()
-    NotificationLabel.Text = coords
-    setclipboard(coords) -- Copy to clipboard
-end)
+				for _, team in ipairs(teamNames) do
+					if playerTeam == team then
+						local location = collectLocations[team]
+						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
+						wait(1)
+						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+						wait(300) -- Esperar 5 minutos
+						break
+					end
+				end
+			end
+		end
+	end
+})
 
--- Teleport Functionality
-TPButton.Name = "TPButton"
-TPButton.Parent = MainFrame
-TPButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-TPButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-TPButton.Position = UDim2.new(0.3, 0, 0.8, 0)
-TPButton.Text = "Teleport"
-TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Tab Discord (Vacío)
+Window:MakeTab({Name = "Discord", Icon = "rbxassetid://4483345998"})
 
-PlayerInput.Parent = MainFrame
-PlayerInput.PlaceholderText = "Enter player name"
-PlayerInput.Size = UDim2.new(0.7, 0, 0.15, 0)
-PlayerInput.Position = UDim2.new(0.3, 0, 0.7, 0)
-
-TPButton.MouseButton1Click:Connect(function()
-    local input = PlayerInput.Text:lower()
-    local found = false
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        if player.Name:lower():find(input) or player.DisplayName:lower():find(input) then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-            NotificationLabel.Text = "Teleported to: " .. player.DisplayName
-            found = true
-            break
-        end
-    end
-    if not found then
-        NotificationLabel.Text = "Player not found"
-    end
-end)
-
--- Notification Label
-NotificationLabel.Parent = MainFrame
-NotificationLabel.Size = UDim2.new(0.7, 0, 0.15, 0)
-NotificationLabel.Position = UDim2.new(0.3, 0, 0.9, 0)
-NotificationLabel.Text = "Waiting for action..."
-NotificationLabel.TextWrapped = true
+-- Inicializar Orion
+OrionLib:Init()

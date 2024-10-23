@@ -20,7 +20,7 @@ function getClosestPlayerToClick(clickPosition)
     
     local ray = camera:ScreenPointToRay(clickPosition.X, clickPosition.Y)
     local rayOrigin = ray.Origin
-    local rayDirection = ray.Direction * 500 -- Prolonga el rayo en la dirección del clic
+    local rayDirection = ray.Direction * 500
 
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then

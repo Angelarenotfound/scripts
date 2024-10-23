@@ -1,5 +1,5 @@
 local aimbotEnabled = false
-local targetPart = "Head" -- Por defecto apunta a la cabeza
+local targetPart = "Head"
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera

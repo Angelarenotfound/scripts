@@ -1,36 +1,29 @@
--- Variables del aimbot
 local aimbotEnabled = false
 local targetPart = "Head" -- Por defecto apunta a la cabeza
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
 
--- Función para habilitar o deshabilitar el aimbot
 function toggleAimbot()
     aimbotEnabled = not aimbotEnabled
     print("Aimbot toggled:", aimbotEnabled)
 end
 
--- Función para cambiar la parte objetivo
 function setTarget(part)
     targetPart = part
     print("Aimbot target set to:", targetPart)
 end
 
--- Función para obtener el jugador más cercano a la posición del clic
 function getClosestPlayerToClick(clickPosition)
     local closestPlayer = nil
     local shortestDistance = math.huge
     
-    -- Hacer un rayo desde la cámara hacia el punto donde se hizo clic
     local ray = camera:ScreenPointToRay(clickPosition.X, clickPosition.Y)
     local rayOrigin = ray.Origin
     local rayDirection = ray.Direction * 500 -- Prolonga el rayo en la dirección del clic
 
-    -- Buscar jugadores enemigos
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Obtener la distancia entre la posición del clic (prolongada por el rayo) y la posición del jugador enemigo
             local distance = (otherPlayer.Character.HumanoidRootPart.Position - rayOrigin).magnitude
             if distance < shortestDistance then
                 shortestDistance = distance
@@ -42,26 +35,21 @@ function getClosestPlayerToClick(clickPosition)
     return closestPlayer
 end
 
--- Función para ajustar la dirección del disparo
 function aimAt(enemy)
     local partToAim = enemy.Character:FindFirstChild(targetPart)
     if partToAim then
-        -- Apunta la cámara o la bala hacia el jugador más cercano
         camera.CFrame = CFrame.new(camera.CFrame.Position, partToAim.Position)
     end
 end
 
--- Detección del disparo, tanto en PC como en móvil
 local userInputService = game:GetService("UserInputService")
 
 userInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
-    -- Detectar si se disparó con el ratón o toque en pantalla
     if aimbotEnabled and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         local clickPosition = input.Position -- Obtener la posición del clic o toque
 
-        -- Encontrar el jugador más cercano al clic
         local enemy = getClosestPlayerToClick(clickPosition)
         if enemy then
             aimAt(enemy)
@@ -69,7 +57,6 @@ userInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Creación del menú para PC y móvil
 local gui = Instance.new("ScreenGui", player.PlayerGui)
 gui.ResetOnSpawn = false
 

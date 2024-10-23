@@ -6,7 +6,6 @@ local isAutoCollectEnabled = false
 local currentTab = "Player"
 local isGuiVisible = true
 
--- GUI Creation
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.CoreGui
 
@@ -21,16 +20,16 @@ frame.BorderSizePixel = 2
 frame.Parent = screenGui
 frame.Active = true
 frame.Draggable = true
-frame.BorderRadius = UDim.new(0, 10)  -- Bordes redondeados
+frame.BorderRadius = UDim.new(0, 10)
 
 local title = Instance.new("TextLabel")
 title.Text = "Angelarenotfound's GUI"
-title.Size = UDim2.new(1, -30, 0, 50) -- Ajustado para dejar espacio al botón "X"
+title.Size = UDim2.new(1, -30, 0, 50)
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 24
 title.BackgroundTransparency = 1
-title.BorderRadius = UDim.new(0, 10) -- Bordes redondeados
+title.BorderRadius = UDim.new(0, 10)
 title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 title.Parent = frame
 local closeButton = Instance.new("TextButton")
@@ -43,7 +42,7 @@ closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.SourceSansBold
 closeButton.TextSize = 18
 closeButton.Parent = frame
-closeButton.BorderRadius = UDim.new(0, 5) -- Bordes redondeados
+closeButton.BorderRadius = UDim.new(0, 5)
 closeButton.Active = true
 closeButton.Draggable = true
 
@@ -80,7 +79,6 @@ for i, tab in ipairs(tabs) do
         updateTabContent()
     end)
 end
--- Content Area
 local contentArea = Instance.new("Frame")
 contentArea.Size = UDim2.new(1, -100, 1, -50)
 contentArea.Position = UDim2.new(0, 100, 0, 50)
@@ -88,11 +86,9 @@ contentArea.BackgroundTransparency = 1
 contentArea.Parent = frame
 
 local function updateTabContent()
-    -- Clear content
     contentArea:ClearAllChildren()
 
     if currentTab == "Player" then
-        -- Player Tab (Speed & JumpPower)
         local speedInput = Instance.new("TextBox")
         speedInput.PlaceholderText = "Speed"
         speedInput.Size = UDim2.new(0, 200, 0, 50)
@@ -139,7 +135,6 @@ speedInput.FocusLost:Connect(function()
         end)
 
     elseif currentTab == "Game" then
-        -- Game Tab (Auto Collect & Get Coordinates)
         local autoCollectToggle = Instance.new("TextButton")
         autoCollectToggle.Text = "Auto Collect: OFF"
         autoCollectToggle.Size = UDim2.new(0, 200, 0, 50)
@@ -187,6 +182,4 @@ local copyButton = Instance.new("TextButton")
         label.Parent = contentArea
     end
 end
-
--- Initialize with Player Tab content
 updateTabContent()

@@ -1,178 +1,182 @@
--- Crear GUI en tiempo de ejecución
-local ScreenGui = Instance.new("ScreenGui")
-local SpeedInput = Instance.new("TextBox")
-local ApplySpeedButton = Instance.new("TextButton")
-local ToggleSpeedPersistence = Instance.new("TextButton")
-local JumpInput = Instance.new("TextBox")
-local ApplyJumpButton = Instance.new("TextButton")
-local ToggleJumpPersistence = Instance.new("TextButton")
-local TeleportSwitch = Instance.new("TextButton")
-local CoordinatesButton = Instance.new("TextButton")
-
--- Configurar propiedades de los elementos GUI
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-SpeedInput.Parent = ScreenGui
-SpeedInput.Size = UDim2.new(0, 200, 0, 50)
-SpeedInput.Position = UDim2.new(0, 10, 0, 10)
-SpeedInput.Text = "Speed"
-
-ApplySpeedButton.Parent = ScreenGui
-ApplySpeedButton.Size = UDim2.new(0, 200, 0, 50)
-ApplySpeedButton.Position = UDim2.new(0, 10, 0, 70)
-ApplySpeedButton.Text = "Apply Speed"
-
-ToggleSpeedPersistence.Parent = ScreenGui
-ToggleSpeedPersistence.Size = UDim2.new(0, 200, 0, 50)
-ToggleSpeedPersistence.Position = UDim2.new(0, 10, 0, 130)
-ToggleSpeedPersistence.Text = "Toggle Speed Persistence"
-
-JumpInput.Parent = ScreenGui
-JumpInput.Size = UDim2.new(0, 200, 0, 50)
-JumpInput.Position = UDim2.new(0, 10, 0, 190)
-JumpInput.Text = "JumpPower"
-
-ApplyJumpButton.Parent = ScreenGui
-ApplyJumpButton.Size = UDim2.new(0, 200, 0, 50)
-ApplyJumpButton.Position = UDim2.new(0, 10, 0, 250)
-ApplyJumpButton.Text = "Apply JumpPower"
-
-ToggleJumpPersistence.Parent = ScreenGui
-ToggleJumpPersistence.Size = UDim2.new(0, 200, 0, 50)
-ToggleJumpPersistence.Position = UDim2.new(0, 10, 0, 310)
-ToggleJumpPersistence.Text = "Toggle Jump Persistence"
-
-TeleportSwitch.Parent = ScreenGui
-TeleportSwitch.Size = UDim2.new(0, 200, 0, 50)
-TeleportSwitch.Position = UDim2.new(0, 10, 0, 370)
-TeleportSwitch.Text = "Toggle Teleport"
-
-CoordinatesButton.Parent = ScreenGui
-CoordinatesButton.Size = UDim2.new(0, 200, 0, 50)
-CoordinatesButton.Position = UDim2.new(0, 10, 0, 430)
-CoordinatesButton.Text = "Show Coordinates"
-
--- Variables del jugador y humanoide
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
+local teams = {"Team1", "Team2", "Team3", "Team4", "Team5", "Team6", "Team7", "Team8", "Team9", "Team10"}
+local isAutoCollectEnabled = false
+local currentTab = "Player"
 
--- Variables para velocidad y JumpPower
-local speedValue = 16
-local speedPersistenceEnabled = true
-local jumpPowerValue = 50
-local jumpPersistenceEnabled = true
+-- GUI Creation
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.CoreGui
 
--- Variables para teletransporte
-local teleportActive = false
-local teleportLocations = {
-    ["Equipo1"] = Vector3.new(10, 0, 10),
-    ["Equipo2"] = Vector3.new(20, 0, 20),
-    -- Añade más ubicaciones para los otros equipos
-}
-local teleportDelay = 60 -- Teletransporte cada minuto
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 500, 0, 300)
+frame.Position = UDim2.new(0.5, -250, 0.5, -150)
+frame.Parent = screenGui
 
--- Función para aplicar velocidad
-local function applySpeed()
-    local newSpeed = tonumber(SpeedInput.Text)
-    if newSpeed then
-        speedValue = newSpeed
-        humanoid.WalkSpeed = speedValue
-    end
-end
+local title = Instance.new("TextLabel")
+title.Text = "Angelarenotfound's GUI"
+title.Size = UDim2.new(1, 0, 0, 50)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 24
+title.BackgroundTransparency = 1
+title.Parent = frame
 
--- Función para aplicar JumpPower
-local function applyJumpPower()
-    local newJumpPower = tonumber(JumpInput.Text)
-    if newJumpPower then
-        jumpPowerValue = newJumpPower
-        humanoid.JumpPower = jumpPowerValue
-    end
-end
+local sideBar = Instance.new("Frame")
+sideBar.Size = UDim2.new(0, 100, 1, 0)
+sideBar.Position = UDim2.new(0, 0, 0, 50)
+sideBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+sideBar.Parent = frame
 
--- Función para activar/desactivar persistencia de velocidad
-local function toggleSpeedPersistence()
-    speedPersistenceEnabled = not speedPersistenceEnabled
-    if not speedPersistenceEnabled then
-        humanoid.WalkSpeed = 16 -- Restaurar velocidad predeterminada
-    end
-end
+local tabs = {"Player", "Game", "Discord"}
+local buttons = {}
 
--- Función para activar/desactivar persistencia de JumpPower
-local function toggleJumpPersistence()
-    jumpPersistenceEnabled = not jumpPersistenceEnabled
-    if not jumpPersistenceEnabled then
-        humanoid.JumpPower = 50 -- Restaurar JumpPower predeterminado
-    end
-end
-
--- Función para gestionar el teletransporte
-local function teleportPlayer()
-    local character = player.Character
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    local team = player.Team.Name
-    local originalPosition = humanoidRootPart.Position
+for i, tab in ipairs(tabs) do
+    local button = Instance.new("TextButton")
+    button.Text = tab
+    button.Size = UDim2.new(1, 0, 0, 50)
+    button.Position = UDim2.new(0, 0, 0, (i - 1) * 50)
+    button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Parent = sideBar
+    table.insert(buttons, button)
     
-    if teleportLocations[team] then
-        humanoidRootPart.CFrame = CFrame.new(teleportLocations[team])
-        wait(teleportDelay)
-        humanoidRootPart.CFrame = CFrame.new(originalPosition)
+    button.MouseButton1Click:Connect(function()
+        currentTab = tab
+        updateTabContent()
+    end)
+end
+
+-- Content Area
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(1, -100, 1, -50)
+contentArea.Position = UDim2.new(0, 100, 0, 50)
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = frame
+
+local function updateTabContent()
+    -- Clear content
+    contentArea:ClearAllChildren()
+
+    if currentTab == "Player" then
+        -- Player Tab (Speed & JumpPower)
+        local speedInput = Instance.new("TextBox")
+        speedInput.PlaceholderText = "Speed"
+        speedInput.Size = UDim2.new(0, 200, 0, 50)
+        speedInput.Position = UDim2.new(0, 50, 0, 0)
+        speedInput.Parent = contentArea
+
+        local jumpPowerInput = Instance.new("TextBox")
+        jumpPowerInput.PlaceholderText = "JumpPower"
+        jumpPowerInput.Size = UDim2.new(0, 200, 0, 50)
+        jumpPowerInput.Position = UDim2.new(0, 50, 0, 60)
+        jumpPowerInput.Parent = contentArea
+
+        local resetSpeed = Instance.new("TextButton")
+        resetSpeed.Text = "Reset Speed"
+        resetSpeed.Size = UDim2.new(0, 200, 0, 50)
+        resetSpeed.Position = UDim2.new(0, 50, 0, 120)
+        resetSpeed.Parent = contentArea
+
+        resetSpeed.MouseButton1Click:Connect(function()
+            humanoid.WalkSpeed = 16
+        end)
+
+        local resetJumpPower = Instance.new("TextButton")
+        resetJumpPower.Text = "Reset JumpPower"
+        resetJumpPower.Size = UDim2.new(0, 200, 0, 50)
+        resetJumpPower.Position = UDim2.new(0, 50, 0, 180)
+        resetJumpPower.Parent = contentArea
+
+        resetJumpPower.MouseButton1Click:Connect(function()
+            humanoid.JumpPower = 50
+        end)
+
+        speedInput.FocusLost:Connect(function()
+            local newSpeed = tonumber(speedInput.Text)
+            if newSpeed then
+                humanoid.WalkSpeed = newSpeed
+            end
+        end)
+
+        jumpPowerInput.FocusLost:Connect(function()
+            local newJumpPower = tonumber(jumpPowerInput.Text)
+            if newJumpPower then
+                humanoid.JumpPower = newJumpPower
+            end
+        end)
+
+    elseif currentTab == "Game" then
+        -- Game Tab (Auto Collect & Get Coordinates)
+        local autoCollectToggle = Instance.new("TextButton")
+        autoCollectToggle.Text = "Auto Collect: OFF"
+        autoCollectToggle.Size = UDim2.new(0, 200, 0, 50)
+        autoCollectToggle.Position = UDim2.new(0, 50, 0, 0)
+        autoCollectToggle.Parent = contentArea
+
+        autoCollectToggle.MouseButton1Click:Connect(function()
+            isAutoCollectEnabled = not isAutoCollectEnabled
+            autoCollectToggle.Text = isAutoCollectEnabled and "Auto Collect: ON" or "Auto Collect: OFF"
+        end)
+
+        local getCoordinatesButton = Instance.new("TextButton")
+        getCoordinatesButton.Text = "Obtener Coordenadas"
+        getCoordinatesButton.Size = UDim2.new(0, 200, 0, 50)
+        getCoordinatesButton.Position = UDim2.new(0, 50, 0, 60)
+        getCoordinatesButton.Parent = contentArea
+
+        getCoordinatesButton.MouseButton1Click:Connect(function()
+            local pos = character.HumanoidRootPart.Position
+            local notification = Instance.new("TextLabel")
+            notification.Text = "Coordenadas: (" .. math.floor(pos.X) .. ", " .. math.floor(pos.Y) .. ", " .. math.floor(pos.Z) .. ")"
+            notification.Size = UDim2.new(0, 300, 0, 50)
+            notification.Position = UDim2.new(0, 50, 0, 120)
+            notification.Parent = contentArea
+
+            local copyButton = Instance.new("TextButton")
+            copyButton.Text = "Copiar"
+            copyButton.Size = UDim2.new(0, 100, 0, 50)
+            copyButton.Position = UDim2.new(0, 360, 0, 120)
+            copyButton.Parent = contentArea
+
+            copyButton.MouseButton1Click:Connect(function()
+                setclipboard("(" .. math.floor(pos.X) .. ", " .. math.floor(pos.Y) .. ", " .. math.floor(pos.Z) .. ")")
+            end)
+        end)
+
+    elseif currentTab == "Discord" then
+        -- Discord Tab (Empty)
+        local label = Instance.new("TextLabel")
+        label.Text = "Por el momento está vacío."
+        label.Size = UDim2.new(1, 0, 0, 50)
+        label.Position = UDim2.new(0, 50, 0, 50)
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.Parent = contentArea
     end
 end
 
--- Función para activar/desactivar el teletransporte
-local function toggleTeleportation()
-    teleportActive = not teleportActive
-    if teleportActive then
-        while teleportActive do
-            teleportPlayer()
-            wait(teleportDelay)
+-- Auto Collect functionality (teleport based on team)
+local function autoCollect()
+    while wait(60) do
+        if isAutoCollectEnabled then
+            local team = player.Team.Name
+            for i, t in ipairs(teams) do
+                if t == team then
+                    local teleportPosition = workspace.Teleports:FindFirstChild("Team" .. i).Position
+                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                    local originalPosition = humanoidRootPart.CFrame
+                    humanoidRootPart.CFrame = CFrame.new(teleportPosition)
+                    wait(1)
+                    humanoidRootPart.CFrame = originalPosition
+                end
+            end
         end
     end
 end
 
--- Mantener velocidad al reaparecer si la persistencia está activada
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = newCharacter:WaitForChild("Humanoid")
-    if speedPersistenceEnabled then
-        humanoid.WalkSpeed = speedValue
-    end
-    if jumpPersistenceEnabled then
-        humanoid.JumpPower = jumpPowerValue
-    end
-end)
+-- Start Auto Collect
+spawn(autoCollect)
 
--- Función para mostrar las coordenadas en una notificación con botón de copiar
-local function showCoordinates()
-    local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        local position = humanoidRootPart.Position
-        local coordinates = string.format("(%.2f, %.2f, %.2f)", position.X, position.Y, position.Z)
-        
-        -- Crear notificación
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Coordenadas",
-            Text = coordinates,
-            Duration = 10,
-            Button1 = "Copiar",
-            Callback = function(buttonClicked)
-                if buttonClicked == "Copiar" then
-                    -- Copiar las coordenadas al portapapeles
-                    setclipboard(coordinates)
-                end
-            end
-        })
-    end
-end
-
--- Eventos de los botones
-ApplySpeedButton.MouseButton1Click:Connect(applySpeed)
-ToggleSpeedPersistence.MouseButton1Click:Connect(toggleSpeedPersistence)
-
-ApplyJumpButton.MouseButton1Click:Connect(applyJumpPower)
-ToggleJumpPersistence.MouseButton1Click:Connect(toggleJumpPersistence)
-
-TeleportSwitch.MouseButton1Click:Connect(toggleTeleportation)
-
-CoordinatesButton.MouseButton1Click:Connect(showCoordinates)
+-- Initialize the GUI with the first tab
+updateTabContent()

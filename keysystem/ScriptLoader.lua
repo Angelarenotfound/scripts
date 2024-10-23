@@ -106,8 +106,8 @@ local function closeWithAnimation()
     KeyInput.PlaceholderText = "Cerrando..."
     wait(1)
     Frame:TweenPosition(UDim2.new(0.5, -200, 0, -150), "Out", "Quint", 0.5, true)
-    wait(0.5) -- Esperar a que termine la animación
-    ScreenGui:Destroy() -- Cierra el GUI
+    wait(0.5)
+    ScreenGui:Destroy()
 end
 
 CloseButton.MouseButton1Click:Connect(closeWithAnimation)

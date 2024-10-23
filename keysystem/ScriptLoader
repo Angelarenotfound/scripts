@@ -6,7 +6,6 @@ local KeyInput = Instance.new("TextBox")
 local VerifyButton = Instance.new("TextButton")
 local CloseButton = Instance.new("TextButton")
 
--- Configuraciones del GUI
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 Frame.Parent = ScreenGui
@@ -17,7 +16,6 @@ Frame.BorderSizePixel = 2
 Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.ClipsDescendants = true
 
--- Título
 TitleLabel.Parent = Frame
 TitleLabel.Size = UDim2.new(1, 0, 0, 50)
 TitleLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -28,7 +26,6 @@ TitleLabel.TextScaled = true
 TitleLabel.TextStrokeTransparency = 0.5
 TitleLabel.BorderSizePixel = 0
 
--- Label de información
 InfoLabel.Parent = Frame
 InfoLabel.Size = UDim2.new(1, 0, 0, 30)
 InfoLabel.Position = UDim2.new(0, 0, 0, 50)
@@ -39,7 +36,6 @@ InfoLabel.TextScaled = true
 InfoLabel.TextStrokeTransparency = 0.5
 InfoLabel.BorderSizePixel = 0
 
--- Input para la key
 KeyInput.Parent = Frame
 KeyInput.Size = UDim2.new(1, -20, 0, 40)
 KeyInput.Position = UDim2.new(0, 10, 0, 90)
@@ -50,7 +46,6 @@ KeyInput.TextScaled = true
 KeyInput.BorderSizePixel = 2
 KeyInput.BorderColor3 = Color3.fromRGB(0, 0, 0)
 
--- Botón para verificar
 VerifyButton.Parent = Frame
 VerifyButton.Size = UDim2.new(1, 0, 0, 50)
 VerifyButton.Position = UDim2.new(0, 0, 0, 140)
@@ -60,7 +55,6 @@ VerifyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 VerifyButton.TextScaled = true
 VerifyButton.BorderSizePixel = 0
 
--- Botón para cerrar
 CloseButton.Parent = Frame
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Position = UDim2.new(1, -35, 0, 5)
@@ -70,15 +64,12 @@ CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseButton.TextScaled = true
 CloseButton.BorderSizePixel = 0
 
--- Animación de entrada
 Frame.Position = UDim2.new(0.5, -200, 0, -150) -- Ajusta la posición inicial
 Frame:TweenPosition(UDim2.new(0.5, -200, 0.5, -150), "Out", "Quint", 0.5, true)
 
--- Función de verificación
 VerifyButton.MouseButton1Click:Connect(function()
     local key = KeyInput.Text
     if key and key ~= "" then
-        -- Solicitar la API para verificar la key
         local HttpService = game:GetService("HttpService")
         local url = "https://adonis-except.xyz/api/roblox/scripts/keysystem/verify"
         local data = HttpService:JSONEncode({key = key})
@@ -92,12 +83,10 @@ VerifyButton.MouseButton1Click:Connect(function()
             if result.success then
                 -- Key válida
                 KeyInput.PlaceholderText = "Key Valida"
-                KeyInput.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde
-                wait(1) -- Esperar un segundo antes de cerrar
-                ScreenGui:Destroy() -- Cierra el GUI
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/AnimeTycoon.lua"))()
+                KeyInput.TextColor3 = Color3.fromRGB(0, 255, 0)
+                wait(1)
+                ScreenGui:Destroy() loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/AnimeTycoon.lua"))()
             elseif result.error then
-                -- Key inválida
                 KeyInput.PlaceholderText = "Key Incorrecta"
                 KeyInput.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
             end
@@ -109,12 +98,10 @@ VerifyButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Función para cerrar el GUI
 CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy() -- Elimina el GUI
+    ScreenGui:Destroy()
 end)
 
--- Función para cerrar el GUI con animación
 local function closeWithAnimation()
     KeyInput.PlaceholderText = "Cerrando..."
     wait(1)
@@ -123,5 +110,4 @@ local function closeWithAnimation()
     ScreenGui:Destroy() -- Cierra el GUI
 end
 
--- Vincular el botón de cerrar al método de animación
 CloseButton.MouseButton1Click:Connect(closeWithAnimation)

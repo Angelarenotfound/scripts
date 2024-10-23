@@ -8,9 +8,6 @@ local PlayerButton = Instance.new("TextButton")
 local GameButton = Instance.new("TextButton")
 local DiscordButton = Instance.new("TextButton")
 local MainLabel = Instance.new("TextLabel")
-local SpeedButton = Instance.new("TextButton")
-local JumpPowerButton = Instance.new("TextButton")
-local ResetButton = Instance.new("TextButton")
 local AutoCollectButton = Instance.new("TextButton")
 local GetCoordsButton = Instance.new("TextButton")
 local TPButton = Instance.new("TextButton")
@@ -21,12 +18,12 @@ local NotificationLabel = Instance.new("TextLabel")
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Main Frame
+-- Main Frame (Responsive for Mobile)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0) -- Adjusted for better mobile display
+MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
 MainFrame.Active = true
 MainFrame.Draggable = true
 -- Close Button
@@ -42,7 +39,7 @@ CloseButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Sidebar
+-- Sidebar (responsive positioning)
 Sidebar.Name = "Sidebar"
 Sidebar.Parent = MainFrame
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -55,7 +52,6 @@ PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 PlayerButton.Size = UDim2.new(1, 0, 0, 50)
 PlayerButton.Text = "Player"
 PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
 -- Game Button
 GameButton.Name = "GameButton"
 GameButton.Parent = Sidebar
@@ -64,6 +60,7 @@ GameButton.Size = UDim2.new(1, 0, 0, 50)
 GameButton.Position = UDim2.new(0, 0, 0, 50)
 GameButton.Text = "Game"
 GameButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
 -- Discord Button
 DiscordButton.Name = "DiscordButton"
 DiscordButton.Parent = Sidebar
@@ -73,22 +70,19 @@ DiscordButton.Position = UDim2.new(0, 0, 0, 100)
 DiscordButton.Text = "Discord"
 DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Main Label (shows content based on the sidebar)
-MainLabel.Name = "MainLabel"
-MainLabel.Parent = MainFrame
-MainLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainLabel.Size = UDim2.new(0.7, 0, 0.3, 0)
-MainLabel.Position = UDim2.new(0.3, 0, 0.1, 0)
-MainLabel.Text = "Angelarenotfound's GUI"
-MainLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MainLabel.Font = Enum.Font.SourceSans
-MainLabel.TextSize = 24
+-- Navigation functionality
+PlayerButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Player Menu"
+end)
 
--- Game Section Functions
 GameButton.MouseButton1Click:Connect(function()
     MainLabel.Text = "Game Menu"
 end)
--- Auto Collect Functionality
+
+DiscordButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Join us on Discord!"
+end)
+-- Auto Collect functionality (Teams with coordinates and quick teleport)
 AutoCollectButton.Name = "AutoCollectButton"
 AutoCollectButton.Parent = MainFrame
 AutoCollectButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -98,24 +92,37 @@ AutoCollectButton.Text = "Auto Collect OFF"
 AutoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local autoCollect = false
+local collectLocations = {
+    Todoroki = Vector3.new(186, 6, 104),
+    Vegeta = Vector3.new(88, 6, 197),
+    Sasuke = Vector3.new(-53, 6, 214),
+    Gon = Vector3.new(176, 6, 142),
+    Luffy = Vector3.new(-229, 6, 19),
+    Deku = Vector3.new(-202, 6, -111),
+    Goku = Vector3.new(-105, 6, -202),
+    Naruto = Vector3.new(36, 6, -220),
+    Gojo = Vector3.new(159, 6, -148),
+    Zoro = Vector3.new(212, 6, -26)
+}
+
 AutoCollectButton.MouseButton1Click:Connect(function()
     autoCollect = not autoCollect
     if autoCollect then
         AutoCollectButton.Text = "Auto Collect ON"
         while autoCollect do
-            local team = game.Players.LocalPlayer.Team.Name
-            if team == "Team1" then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(100, 10, 100)
-            elseif team == "Team2" then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(200, 10, 200)
+            local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            for _, location in pairs(collectLocations) do
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(location)
+                wait(1) -- Quick teleport
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+                wait(300) -- 5 minutes (300 seconds)
             end
-            wait(300)
         end
     else
         AutoCollectButton.Text = "Auto Collect OFF"
     end
 end)
--- Get Coordinates Functionality
+-- Get Coordinates and copy to clipboard
 GetCoordsButton.Name = "GetCoordsButton"
 GetCoordsButton.Parent = MainFrame
 GetCoordsButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -132,6 +139,7 @@ end
 GetCoordsButton.MouseButton1Click:Connect(function()
     local coords = getCoordinates()
     NotificationLabel.Text = coords
+    setclipboard(coords) -- Copy to clipboard
 end)
 
 -- Teleport Functionality

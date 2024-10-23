@@ -1,5 +1,4 @@
-
--- GUI Code with improved design and functionality
+-- GUI Code with improved design and functionality for Mobile compatibility
 
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -25,7 +24,6 @@ MainFrame.Size = UDim2.new(0, 400, 0, 300)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
 MainFrame.Active = true
 MainFrame.Draggable = true
-
 -- Close Button
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = ScreenGui
@@ -52,7 +50,6 @@ PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 PlayerButton.Size = UDim2.new(1, 0, 0, 50)
 PlayerButton.Text = "Player"
 PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
 -- Game Button
 GameButton.Name = "GameButton"
 GameButton.Parent = Sidebar
@@ -81,60 +78,47 @@ MainLabel.Text = "Angelarenotfound's GUI"
 MainLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainLabel.Font = Enum.Font.SourceSans
 MainLabel.TextSize = 24
-
--- Speed Button
-SpeedButton.Name = "SpeedButton"
-SpeedButton.Parent = MainFrame
-SpeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-SpeedButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-SpeedButton.Position = UDim2.new(0.3, 0, 0.5, 0)
-SpeedButton.Text = "Set Speed"
-SpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedButton.MouseButton1Click:Connect(function()
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-end)
-
--- Jump Power Button
-JumpPowerButton.Name = "JumpPowerButton"
-JumpPowerButton.Parent = MainFrame
-JumpPowerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-JumpPowerButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-JumpPowerButton.Position = UDim2.new(0.3, 0, 0.65, 0)
-JumpPowerButton.Text = "Set JumpPower"
-JumpPowerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-JumpPowerButton.MouseButton1Click:Connect(function()
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
-end)
-
--- Reset Button
-ResetButton.Name = "ResetButton"
-ResetButton.Parent = MainFrame
-ResetButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-ResetButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-ResetButton.Position = UDim2.new(0.3, 0, 0.8, 0)
-ResetButton.Text = "Reset"
-ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ResetButton.MouseButton1Click:Connect(function()
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
-end)
-
--- Sidebar navigation functionality
+-- Player Section Functions
 PlayerButton.MouseButton1Click:Connect(function()
     MainLabel.Text = "Player Menu"
-end)
 
-GameButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Game Menu"
-end)
+    -- Speed Button
+    SpeedButton.Visible = true
+    SpeedButton.Name = "SpeedButton"
+    SpeedButton.Parent = MainFrame
+    SpeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    SpeedButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+    SpeedButton.Position = UDim2.new(0.3, 0, 0.5, 0)
+    SpeedButton.Text = "Set Speed"
+    SpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+    end)
 
-DiscordButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Discord Menu"
+    -- Jump Power Button
+    JumpPowerButton.Visible = true
+    JumpPowerButton.Name = "JumpPowerButton"
+    JumpPowerButton.Parent = MainFrame
+    JumpPowerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    JumpPowerButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+    JumpPowerButton.Position = UDim2.new(0.3, 0, 0.65, 0)
+    JumpPowerButton.Text = "Set JumpPower"
+    JumpPowerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    JumpPowerButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
+    end)
 end)
-
--- Adding persistence after player respawn
-game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = 100
-    humanoid.JumpPower = 150
+-- Reset Button
+    ResetButton.Visible = true
+    ResetButton.Name = "ResetButton"
+    ResetButton.Parent = MainFrame
+    ResetButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    ResetButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+    ResetButton.Position = UDim2.new(0.3, 0, 0.8, 0)
+    ResetButton.Text = "Reset"
+    ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ResetButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+    end)
 end)

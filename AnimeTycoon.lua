@@ -1,15 +1,56 @@
--- Obtener referencias a los elementos del GUI
-local SpeedInput = script.Parent.SpeedInput -- Input para velocidad
-local ApplySpeedButton = script.Parent.ApplySpeedButton -- Botón para aplicar velocidad
-local ToggleSpeedPersistence = script.Parent.ToggleSpeedPersistence -- Botón para persistencia de velocidad
+-- Crear GUI en tiempo de ejecución
+local ScreenGui = Instance.new("ScreenGui")
+local SpeedInput = Instance.new("TextBox")
+local ApplySpeedButton = Instance.new("TextButton")
+local ToggleSpeedPersistence = Instance.new("TextButton")
+local JumpInput = Instance.new("TextBox")
+local ApplyJumpButton = Instance.new("TextButton")
+local ToggleJumpPersistence = Instance.new("TextButton")
+local TeleportSwitch = Instance.new("TextButton")
+local CoordinatesButton = Instance.new("TextButton")
 
-local JumpInput = script.Parent.JumpInput -- Input para JumpPower
-local ApplyJumpButton = script.Parent.ApplyJumpButton -- Botón para aplicar JumpPower
-local ToggleJumpPersistence = script.Parent.ToggleJumpPersistence -- Botón para persistencia de JumpPower
+-- Configurar propiedades de los elementos GUI
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-local TeleportSwitch = script.Parent.TeleportSwitch -- Interruptor de teletransporte
+SpeedInput.Parent = ScreenGui
+SpeedInput.Size = UDim2.new(0, 200, 0, 50)
+SpeedInput.Position = UDim2.new(0, 10, 0, 10)
+SpeedInput.Text = "Speed"
 
-local CoordinatesLabel = script.Parent.CoordinatesLabel -- Label para mostrar las coordenadas
+ApplySpeedButton.Parent = ScreenGui
+ApplySpeedButton.Size = UDim2.new(0, 200, 0, 50)
+ApplySpeedButton.Position = UDim2.new(0, 10, 0, 70)
+ApplySpeedButton.Text = "Apply Speed"
+
+ToggleSpeedPersistence.Parent = ScreenGui
+ToggleSpeedPersistence.Size = UDim2.new(0, 200, 0, 50)
+ToggleSpeedPersistence.Position = UDim2.new(0, 10, 0, 130)
+ToggleSpeedPersistence.Text = "Toggle Speed Persistence"
+
+JumpInput.Parent = ScreenGui
+JumpInput.Size = UDim2.new(0, 200, 0, 50)
+JumpInput.Position = UDim2.new(0, 10, 0, 190)
+JumpInput.Text = "JumpPower"
+
+ApplyJumpButton.Parent = ScreenGui
+ApplyJumpButton.Size = UDim2.new(0, 200, 0, 50)
+ApplyJumpButton.Position = UDim2.new(0, 10, 0, 250)
+ApplyJumpButton.Text = "Apply JumpPower"
+
+ToggleJumpPersistence.Parent = ScreenGui
+ToggleJumpPersistence.Size = UDim2.new(0, 200, 0, 50)
+ToggleJumpPersistence.Position = UDim2.new(0, 10, 0, 310)
+ToggleJumpPersistence.Text = "Toggle Jump Persistence"
+
+TeleportSwitch.Parent = ScreenGui
+TeleportSwitch.Size = UDim2.new(0, 200, 0, 50)
+TeleportSwitch.Position = UDim2.new(0, 10, 0, 370)
+TeleportSwitch.Text = "Toggle Teleport"
+
+CoordinatesButton.Parent = ScreenGui
+CoordinatesButton.Size = UDim2.new(0, 200, 0, 50)
+CoordinatesButton.Position = UDim2.new(0, 10, 0, 430)
+CoordinatesButton.Text = "Show Coordinates"
 
 -- Variables del jugador y humanoide
 local player = game.Players.LocalPlayer
@@ -102,15 +143,26 @@ player.CharacterAdded:Connect(function(newCharacter)
     end
 end)
 
--- Función para actualizar y mostrar las coordenadas
-local function updateCoordinates()
-    while true do
-        local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            local position = humanoidRootPart.Position
-            CoordinatesLabel.Text = string.format("X: %.2f, Y: %.2f, Z: %.2f", position.X, position.Y, position.Z)
-        end
-        wait(0.1) -- Actualizar cada 0.1 segundos
+-- Función para mostrar las coordenadas en una notificación con botón de copiar
+local function showCoordinates()
+    local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local position = humanoidRootPart.Position
+        local coordinates = string.format("(%.2f, %.2f, %.2f)", position.X, position.Y, position.Z)
+        
+        -- Crear notificación
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Coordenadas",
+            Text = coordinates,
+            Duration = 10,
+            Button1 = "Copiar",
+            Callback = function(buttonClicked)
+                if buttonClicked == "Copiar" then
+                    -- Copiar las coordenadas al portapapeles
+                    setclipboard(coordinates)
+                end
+            end
+        })
     end
 end
 
@@ -123,5 +175,4 @@ ToggleJumpPersistence.MouseButton1Click:Connect(toggleJumpPersistence)
 
 TeleportSwitch.MouseButton1Click:Connect(toggleTeleportation)
 
--- Iniciar la actualización de las coordenadas
-spawn(updateCoordinates)
+CoordinatesButton.MouseButton1Click:Connect(showCoordinates)

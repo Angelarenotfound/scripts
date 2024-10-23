@@ -11,6 +11,11 @@ local MainLabel = Instance.new("TextLabel")
 local SpeedButton = Instance.new("TextButton")
 local JumpPowerButton = Instance.new("TextButton")
 local ResetButton = Instance.new("TextButton")
+local AutoCollectButton = Instance.new("TextButton")
+local GetCoordsButton = Instance.new("TextButton")
+local TPButton = Instance.new("TextButton")
+local PlayerInput = Instance.new("TextBox")
+local NotificationLabel = Instance.new("TextLabel")
 
 -- Setting up the ScreenGui
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -50,6 +55,7 @@ PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 PlayerButton.Size = UDim2.new(1, 0, 0, 50)
 PlayerButton.Text = "Player"
 PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
 -- Game Button
 GameButton.Name = "GameButton"
 GameButton.Parent = Sidebar
@@ -58,7 +64,6 @@ GameButton.Size = UDim2.new(1, 0, 0, 50)
 GameButton.Position = UDim2.new(0, 0, 0, 50)
 GameButton.Text = "Game"
 GameButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
 -- Discord Button
 DiscordButton.Name = "DiscordButton"
 DiscordButton.Parent = Sidebar
@@ -78,47 +83,90 @@ MainLabel.Text = "Angelarenotfound's GUI"
 MainLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainLabel.Font = Enum.Font.SourceSans
 MainLabel.TextSize = 24
--- Player Section Functions
-PlayerButton.MouseButton1Click:Connect(function()
-    MainLabel.Text = "Player Menu"
 
-    -- Speed Button
-    SpeedButton.Visible = true
-    SpeedButton.Name = "SpeedButton"
-    SpeedButton.Parent = MainFrame
-    SpeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    SpeedButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-    SpeedButton.Position = UDim2.new(0.3, 0, 0.5, 0)
-    SpeedButton.Text = "Set Speed"
-    SpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SpeedButton.MouseButton1Click:Connect(function()
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-    end)
+-- Game Section Functions
+GameButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Game Menu"
+end)
+-- Auto Collect Functionality
+AutoCollectButton.Name = "AutoCollectButton"
+AutoCollectButton.Parent = MainFrame
+AutoCollectButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+AutoCollectButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+AutoCollectButton.Position = UDim2.new(0.3, 0, 0.5, 0)
+AutoCollectButton.Text = "Auto Collect OFF"
+AutoCollectButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    -- Jump Power Button
-    JumpPowerButton.Visible = true
-    JumpPowerButton.Name = "JumpPowerButton"
-    JumpPowerButton.Parent = MainFrame
-    JumpPowerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    JumpPowerButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-    JumpPowerButton.Position = UDim2.new(0.3, 0, 0.65, 0)
-    JumpPowerButton.Text = "Set JumpPower"
-    JumpPowerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    JumpPowerButton.MouseButton1Click:Connect(function()
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
-    end)
+local autoCollect = false
+AutoCollectButton.MouseButton1Click:Connect(function()
+    autoCollect = not autoCollect
+    if autoCollect then
+        AutoCollectButton.Text = "Auto Collect ON"
+        while autoCollect do
+            local team = game.Players.LocalPlayer.Team.Name
+            if team == "Team1" then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(100, 10, 100)
+            elseif team == "Team2" then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(200, 10, 200)
+            end
+            wait(300)
+        end
+    else
+        AutoCollectButton.Text = "Auto Collect OFF"
+    end
 end)
--- Reset Button
-    ResetButton.Visible = true
-    ResetButton.Name = "ResetButton"
-    ResetButton.Parent = MainFrame
-    ResetButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    ResetButton.Size = UDim2.new(0.7, 0, 0.15, 0)
-    ResetButton.Position = UDim2.new(0.3, 0, 0.8, 0)
-    ResetButton.Text = "Reset"
-    ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ResetButton.MouseButton1Click:Connect(function()
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
-    end)
+-- Get Coordinates Functionality
+GetCoordsButton.Name = "GetCoordsButton"
+GetCoordsButton.Parent = MainFrame
+GetCoordsButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+GetCoordsButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+GetCoordsButton.Position = UDim2.new(0.3, 0, 0.65, 0)
+GetCoordsButton.Text = "Show Coordinates"
+GetCoordsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local function getCoordinates()
+    local position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    return "X: " .. math.floor(position.X) .. ", Y: " .. math.floor(position.Y) .. ", Z: " .. math.floor(position.Z)
+end
+
+GetCoordsButton.MouseButton1Click:Connect(function()
+    local coords = getCoordinates()
+    NotificationLabel.Text = coords
 end)
+
+-- Teleport Functionality
+TPButton.Name = "TPButton"
+TPButton.Parent = MainFrame
+TPButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+TPButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+TPButton.Position = UDim2.new(0.3, 0, 0.8, 0)
+TPButton.Text = "Teleport"
+TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+PlayerInput.Parent = MainFrame
+PlayerInput.PlaceholderText = "Enter player name"
+PlayerInput.Size = UDim2.new(0.7, 0, 0.15, 0)
+PlayerInput.Position = UDim2.new(0.3, 0, 0.7, 0)
+
+TPButton.MouseButton1Click:Connect(function()
+    local input = PlayerInput.Text:lower()
+    local found = false
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player.Name:lower():find(input) or player.DisplayName:lower():find(input) then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+            NotificationLabel.Text = "Teleported to: " .. player.DisplayName
+            found = true
+            break
+        end
+    end
+    if not found then
+        NotificationLabel.Text = "Player not found"
+    end
+end)
+
+-- Notification Label
+NotificationLabel.Parent = MainFrame
+NotificationLabel.Size = UDim2.new(0.7, 0, 0.15, 0)
+NotificationLabel.Position = UDim2.new(0.3, 0, 0.9, 0)
+NotificationLabel.Text = "Waiting for action..."
+NotificationLabel.TextWrapped = true

@@ -132,7 +132,7 @@ GameTab:AddButton({
             OrionLib:MakeNotification({Name = "Auto Collect", Content = "Enabled", Time = 5})
             spawn(function()
                 while autoCollect do
-                    timeLeft = 120 -- Reiniciar el temporizador
+                    timeLeft = 120 -- Reiniciar el temporizador al comenzar
                     while timeLeft > 0 do
                         timeLabel:Set("Time until next TP: " .. timeLeft .. " seconds")
                         wait(1)
@@ -145,6 +145,7 @@ GameTab:AddButton({
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
                         wait(120) -- Esperar 2 minutos
                     end
+                    timeLeft = 120 -- Reiniciar el temporizador después de teletransportarse
                 end
             end)
         else

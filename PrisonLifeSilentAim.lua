@@ -17,9 +17,9 @@ function setTarget(part)
     print("Aimbot target set to:", targetPart)
 end
 
--- Función para obtener el enemigo más cercano a la posición del clic
-function getClosestEnemyToClick(clickPosition)
-    local closestEnemy = nil
+-- Función para obtener el jugador más cercano a la posición del clic
+function getClosestPlayerToClick(clickPosition)
+    local closestPlayer = nil
     local shortestDistance = math.huge
     
     -- Hacer un rayo desde la cámara hacia el punto donde se hizo clic
@@ -27,25 +27,26 @@ function getClosestEnemyToClick(clickPosition)
     local rayOrigin = ray.Origin
     local rayDirection = ray.Direction * 500 -- Prolonga el rayo en la dirección del clic
 
-    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") then
-            -- Obtener la distancia entre la posición de clic (prolongada por el rayo) y la posición del enemigo
-            local distance = (enemy.HumanoidRootPart.Position - rayOrigin).magnitude
+    -- Buscar jugadores enemigos
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            -- Obtener la distancia entre la posición del clic (prolongada por el rayo) y la posición del jugador enemigo
+            local distance = (otherPlayer.Character.HumanoidRootPart.Position - rayOrigin).magnitude
             if distance < shortestDistance then
                 shortestDistance = distance
-                closestEnemy = enemy
+                closestPlayer = otherPlayer
             end
         end
     end
 
-    return closestEnemy
+    return closestPlayer
 end
 
 -- Función para ajustar la dirección del disparo
 function aimAt(enemy)
-    local partToAim = enemy:FindFirstChild(targetPart)
+    local partToAim = enemy.Character:FindFirstChild(targetPart)
     if partToAim then
-        -- Apunta la cámara o la bala hacia el enemigo más cercano
+        -- Apunta la cámara o la bala hacia el jugador más cercano
         camera.CFrame = CFrame.new(camera.CFrame.Position, partToAim.Position)
     end
 end
@@ -60,8 +61,8 @@ userInputService.InputBegan:Connect(function(input, gameProcessed)
     if aimbotEnabled and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         local clickPosition = input.Position -- Obtener la posición del clic o toque
 
-        -- Encontrar el enemigo más cercano al clic
-        local enemy = getClosestEnemyToClick(clickPosition)
+        -- Encontrar el jugador más cercano al clic
+        local enemy = getClosestPlayerToClick(clickPosition)
         if enemy then
             aimAt(enemy)
         end

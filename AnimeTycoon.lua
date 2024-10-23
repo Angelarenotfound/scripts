@@ -4,6 +4,7 @@ local humanoid = character:WaitForChild("Humanoid")
 local teams = {"Team1", "Team2", "Team3", "Team4", "Team5", "Team6", "Team7", "Team8", "Team9", "Team10"}
 local isAutoCollectEnabled = false
 local currentTab = "Player"
+local isGuiVisible = true
 
 -- GUI Creation
 local screenGui = Instance.new("ScreenGui")
@@ -12,22 +13,53 @@ screenGui.Parent = game.CoreGui
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 500, 0, 300)
 frame.Position = UDim2.new(0.5, -250, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 0.1
+frame.ClipsDescendants = true
+frame.BorderSizePixel = 2
 frame.Parent = screenGui
+frame.Active = true
+frame.Draggable = true
+frame.BorderRadius = UDim.new(0, 10)  -- Bordes redondeados
 
 local title = Instance.new("TextLabel")
 title.Text = "Angelarenotfound's GUI"
-title.Size = UDim2.new(1, 0, 0, 50)
+title.Size = UDim2.new(1, -30, 0, 50) -- Ajustado para dejar espacio al botón "X"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 24
 title.BackgroundTransparency = 1
+title.BorderRadius = UDim.new(0, 10) -- Bordes redondeados
+title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 title.Parent = frame
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -40, 0, 10)
+closeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+closeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 18
+closeButton.Parent = frame
+closeButton.BorderRadius = UDim.new(0, 5) -- Bordes redondeados
+closeButton.Active = true
+closeButton.Draggable = true
+
+closeButton.MouseButton1Click:Connect(function()
+    isGuiVisible = not isGuiVisible
+    frame.Visible = isGuiVisible
+end)
 
 local sideBar = Instance.new("Frame")
 sideBar.Size = UDim2.new(0, 100, 1, 0)
 sideBar.Position = UDim2.new(0, 0, 0, 50)
-sideBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+sideBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+sideBar.BorderSizePixel = 2
+sideBar.BorderColor3 = Color3.fromRGB(0, 0, 0)
 sideBar.Parent = frame
+sideBar.BorderRadius = UDim.new(0, 10)
 
 local tabs = {"Player", "Game", "Discord"}
 local buttons = {}
@@ -41,13 +73,13 @@ for i, tab in ipairs(tabs) do
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Parent = sideBar
     table.insert(buttons, button)
+    button.BorderRadius = UDim.new(0, 10)
     
     button.MouseButton1Click:Connect(function()
         currentTab = tab
         updateTabContent()
     end)
 end
-
 -- Content Area
 local contentArea = Instance.new("Frame")
 contentArea.Size = UDim2.new(1, -100, 1, -50)
@@ -92,8 +124,7 @@ local function updateTabContent()
         resetJumpPower.MouseButton1Click:Connect(function()
             humanoid.JumpPower = 50
         end)
-
-        speedInput.FocusLost:Connect(function()
+speedInput.FocusLost:Connect(function()
             local newSpeed = tonumber(speedInput.Text)
             if newSpeed then
                 humanoid.WalkSpeed = newSpeed
@@ -133,8 +164,7 @@ local function updateTabContent()
             notification.Size = UDim2.new(0, 300, 0, 50)
             notification.Position = UDim2.new(0, 50, 0, 120)
             notification.Parent = contentArea
-
-            local copyButton = Instance.new("TextButton")
+local copyButton = Instance.new("TextButton")
             copyButton.Text = "Copiar"
             copyButton.Size = UDim2.new(0, 100, 0, 50)
             copyButton.Position = UDim2.new(0, 360, 0, 120)
@@ -148,35 +178,15 @@ local function updateTabContent()
     elseif currentTab == "Discord" then
         -- Discord Tab (Empty)
         local label = Instance.new("TextLabel")
-        label.Text = "Por el momento está vacío."
-        label.Size = UDim2.new(1, 0, 0, 50)
-        label.Position = UDim2.new(0, 50, 0, 50)
+        label.Text = "Por el momento está vacío"
+        label.Size = UDim2.new(1, 0, 1, 0)
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.Font = Enum.Font.SourceSans
+        label.TextSize = 24
+        label.BackgroundTransparency = 1
         label.Parent = contentArea
     end
 end
 
--- Auto Collect functionality (teleport based on team)
-local function autoCollect()
-    while wait(60) do
-        if isAutoCollectEnabled then
-            local team = player.Team.Name
-            for i, t in ipairs(teams) do
-                if t == team then
-                    local teleportPosition = workspace.Teleports:FindFirstChild("Team" .. i).Position
-                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-                    local originalPosition = humanoidRootPart.CFrame
-                    humanoidRootPart.CFrame = CFrame.new(teleportPosition)
-                    wait(1)
-                    humanoidRootPart.CFrame = originalPosition
-                end
-            end
-        end
-    end
-end
-
--- Start Auto Collect
-spawn(autoCollect)
-
--- Initialize the GUI with the first tab
+-- Initialize with Player Tab content
 updateTabContent()

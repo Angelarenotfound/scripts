@@ -1,187 +1,140 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local currentTab = "Player"
-local isGuiVisible = true
 
--- GUI principal
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.CoreGui
+-- GUI Code with improved design and functionality
 
--- Frame principal con estilo visual mejorado
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 500, 0, 300)
-frame.Position = UDim2.new(0.5, -250, 0.5, -150)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Fondo oscuro similar a la imagen
-frame.BorderSizePixel = 0
-frame.Parent = screenGui
-frame.Active = true
-frame.Draggable = true
-frame.BackgroundTransparency = 0.2 -- Le damos algo de transparencia
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local CloseButton = Instance.new("TextButton")
+local Sidebar = Instance.new("Frame")
+local PlayerButton = Instance.new("TextButton")
+local GameButton = Instance.new("TextButton")
+local DiscordButton = Instance.new("TextButton")
+local MainLabel = Instance.new("TextLabel")
+local SpeedButton = Instance.new("TextButton")
+local JumpPowerButton = Instance.new("TextButton")
+local ResetButton = Instance.new("TextButton")
 
--- TÃ­tulo con diseÃ±o mejorado
-local title = Instance.new("TextLabel")
-title.Text = "Angelarenotfound's GUI"
-title.Size = UDim2.new(1, -30, 0, 50)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold -- CambiÃ© la fuente para un estilo mÃ¡s moderno
-title.TextSize = 24
-title.BackgroundTransparency = 1
-title.Parent = frame
+-- Setting up the ScreenGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
--- BotÃ³n "X" flotante y desplazable
-local closeButton = Instance.new("TextButton")
-closeButton.Text = "X"
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(0.95, 10, 0, 0) -- PosiciÃ³n ajustada para que estÃ© separado
-closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- BotÃ³n rojo destacado
-closeButton.BorderSizePixel = 0
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 18
-closeButton.Parent = screenGui -- Se agrega fuera del frame para ser independiente
-closeButton.Active = true
-closeButton.Draggable = true -- BotÃ³n puede moverse
+-- Main Frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
-closeButton.MouseButton1Click:Connect(function()
-    isGuiVisible = not isGuiVisible
-    frame.Visible = isGuiVisible
+-- Close Button
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = ScreenGui
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Position = UDim2.new(1, -60, 0, 40)
+CloseButton.Text = "X"
+CloseButton.Draggable = true
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Barra lateral con tabs
-local sideBar = Instance.new("Frame")
-sideBar.Size = UDim2.new(0, 100, 1, 0)
-sideBar.Position = UDim2.new(0, 0, 0, 50)
-sideBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Fondo ligeramente mÃ¡s claro
-sideBar.BorderSizePixel = 0
-sideBar.Parent = frame
+-- Sidebar
+Sidebar.Name = "Sidebar"
+Sidebar.Parent = MainFrame
+Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Sidebar.Size = UDim2.new(0, 100, 1, 0)
 
--- Lista de tabs con nuevo estilo
-local tabs = {"Player", "Game", "Discord"}
-local buttons = {}
+-- Player Button
+PlayerButton.Name = "PlayerButton"
+PlayerButton.Parent = Sidebar
+PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PlayerButton.Size = UDim2.new(1, 0, 0, 50)
+PlayerButton.Text = "Player"
+PlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-for i, tab in ipairs(tabs) do
-    local button = Instance.new("TextButton")
-    button.Text = tab
-    button.Size = UDim2.new(1, 0, 0, 50)
-    button.Position = UDim2.new(0, 0, 0, (i - 1) * 50)
-    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Estilo mÃ¡s oscuro
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.Gotham -- Fuente moderna
-    button.TextSize = 18
-    button.Parent = sideBar
-    table.insert(buttons, button)
+-- Game Button
+GameButton.Name = "GameButton"
+GameButton.Parent = Sidebar
+GameButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+GameButton.Size = UDim2.new(1, 0, 0, 50)
+GameButton.Position = UDim2.new(0, 0, 0, 50)
+GameButton.Text = "Game"
+GameButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    button.MouseButton1Click:Connect(function()
-        currentTab = tab
-        updateTabContent()
-    end)
-end
+-- Discord Button
+DiscordButton.Name = "DiscordButton"
+DiscordButton.Parent = Sidebar
+DiscordButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+DiscordButton.Size = UDim2.new(1, 0, 0, 50)
+DiscordButton.Position = UDim2.new(0, 0, 0, 100)
+DiscordButton.Text = "Discord"
+DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Ãrea de contenido
-local contentArea = Instance.new("Frame")
-contentArea.Size = UDim2.new(1, -100, 1, -50)
-contentArea.Position = UDim2.new(0, 100, 0, 50)
-contentArea.BackgroundTransparency = 0.2 -- Transparente, similar al estilo de la imagen proporcionada
-contentArea.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Fondo oscuro
-contentArea.BorderSizePixel = 0
-contentArea.Parent = frame
+-- Main Label (shows content based on the sidebar)
+MainLabel.Name = "MainLabel"
+MainLabel.Parent = MainFrame
+MainLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainLabel.Size = UDim2.new(0.7, 0, 0.3, 0)
+MainLabel.Position = UDim2.new(0.3, 0, 0.1, 0)
+MainLabel.Text = "Angelarenotfound's GUI"
+MainLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainLabel.Font = Enum.Font.SourceSans
+MainLabel.TextSize = 24
 
--- Actualizar contenido de tabs
-local function updateTabContent()
-    contentArea:ClearAllChildren()
+-- Speed Button
+SpeedButton.Name = "SpeedButton"
+SpeedButton.Parent = MainFrame
+SpeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+SpeedButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+SpeedButton.Position = UDim2.new(0.3, 0, 0.5, 0)
+SpeedButton.Text = "Set Speed"
+SpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedButton.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+end)
 
-    if currentTab == "Player" then
-        -- Contenido para la pestaÃ±a de Player
-        local speedInput = Instance.new("TextBox")
-        speedInput.PlaceholderText = "Speed"
-        speedInput.Size = UDim2.new(0, 200, 0, 50)
-        speedInput.Position = UDim2.new(0, 50, 0, 0)
-        speedInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-        speedInput.Font = Enum.Font.Gotham
-        speedInput.TextSize = 18
-        speedInput.Parent = contentArea
+-- Jump Power Button
+JumpPowerButton.Name = "JumpPowerButton"
+JumpPowerButton.Parent = MainFrame
+JumpPowerButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+JumpPowerButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+JumpPowerButton.Position = UDim2.new(0.3, 0, 0.65, 0)
+JumpPowerButton.Text = "Set JumpPower"
+JumpPowerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+JumpPowerButton.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
+end)
 
-        local jumpPowerInput = Instance.new("TextBox")
-        jumpPowerInput.PlaceholderText = "JumpPower"
-        jumpPowerInput.Size = UDim2.new(0, 200, 0, 50)
-        jumpPowerInput.Position = UDim2.new(0, 50, 0, 60)
-        jumpPowerInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        jumpPowerInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-        jumpPowerInput.Font = Enum.Font.Gotham
-        jumpPowerInput.TextSize = 18
-        jumpPowerInput.Parent = contentArea
+-- Reset Button
+ResetButton.Name = "ResetButton"
+ResetButton.Parent = MainFrame
+ResetButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+ResetButton.Size = UDim2.new(0.7, 0, 0.15, 0)
+ResetButton.Position = UDim2.new(0.3, 0, 0.8, 0)
+ResetButton.Text = "Reset"
+ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ResetButton.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+end)
 
-        local resetSpeed = Instance.new("TextButton")
-        resetSpeed.Text = "Reset Speed"
-        resetSpeed.Size = UDim2.new(0, 200, 0, 50)
-        resetSpeed.Position = UDim2.new(0, 50, 0, 120)
-        resetSpeed.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- BotÃ³n oscuro
-        resetSpeed.TextColor3 = Color3.fromRGB(255, 255, 255)
-        resetSpeed.Font = Enum.Font.Gotham
-        resetSpeed.TextSize = 18
-        resetSpeed.Parent = contentArea
+-- Sidebar navigation functionality
+PlayerButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Player Menu"
+end)
 
-        resetSpeed.MouseButton1Click:Connect(function()
-            humanoid.WalkSpeed = 16
-        end)
+GameButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Game Menu"
+end)
 
-        local resetJumpPower = Instance.new("TextButton")
-        resetJumpPower.Text = "Reset JumpPower"
-        resetJumpPower.Size = UDim2.new(0, 200, 0, 50)
-        resetJumpPower.Position = UDim2.new(0, 50, 0, 180)
-        resetJumpPower.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- BotÃ³n oscuro
-        resetJumpPower.TextColor3 = Color3.fromRGB(255, 255, 255)
-        resetJumpPower.Font = Enum.Font.Gotham
-        resetJumpPower.TextSize = 18
-        resetJumpPower.Parent = contentArea
+DiscordButton.MouseButton1Click:Connect(function()
+    MainLabel.Text = "Discord Menu"
+end)
 
-        resetJumpPower.MouseButton1Click:Connect(function()
-            humanoid.JumpPower = 50
-        end)
-
-        speedInput.FocusLost:Connect(function()
-            local newSpeed = tonumber(speedInput.Text)
-            if newSpeed then
-                humanoid.WalkSpeed = newSpeed
-            end
-        end)
-
-        jumpPowerInput.FocusLost:Connect(function()
-            local newJumpPower = tonumber(jumpPowerInput.Text)
-            if newJumpPower then
-                humanoid.JumpPower = newJumpPower
-            end
-        end)
-
-    elseif currentTab == "Game" then
-        -- Contenido para la pestaÃ±a de Game
-        local autoCollectToggle = Instance.new("TextButton")
-        autoCollectToggle.Text = "Auto Collect: OFF"
-        autoCollectToggle.Size = UDim2.new(0, 200, 0, 50)
-        autoCollectToggle.Position = UDim2.new(0, 50, 0, 0)
-        autoCollectToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        autoCollectToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        autoCollectToggle.Font = Enum.Font.Gotham
-        autoCollectToggle.TextSize = 18
-        autoCollectToggle.Parent = contentArea
-
-        autoCollectToggle.MouseButton1Click:Connect(function()
-            -- Cambia el estado del auto collect
-        end)
-
-    elseif currentTab == "Discord" then
-        -- Contenido para la pestaÃ±a de Discord
-        local label = Instance.new("TextLabel")
-        label.Text = "Por el momento estÃ¡ vacÃ­o"
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.Font = Enum.Font.Gotham
-        label.TextSize = 18
-        label.Parent = contentArea
-    end
-end
-
--- Inicializar la pestaÃ±a de Player
-updateTabContent()
+-- Adding persistence after player respawn
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.WalkSpeed = 100
+    humanoid.JumpPower = 150
+end)

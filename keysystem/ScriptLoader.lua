@@ -1,3 +1,4 @@
+-- Crear GUI
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local TitleLabel = Instance.new("TextLabel")
@@ -5,17 +6,19 @@ local InfoLabel = Instance.new("TextLabel")
 local KeyInput = Instance.new("TextBox")
 local VerifyButton = Instance.new("TextButton")
 local CloseButton = Instance.new("TextButton")
+local HttpService = game:GetService("HttpService")  -- Asegúrate de incluir esto
 
+-- Configurar GUI
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
 Frame.Parent = ScreenGui
 Frame.Size = UDim2.new(0, 400, 0, 300)
-Frame.Position = UDim2.new(0.5, -200, 0, -150) -- Comienza fuera de la pantalla
+Frame.Position = UDim2.new(0.5, -200, 0, -150)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.BorderSizePixel = 2
 Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.ClipsDescendants = true
 
+-- Configurar elementos del GUI
 TitleLabel.Parent = Frame
 TitleLabel.Size = UDim2.new(1, 0, 0, 50)
 TitleLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -32,7 +35,7 @@ InfoLabel.Position = UDim2.new(0, 0, 0, 50)
 InfoLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 InfoLabel.Text = "Verifica tu key"
 InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoLabel.TextScaled = true
+InfoLabel.TextScaled = true  -- Corregido
 InfoLabel.TextStrokeTransparency = 0.5
 InfoLabel.BorderSizePixel = 0
 
@@ -64,20 +67,21 @@ CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseButton.TextScaled = true
 CloseButton.BorderSizePixel = 0
 
-Frame.Position = UDim2.new(0.5, -200, 0, -150) -- Ajusta la posición inicial
-Frame:TweenPosition(UDim2.new(0.5, -200, 0.5, -150), "Out", "Quint", 0.5, true)
-
-VerifyButton.MouseButton1Click:Connect(function()
-    local key = KeyInput.Text
+-- Función para verificar la clave
+local function verifyKey(key)
     if key and key ~= "" then
-        local HttpService = game:GetService("HttpService")
+        local HTTPProxy = require(game:GetService("ReplicatedStorage"):FindFirstChild("HTTPProxy"))
+
+        local function sendRequest(url, data)
+            local proxy = HTTPProxy:GetInstance()
+            local response = proxy:SendRequest(url, data)
+            return response
+        end
+
         local url = "https://adonis-except.xyz/api/roblox/scripts/keysystem/verify"
         local data = HttpService:JSONEncode({key = key})
-        
-        local success, response = pcall(function()
-            return HttpService:PostAsync(url, data, Enum.HttpContentType.ApplicationJson)
-        end)
-        
+
+        local success, response = pcall(sendRequest, url, data)
         if success then
             local result = HttpService:JSONDecode(response)
             if result.success then
@@ -85,7 +89,8 @@ VerifyButton.MouseButton1Click:Connect(function()
                 KeyInput.PlaceholderText = "Key Valida"
                 KeyInput.TextColor3 = Color3.fromRGB(0, 255, 0)
                 wait(1)
-                ScreenGui:Destroy() loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/AnimeTycoon.lua"))()
+                ScreenGui:Destroy()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/AnimeTycoon.lua"))()
             elseif result.error then
                 KeyInput.PlaceholderText = "Key Incorrecta"
                 KeyInput.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
@@ -96,6 +101,10 @@ VerifyButton.MouseButton1Click:Connect(function()
     else
         print("Por favor, ingresa una key.")
     end
+end
+
+VerifyButton.MouseButton1Click:Connect(function()
+    verifyKey(KeyInput.Text)  -- Conectar el botón a la función
 end)
 
 CloseButton.MouseButton1Click:Connect(function()

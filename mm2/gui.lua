@@ -14,18 +14,18 @@ ScreenGui.ResetOnSpawn = false
 
 -- Sección Principal (MainFrame)
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 500)
+MainFrame.Size = UDim2.new(0, 400, 0, 500) -- Tamaño fijo
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250) -- Centrado
 MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Gris oscuro
-MainFrame.BackgroundTransparency = 0.2
+MainFrame.BackgroundTransparency = 0 -- No transparente
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
 
 -- Título del GUI
 TitleLabel.Name = "TitleLabel"
-TitleLabel.Size = UDim2.new(0, 400, 0, 50)
-TitleLabel.Position = UDim2.new(0.5, -200, 0, 0)
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "Adonis"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -38,8 +38,8 @@ TitleLabel.Parent = MainFrame
 
 local ExceptLabel = Instance.new("TextLabel")
 ExceptLabel.Name = "ExceptLabel"
-ExceptLabel.Size = UDim2.new(0, 400, 0, 50)
-ExceptLabel.Position = UDim2.new(0.5, -200, 0.1, 50)
+ExceptLabel.Size = UDim2.new(1, 0, 0, 50)
+ExceptLabel.Position = UDim2.new(0, 0, 0.1, 50)
 ExceptLabel.BackgroundTransparency = 1
 ExceptLabel.Text = "Except"
 ExceptLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -102,7 +102,7 @@ AimButton.TextScaled = true
 AimButton.BorderRadius = UDim.new(0, 25)
 AimButton.Parent = MainFrame
 
--- Función para mover el GUI
+-- Función para mover el GUI (adaptado para dispositivos móviles)
 local dragging = false
 local dragInput, dragStart, startPos
 
@@ -126,20 +126,20 @@ end
 -- Conectar eventos de mover el GUI
 MainFrame.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed then
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             startDrag(input)
         end
     end
 end)
 
 MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         updateDrag(input)
     end
 end)
 
 MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         stopDrag()
     end
 end)

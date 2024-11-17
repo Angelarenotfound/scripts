@@ -14,9 +14,9 @@ ScreenGui.ResetOnSpawn = false
 
 -- Sección Principal (MainFrame)
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -200) -- Centrado
-MainFrame.BackgroundColor3 = Color3.fromRGB(169, 169, 169)
+MainFrame.Size = UDim2.new(0, 400, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250) -- Centrado
+MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Gris oscuro
 MainFrame.BackgroundTransparency = 0.2
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)

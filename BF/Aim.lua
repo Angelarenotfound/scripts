@@ -1,137 +1,142 @@
--- Servicios
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local localPlayer = Players.LocalPlayer
-local camera = game.Workspace.CurrentCamera
-
-local following = false
+-- Variables principales
+local guiVisible = true
 local targetPlayer = nil
+local following = false
 
--- Creación de GUI
+-- Crear GUI
 local ScreenGui = Instance.new("ScreenGui")
-local TitleLabel = Instance.new("TextLabel")
-local FollowButton = Instance.new("TextButton")
-local ChangeButton = Instance.new("TextButton")
-local PlayerLabel = Instance.new("TextLabel")
-
--- Configuración de ScreenGui
+ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "AdonisExceptGui"
 
--- Configuración del título "Adonis Except"
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Parent = ScreenGui
-TitleLabel.Text = "<font color=\"rgb(255, 255, 255)\">Adonis</font> <font color=\"rgb(255, 85, 85)\">Except</font>"
-TitleLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
-TitleLabel.Position = UDim2.new(0.25, 0, 0.1, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextScaled = true
-TitleLabel.RichText = true
-TitleLabel.Font = Enum.Font.SourceSansBold
+-- Botón para mostrar/ocultar GUI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 100, 0, 40)
+toggleButton.Position = UDim2.new(0.5, -50, 0.8, 0)
+toggleButton.Text = "Mostrar GUI"
+toggleButton.Parent = ScreenGui
 
--- Configuración del botón "Seguir"
-FollowButton.Name = "FollowButton"
-FollowButton.Parent = ScreenGui
-FollowButton.Text = "Seguir/Detener"
-FollowButton.Size = UDim2.new(0.4, 0, 0.1, 0)
-FollowButton.Position = UDim2.new(0.05, 0, 0.3, 0)
-FollowButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-FollowButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-FollowButton.Font = Enum.Font.SourceSansBold
-FollowButton.TextSize = 20
+-- Panel principal del GUI
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 250, 0, 150)
+mainFrame.Position = UDim2.new(0.5, -125, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BorderSizePixel = 3
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Visible = true
+mainFrame.Parent = ScreenGui
 
--- Configuración del botón "Cambiar"
-ChangeButton.Name = "ChangeButton"
-ChangeButton.Parent = ScreenGui
-ChangeButton.Text = "Cambiar Jugador"
-ChangeButton.Size = UDim2.new(0.4, 0, 0.1, 0)
-ChangeButton.Position = UDim2.new(0.55, 0, 0.3, 0)
-ChangeButton.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
-ChangeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ChangeButton.Font = Enum.Font.SourceSansBold
-ChangeButton.TextSize = 20
+-- Borde superior para mover GUI
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleBar.Parent = mainFrame
 
--- Configuración del Label para mostrar el jugador seguido
-PlayerLabel.Name = "PlayerLabel"
-PlayerLabel.Parent = ScreenGui
-PlayerLabel.Text = "Jugador seguido: Ninguno"
-PlayerLabel.Size = UDim2.new(0.9, 0, 0.1, 0)
-PlayerLabel.Position = UDim2.new(0.05, 0, 0.45, 0)
-PlayerLabel.BackgroundTransparency = 1
-PlayerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlayerLabel.Font = Enum.Font.SourceSansBold
-PlayerLabel.TextSize = 18
-PlayerLabel.TextScaled = true
+-- Título
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 1, 0)
+titleLabel.Text = "Adonis Except"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextScaled = true
+titleLabel.Parent = titleBar
 
--- Función para encontrar al jugador más cercano
-local function getClosestPlayer()
-    local closestPlayer = nil
-    local closestDistance = math.huge
+-- Botón para activar/desactivar seguimiento
+local followButton = Instance.new("TextButton")
+followButton.Size = UDim2.new(0.8, 0, 0.2, 0)
+followButton.Position = UDim2.new(0.1, 0, 0.35, 0)
+followButton.Text = "Seguir/Detener"
+followButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+followButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+followButton.Parent = mainFrame
 
-    for _, player in pairs(Players:GetPlayers()) do
+-- Botón para cambiar de jugador
+local changeButton = Instance.new("TextButton")
+changeButton.Size = UDim2.new(0.8, 0, 0.2, 0)
+changeButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+changeButton.Text = "Cambiar Jugador"
+changeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+changeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+changeButton.Parent = mainFrame
+
+-- Texto del jugador seguido
+local followLabel = Instance.new("TextLabel")
+followLabel.Size = UDim2.new(0.8, 0, 0.2, 0)
+followLabel.Position = UDim2.new(0.1, 0, 0.8, 0)
+followLabel.Text = "Jugador seguido: Ninguno"
+followLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+followLabel.BackgroundTransparency = 1
+followLabel.Parent = mainFrame
+
+-- Función para obtener el jugador más cercano
+local function getNearestPlayer()
+    local players = game.Players:GetPlayers()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+    local localPlayer = game.Players.LocalPlayer
+
+    for _, player in ipairs(players) do
         if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            local distance = (localPlayer.Character.HumanoidRootPart.Position - playerPosition).magnitude
-
-            if distance < closestDistance then
-                closestDistance = distance
-                closestPlayer = player
+            local distance = (player.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestPlayer = player
             end
         end
     end
-
-    return closestPlayer
+    return nearestPlayer
 end
 
--- Función para seguir al jugador objetivo
+-- Función de seguimiento de cámara
 local function followPlayer()
-    if following and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    if not following or not targetPlayer or not targetPlayer.Character then
+        return
+    end
+
+    local localPlayer = game.Players.LocalPlayer
+    local camera = game.Workspace.CurrentCamera
+    local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+    if targetHRP then
         camera.CameraType = Enum.CameraType.Scriptable
-        RunService.RenderStepped:Connect(function()
-            if following and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetPart = targetPlayer.Character.HumanoidRootPart
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetPart.Position)
-            end
-        end)
+        camera.CFrame = CFrame.new(camera.CFrame.Position, targetHRP.Position)
     end
 end
 
--- Actualizar la etiqueta del jugador seguido
-local function updatePlayerLabel()
-    if targetPlayer then
-        PlayerLabel.Text = "Jugador seguido: " .. targetPlayer.Name
+-- Actualizar la cámara para seguir al jugador
+game:GetService("RunService").RenderStepped:Connect(function()
+    if following then
+        followPlayer()
     else
-        PlayerLabel.Text = "Jugador seguido: Ninguno"
-    end
-end
-
--- Evento para activar/desactivar el seguimiento
-FollowButton.MouseButton1Click:Connect(function()
-    if not following then
-        targetPlayer = getClosestPlayer()
-        if targetPlayer then
-            following = true
-            updatePlayerLabel()
-            followPlayer()
-        end
-    else
-        following = false
-        camera.CameraType = Enum.CameraType.Custom
-        camera.CameraSubject = localPlayer.Character:FindFirstChild("Humanoid")
-        targetPlayer = nil
-        updatePlayerLabel()
+        game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
     end
 end)
 
--- Evento para cambiar de jugador
-ChangeButton.MouseButton1Click:Connect(function()
-    if following then
-        targetPlayer = getClosestPlayer()
-        if targetPlayer then
-            updatePlayerLabel()
-            followPlayer()
-        end
+-- Botón para seguir/detener
+followButton.MouseButton1Click:Connect(function()
+    following = not following
+    followButton.Text = following and "Detener" or "Seguir"
+    if not following then
+        game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+        followLabel.Text = "Jugador seguido: Ninguno"
+        targetPlayer = nil
     end
+end)
+
+-- Botón para cambiar jugador
+changeButton.MouseButton1Click:Connect(function()
+    targetPlayer = getNearestPlayer()
+    if targetPlayer then
+        followLabel.Text = "Jugador seguido: " .. targetPlayer.Name
+    else
+        followLabel.Text = "Jugador seguido: Ninguno"
+    end
+end)
+
+-- Función para mostrar/ocultar GUI
+toggleButton.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    mainFrame.Visible = guiVisible
+    toggleButton.Text = guiVisible and "Ocultar GUI" or "Mostrar GUI"
 end)

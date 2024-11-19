@@ -119,9 +119,9 @@ local function followPlayer()
     if followTarget and followTarget.Character and followTarget.Character:FindFirstChild("HumanoidRootPart") then
         RunService:BindToRenderStep("FollowPlayer", Enum.RenderPriority.Camera.Value, function()
             if followTarget.Character and followTarget.Character:FindFirstChild("HumanoidRootPart") then
-                -- Mantener la cámara activa y apuntando al jugador objetivo
+                -- Centramos la cámara en el torso del jugador seguido
                 local targetPosition = followTarget.Character.HumanoidRootPart.Position
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition + Vector3.new(0, 1.5, 0))
             end
         end)
     end

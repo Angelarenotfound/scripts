@@ -121,7 +121,7 @@ local function followPlayer()
             if followTarget.Character and followTarget.Character:FindFirstChild("HumanoidRootPart") then
                 -- Centramos la cámara en el torso del jugador seguido
                 local targetPosition = followTarget.Character.HumanoidRootPart.Position
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition + Vector3.new(0, -10, 0))
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition + Vector3.new(0, -5, 0))
             end
         end)
     end

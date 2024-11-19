@@ -87,7 +87,7 @@ ShowHideButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ShowHideButton.BorderSizePixel = 3
 ShowHideButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ShowHideButton.Size = UDim2.new(0, 100, 0, 25)
-ShowHideButton.Position = UDim2.new(0.5, -50, 0, 10) -- Posición en la parte superior
+ShowHideButton.Position = UDim2.new(0.5, -50, 0, 10)
 ShowHideButton.Text = "Mostrar/Ocultar GUI"
 ShowHideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShowHideButton.TextSize = 14
@@ -117,10 +117,11 @@ end
 
 local function followPlayer()
     if followTarget and followTarget.Character and followTarget.Character:FindFirstChild("HumanoidRootPart") then
-        Camera.CameraType = Enum.CameraType.Scriptable
         RunService:BindToRenderStep("FollowPlayer", Enum.RenderPriority.Camera.Value, function()
             if followTarget.Character and followTarget.Character:FindFirstChild("HumanoidRootPart") then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, followTarget.Character.HumanoidRootPart.Position)
+                -- Mantener la cámara activa y apuntando al jugador objetivo
+                local targetPosition = followTarget.Character.HumanoidRootPart.Position
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
             end
         end)
     end
@@ -131,7 +132,6 @@ local function stopFollowing()
     followTarget = nil
     TargetLabel.Text = "Siguiendo: Ninguno"
     RunService:UnbindFromRenderStep("FollowPlayer")
-    Camera.CameraType = Enum.CameraType.Custom
 end
 
 -- Eventos

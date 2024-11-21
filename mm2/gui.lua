@@ -1,105 +1,106 @@
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ScriptGUI"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Variables
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = game.Workspace.CurrentCamera
 
--- Crear el marco principal
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
+local ToggleESPButton = Instance.new("TextButton")
+local ToggleAimbotButton = Instance.new("TextButton")
+local Title = Instance.new("TextLabel")
+
+-- Propiedades GUI
+ScreenGui.Name = "AdonisExceptGui"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.Position = UDim2.new(0.35, 0, 0.35, 0)
-MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MainFrame.BorderSizePixel = 3
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = true
 
--- Hacer que el GUI sea movible
-local dragging = false
-local dragInput, dragStart, startPos
-
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-    end
-end)
-
-MainFrame.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-MainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- Crear el título
-local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Title.Size = UDim2.new(1, 0, 0.2, 0)
+Title.Size = UDim2.new(1, 0, 0, 25)
+Title.Font = Enum.Font.SourceSansBold
 Title.Text = "Adonis Except"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextStrokeTransparency = 0
 Title.TextSize = 20
-Title.TextXAlignment = Enum.TextXAlignment.Center  -- Corrección
-Title.TextYAlignment = Enum.TextYAlignment.Center
 
--- Botón para activar/desactivar ESP
-local ToggleESPButton = Instance.new("TextButton")
 ToggleESPButton.Name = "ToggleESPButton"
 ToggleESPButton.Parent = MainFrame
 ToggleESPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleESPButton.Position = UDim2.new(0.1, 0, 0.6, 0)
-ToggleESPButton.Text = "Activar/Desactivar ESP"
+ToggleESPButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+ToggleESPButton.Text = "Activar ESP"
 ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleESPButton.TextSize = 14
 
--- Botón para activar/desactivar Aim
-local ToggleAimButton = Instance.new("TextButton")
-ToggleAimButton.Name = "ToggleAimButton"
-ToggleAimButton.Parent = MainFrame
-ToggleAimButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-ToggleAimButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleAimButton.Position = UDim2.new(0.1, 0, 0.8, 0)
-ToggleAimButton.Text = "Activar/Desactivar Aim"
-ToggleAimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimButton.TextSize = 14
+ToggleAimbotButton.Name = "ToggleAimbotButton"
+ToggleAimbotButton.Parent = MainFrame
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleAimbotButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+ToggleAimbotButton.Text = "Activar Aimbot"
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextSize = 14
 
--- Botón para ocultar/mostrar el GUI
-local ToggleVisibilityButton = Instance.new("TextButton")
-ToggleVisibilityButton.Name = "ToggleVisibilityButton"
-ToggleVisibilityButton.Parent = MainFrame
-ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Rojo
-ToggleVisibilityButton.Size = UDim2.new(0.2, 0, 0.2, 0)
-ToggleVisibilityButton.Position = UDim2.new(0.8, 0, 0, 0)
-ToggleVisibilityButton.Text = "Ocultar"
-ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleVisibilityButton.TextSize = 14
+-- Variables de control
+local espEnabled = false
+local aimbotEnabled = false
 
--- Funcionalidad para ocultar/mostrar el GUI
-ToggleVisibilityButton.MouseButton1Click:Connect(function()
-    if MainFrame.Visible then
-        MainFrame.Visible = false
-        ToggleVisibilityButton.Text = "Mostrar"
-    else
-        MainFrame.Visible = true
-        ToggleVisibilityButton.Text = "Ocultar"
+-- Función para activar/desactivar el ESP
+local function toggleESP()
+    espEnabled = not espEnabled
+    ToggleESPButton.Text = espEnabled and "Desactivar ESP" or "Activar ESP"
+    
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/mm2/esp.lua"))()
+end
+
+-- Función para obtener al jugador con el cuchillo
+local function getPlayerWithKnife()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+                return player
+            end
+        end
+    end
+    return nil
+end
+
+-- Función para activar/desactivar el Aimbot
+local function toggleAimbot()
+    aimbotEnabled = not aimbotEnabled
+    ToggleAimbotButton.Text = aimbotEnabled and "Desactivar Aimbot" or "Activar Aimbot"
+
+    if not aimbotEnabled then
+        RunService:UnbindFromRenderStep("Aimbot")
+    end
+end
+
+-- Aimbot con la pistola en mano
+RunService.RenderStepped:Connect(function()
+    if aimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun") then
+        local targetPlayer = getPlayerWithKnife()
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
+        end
     end
 end)
 
--- Activar/Desactivar ESP
-ToggleESPButton.MouseButton1Click:Connect(function()
-    local espScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/mm2/esp.lua"))
-    espScript()
-end)
-
--- Activar/Desactivar Aim
-ToggleAimButton.MouseButton1Click:Connect(function()
-    local aimScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/mm2/Aim.lua"))
-    aimScript()
-end)
+-- Eventos de los botones
+ToggleESPButton.MouseButton1Click:Connect(toggleESP)
+ToggleAimbotButton.MouseButton1Click:Connect(toggleAimbot)

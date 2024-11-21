@@ -3,12 +3,14 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = game.Workspace.CurrentCamera
+local defaultWalkSpeed = 16
 
 -- GUI
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local ToggleESPButton = Instance.new("TextButton")
 local ToggleAimbotButton = Instance.new("TextButton")
+local WalkSpeedInput = Instance.new("TextBox")
 local Title = Instance.new("TextLabel")
 
 -- Propiedades GUI
@@ -22,8 +24,8 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MainFrame.BorderSizePixel = 3
 MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 100)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+MainFrame.Size = UDim2.new(0, 200, 0, 125)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -62)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = true
@@ -51,16 +53,27 @@ ToggleAimbotButton.Name = "ToggleAimbotButton"
 ToggleAimbotButton.Parent = MainFrame
 ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 ToggleAimbotButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.5, 0)
 ToggleAimbotButton.Text = "Activar Aimbot"
 ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAimbotButton.TextSize = 14
+
+WalkSpeedInput.Name = "WalkSpeedInput"
+WalkSpeedInput.Parent = MainFrame
+WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+WalkSpeedInput.Size = UDim2.new(0.8, 0, 0, 25)
+WalkSpeedInput.Position = UDim2.new(0.1, 0, 0.7, 0)
+WalkSpeedInput.PlaceholderText = "Velocidad (default 16)"
+WalkSpeedInput.Text = ""
+WalkSpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+WalkSpeedInput.TextSize = 14
 
 -- Variables de control
 local espEnabled = false
 local aimbotEnabled = false
 local updateInterval = 1
 local lastUpdate = 0
+local walkSpeedValue = defaultWalkSpeed
 
 -- Función para crear el marcador ESP
 local function createMarker(player, color)
@@ -161,6 +174,35 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Eventos de los botones
+-- Función para cambiar WalkSpeed
+local function applyWalkSpeed(speed)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
+end
+
+-- Función para aplicar la velocidad ingresada
+WalkSpeedInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local inputSpeed = tonumber(WalkSpeedInput.Text)
+        if inputSpeed and inputSpeed > 0 then
+            walkSpeedValue = inputSpeed
+        else
+            walkSpeedValue = defaultWalkSpeed
+        end
+        applyWalkSpeed(walkSpeedValue)
+    end
+end)
+
+-- Aplicar velocidad en cada respawn
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid").Died:Connect(function()
+        -- Al reaparecer, volver a aplicar la velocidad seleccionada
+        local humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
+        humanoid:GetPropertyChangedSignal("Parent"):Wait()  -- Esperar a reaparecer
+        applyWalkSpeed(walkSpeedValue)
+    end)
+end)
+
 ToggleESPButton.MouseButton1Click:Connect(toggleESP)
 ToggleAimbotButton.MouseButton1Click:Connect(toggleAimbot)

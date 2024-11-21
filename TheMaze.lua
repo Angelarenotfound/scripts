@@ -1,12 +1,13 @@
--- CONFIGURACIÓN INICIAL
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- MENÚ PRINCIPAL
 local MainMenu = Instance.new("Frame")
 MainMenu.Parent = ScreenGui
 MainMenu.Size = UDim2.new(0, 400, 0, 300)
@@ -19,24 +20,30 @@ MainMenu.Active = true
 MainMenu.ZIndex = 10
 MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
 
--- BORDES REDONDEADOS
 local UICorner = Instance.new("UICorner")
 UICorner.Parent = MainMenu
 UICorner.CornerRadius = UDim.new(0, 15)
 
--- TÍTULO DEL MENÚ
-local Title = Instance.new("TextLabel")
-Title.Parent = MainMenu
-Title.Size = UDim2.new(1, 0, 0.2, 0)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "<b><font color='white'>Adonis</font> <font color='red'>Except</font></b>"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextScaled = true
-Title.Font = Enum.Font.SourceSansBold
-Title.RichText = true
+local TitleAdonis = Instance.new("TextLabel")
+TitleAdonis.Parent = MainMenu
+TitleAdonis.Size = UDim2.new(0.5, 0, 0.2, 0)
+TitleAdonis.Position = UDim2.new(0, 0, 0, 0)
+TitleAdonis.BackgroundTransparency = 1
+TitleAdonis.Text = "Adonis"
+TitleAdonis.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleAdonis.TextScaled = true
+TitleAdonis.Font = Enum.Font.SourceSansBold
 
--- INPUT DE COMANDOS
+local TitleExcept = Instance.new("TextLabel")
+TitleExcept.Parent = MainMenu
+TitleExcept.Size = UDim2.new(0.5, 0, 0.2, 0)
+TitleExcept.Position = UDim2.new(0.5, 0, 0, 0)
+TitleExcept.BackgroundTransparency = 1
+TitleExcept.Text = "Except"
+TitleExcept.TextColor3 = Color3.fromRGB(255, 0, 0)
+TitleExcept.TextScaled = true
+TitleExcept.Font = Enum.Font.SourceSansBold)
+
 local InputBox = Instance.new("TextBox")
 InputBox.Parent = MainMenu
 InputBox.Size = UDim2.new(0.9, 0, 0.15, 0)
@@ -52,7 +59,6 @@ local InputCorner = Instance.new("UICorner")
 InputCorner.Parent = InputBox
 InputCorner.CornerRadius = UDim.new(0, 8)
 
--- NOTIFICACIÓN DE ERRORES
 local function showNotification(message)
     local Notification = Instance.new("TextLabel")
     Notification.Parent = ScreenGui
@@ -69,7 +75,7 @@ local function showNotification(message)
     NotificationCorner.Parent = Notification
     NotificationCorner.CornerRadius = UDim.new(0, 8)
 
-    game:GetService("TweenService"):Create(
+    TweenService:Create(
         Notification,
         TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
         {BackgroundTransparency = 1, TextTransparency = 1}
@@ -79,7 +85,6 @@ local function showNotification(message)
     Notification:Destroy()
 end
 
--- LISTA DE COMANDOS
 local commands = {
     {name = "speed", alias = "spd", description = "Aumenta la velocidad del jugador"},
     {name = "jumppower", alias = "jp", description = "Modifica el poder de salto"},
@@ -89,7 +94,6 @@ local commands = {
     {name = "espMobs", alias = "em", description = "Activa ESP para mobs"}
 }
 
--- VENTANA DE COMANDOS
 local function showCommands()
     local CommandFrame = Instance.new("Frame")
     CommandFrame.Parent = ScreenGui
@@ -137,7 +141,6 @@ local function showCommands()
     end
 end
 
--- MANEJO DE COMANDOS
 local function handleCommand(command)
     if command == "commands" or command == "cmds" then
         showCommands()
@@ -146,23 +149,22 @@ local function handleCommand(command)
     elseif command == "jumppower" or command == "jp" then
         LocalPlayer.Character.Humanoid.JumpPower = 100
     elseif command == "fullbright" or command == "fb" then
-        game.Lighting.Brightness = 2
+        Lighting.Brightness = 2
     elseif command == "xray" or command == "xr" then
-        for _, part in pairs(workspace:GetDescendants()) do
+        for _, part in pairs(Workspace:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.Transparency = 0.5
             end
         end
     elseif command == "esp" then
-        -- ESP código aquí
+        showNotification("ESP para jugadores activado")
     elseif command == "espMobs" or command == "em" then
-        -- Código para ESP de mobs
+        showNotification("ESP para mobs activado")
     else
         showNotification("Comando no válido")
     end
 end
 
--- EVENTO DE CHAT
 LocalPlayer.Chatted:Connect(function(message)
     if string.sub(message, 1, 1) == ";" then
         local cmd = string.sub(message, 2):lower()
@@ -170,7 +172,6 @@ LocalPlayer.Chatted:Connect(function(message)
     end
 end)
 
--- BOTÓN DE INPUT
 InputBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         handleCommand(InputBox.Text:lower())

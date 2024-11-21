@@ -1,76 +1,81 @@
--- Variables globales
-local player = game.Players.LocalPlayer
-local infiniteJumpPower = 100
-local defaultJumpPower = 50
-local infiniteJumpEnabled = false
-local walkSpeedValue = 16
-local walkSpeedInput = script.Parent:WaitForChild("WalkSpeedInput")
-local ToggleInfiniteJumpButton = script.Parent:WaitForChild("ToggleInfiniteJumpButton")
-local ToggleESPButton = script.Parent:WaitForChild("ToggleESPButton")
-local ToggleAimbotButton = script.Parent:WaitForChild("ToggleAimbotButton")
-local UserInputService = game:GetService("UserInputService")
-
--- Función para cambiar la velocidad de caminar
-local function applyWalkSpeed(speed)
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = speed
-    end
-end
-
--- Lógica para el cambio de velocidad de caminar
-walkSpeedInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local inputSpeed = tonumber(walkSpeedInput.Text)
-        if inputSpeed and inputSpeed > 0 then
-            walkSpeedValue = inputSpeed
-            -- Aplicar la nueva velocidad de caminar
-            applyWalkSpeed(walkSpeedValue)
-        else
-            walkSpeedInput.Text = tostring(walkSpeedValue) -- Volver al valor anterior si la entrada no es válida
-        end
-    end
-end)
-
--- Función para manejar el salto infinito
-local function handleJump()
-    if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-        humanoid.JumpPower = infiniteJumpPower
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end
-
--- Función para activar el salto infinito
-local function turnOnInfiniteJump()
-    handleJump()
-end
-
--- Conectar el botón de salto infinito
-ToggleInfiniteJumpButton.MouseButton1Click:Connect(function()
-    infiniteJumpEnabled = not infiniteJumpEnabled
-    ToggleInfiniteJumpButton.Text = infiniteJumpEnabled and "Desactivar Salto Infinito" or "Activar Salto Infinito"
-
-    if infiniteJumpEnabled then
-        -- Si el salto infinito está activado, también saltar cada vez que se presiona la tecla espacio
-        UserInputService.InputBegan:Connect(function(input, isProcessed)
-            if not isProcessed and input.KeyCode == Enum.KeyCode.Space then
-                turnOnInfiniteJump()
-            end
-        end)
-    else
-        -- Detener el salto infinito
-        UserInputService.InputBegan:Disconnect()
-    end
-end)
-
--- --- ESP Script ---
+-- Variables
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local updateInterval = 1
-local espEnabled = false  -- Inicialmente deshabilitado
-local lastUpdate = 0  -- Para controlar el intervalo de actualización
+local LocalPlayer = Players.LocalPlayer
+local Camera = game.Workspace.CurrentCamera
+local defaultWalkSpeed = 16
 
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ToggleESPButton = Instance.new("TextButton")
+local ToggleAimbotButton = Instance.new("TextButton")
+local WalkSpeedInput = Instance.new("TextBox")
+local Title = Instance.new("TextLabel")
+
+-- Propiedades GUI
+ScreenGui.Name = "AdonisExceptGui"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MainFrame.BorderSizePixel = 3
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 125)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -62)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = true
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.Size = UDim2.new(1, 0, 0, 25)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "Adonis Except"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextStrokeTransparency = 0
+Title.TextSize = 20
+
+ToggleESPButton.Name = "ToggleESPButton"
+ToggleESPButton.Parent = MainFrame
+ToggleESPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleESPButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+ToggleESPButton.Text = "Activar ESP"
+ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleESPButton.TextSize = 14
+
+ToggleAimbotButton.Name = "ToggleAimbotButton"
+ToggleAimbotButton.Parent = MainFrame
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleAimbotButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.5, 0)
+ToggleAimbotButton.Text = "Activar Aimbot"
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextSize = 14
+
+WalkSpeedInput.Name = "WalkSpeedInput"
+WalkSpeedInput.Parent = MainFrame
+WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+WalkSpeedInput.Size = UDim2.new(0.8, 0, 0, 25)
+WalkSpeedInput.Position = UDim2.new(0.1, 0, 0.7, 0)
+WalkSpeedInput.PlaceholderText = "Velocidad (default 16)"
+WalkSpeedInput.Text = ""
+WalkSpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+WalkSpeedInput.TextSize = 14
+
+-- Variables de control
+local espEnabled = false
+local aimbotEnabled = false
+local updateInterval = 1
+local lastUpdate = 0
+local walkSpeedValue = defaultWalkSpeed
+
+-- Función para crear el marcador ESP
 local function createMarker(player, color)
     if player.Character:FindFirstChild("ESPMarker") then
         player.Character.ESPMarker:Destroy()
@@ -93,6 +98,7 @@ local function createMarker(player, color)
     uicorner.CornerRadius = UDim.new(1, 0)
 end
 
+-- Función para actualizar el ESP
 local function updateESP()
     if not espEnabled then return end  -- No actualizar si está deshabilitado
     for _, player in pairs(Players:GetPlayers()) do
@@ -125,7 +131,6 @@ end)
 local function toggleESP()
     espEnabled = not espEnabled
     ToggleESPButton.Text = espEnabled and "Desactivar ESP" or "Activar ESP"
-
     if not espEnabled then
         -- Limpiar marcadores si se desactiva
         for _, player in pairs(Players:GetPlayers()) do
@@ -136,56 +141,68 @@ local function toggleESP()
     end
 end
 
--- --- Aimbot Script ---
-local aimbotEnabled = false
-local targetPlayer = nil
-
-local function aimAtPlayer(player)
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local camera = game.Workspace.CurrentCamera
-        camera.CFrame = CFrame.new(camera.CFrame.Position, character.HumanoidRootPart.Position)
+-- Función para obtener al jugador con el cuchillo
+local function getPlayerWithKnife()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+                return player
+            end
+        end
     end
+    return nil
 end
 
+-- Función para activar/desactivar el Aimbot
 local function toggleAimbot()
     aimbotEnabled = not aimbotEnabled
     ToggleAimbotButton.Text = aimbotEnabled and "Desactivar Aimbot" or "Activar Aimbot"
+
+    if not aimbotEnabled then
+        RunService:UnbindFromRenderStep("Aimbot")
+    end
 end
 
-UserInputService.InputBegan:Connect(function(input, isProcessed)
-    if not isProcessed and aimbotEnabled then
-        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-        local hasGun = player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun")
-        
-        if hasGun then
-            -- Aimbot solo cuando el jugador tiene la pistola
-            local closestPlayer = nil
-            local closestDistance = math.huge
-
-            for _, target in pairs(Players:GetPlayers()) do
-                if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude
-                    if distance < closestDistance then
-                        closestDistance = distance
-                        closestPlayer = target
-                    end
-                end
-            end
-
-            if closestPlayer then
-                aimAtPlayer(closestPlayer)
-            end
+-- Aimbot con la pistola en mano
+RunService.RenderStepped:Connect(function()
+    if aimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun") then
+        local targetPlayer = getPlayerWithKnife()
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
         end
     end
 end)
 
--- Conectar los botones para alternar ESP, Aimbot y Salto Infinito
-ToggleESPButton.MouseButton1Click:Connect(toggleESP)
-ToggleAimbotButton.MouseButton1Click:Connect(toggleAimbot)
+-- Función para cambiar WalkSpeed
+local function applyWalkSpeed(speed)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
+end
 
--- Aplicar la velocidad de caminar cuando el personaje reaparece
-game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = walkSpeedValue
+-- Función para aplicar la velocidad ingresada
+WalkSpeedInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local inputSpeed = tonumber(WalkSpeedInput.Text)
+        if inputSpeed and inputSpeed > 0 then
+            walkSpeedValue = inputSpeed
+        else
+            walkSpeedValue = defaultWalkSpeed
+        end
+        applyWalkSpeed(walkSpeedValue)
+    end
 end)
+
+-- Aplicar velocidad en cada respawn
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid").Died:Connect(function()
+        -- Al reaparecer, volver a aplicar la velocidad seleccionada
+        local humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
+        humanoid:GetPropertyChangedSignal("Parent"):Wait()  -- Esperar a reaparecer
+        applyWalkSpeed(walkSpeedValue)
+    end)
+end)
+
+-- Eventos de los botones
+ToggleESPButton.MouseButton1Click:Connect(toggleESP)

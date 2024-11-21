@@ -206,3 +206,4 @@ end)
 
 -- Eventos de los botones
 ToggleESPButton.MouseButton1Click:Connect(toggleESP)
+ToggleAimbotButton.MouseButton1Click:Connect(toggleAimbot)

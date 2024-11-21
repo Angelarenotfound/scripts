@@ -94,12 +94,12 @@ end)
 
 -- Activar/Desactivar ESP
 ToggleESPButton.MouseButton1Click:Connect(function()
-    local espScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/refs/heads/main/mm2/esp.lua"))
+    local espScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/mm2/esp.lua"))
     espScript()
 end)
 
 -- Activar/Desactivar Aim
 ToggleAimButton.MouseButton1Click:Connect(function()
-    local aimScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/refs/heads/main/mm2/Aim.lua"))
+    local aimScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelarenotfound/scripts/main/mm2/Aim.lua"))
     aimScript()
 end)

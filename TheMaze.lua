@@ -6,7 +6,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Parent = game:GetService("PlayerGui")
 
 local MainMenu = Instance.new("Frame")
 MainMenu.Parent = ScreenGui

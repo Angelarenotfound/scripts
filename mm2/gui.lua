@@ -1,4 +1,3 @@
--- Crear la pantalla principal del GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ScriptGUI"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -46,17 +45,8 @@ Title.Size = UDim2.new(1, 0, 0.2, 0)
 Title.Text = "Adonis Except"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 20
-Title.TextAlignment = Enum.TextAlignment.Center
+Title.TextXAlignment = Enum.TextXAlignment.Center  -- Corrección
 Title.TextYAlignment = Enum.TextYAlignment.Center
-
--- Cambiar "Except" a rojo
-local titleText = Title.Text
-local exceptStart = string.find(titleText, "Except")
-local firstPart = titleText:sub(1, exceptStart-1)
-local secondPart = titleText:sub(exceptStart)
-
-Title.Text = firstPart .. " " .. secondPart
-Title.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Rojo para Except
 
 -- Botón para activar/desactivar ESP
 local ToggleESPButton = Instance.new("TextButton")

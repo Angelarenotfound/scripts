@@ -8,10 +8,18 @@ local Workspace = game:GetService("Workspace")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game:GetService("PlayerGui")
 
+-- Verifica si el dispositivo es móvil
+local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+
+-- Redimensionar la interfaz para móviles
 local MainMenu = Instance.new("Frame")
 MainMenu.Parent = ScreenGui
-MainMenu.Size = UDim2.new(0, 400, 0, 300)
-MainMenu.Position = UDim2.new(0.5, -200, 0.5, -150)
+if isMobile then
+    MainMenu.Size = UDim2.new(0.9, 0, 0.6, 0)  -- Tamaño más pequeño y ajustable para móviles
+else
+    MainMenu.Size = UDim2.new(0, 400, 0, 300)
+end
+MainMenu.Position = UDim2.new(0.5, -MainMenu.Size.X.Offset / 2, 0.5, -MainMenu.Size.Y.Offset / 2)
 MainMenu.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainMenu.BackgroundTransparency = 0.2
 MainMenu.BorderSizePixel = 0
@@ -42,7 +50,7 @@ TitleExcept.BackgroundTransparency = 1
 TitleExcept.Text = "Except"
 TitleExcept.TextColor3 = Color3.fromRGB(255, 0, 0)
 TitleExcept.TextScaled = true
-TitleExcept.Font = Enum.Font.SourceSansBold)
+TitleExcept.Font = Enum.Font.SourceSansBold
 
 local InputBox = Instance.new("TextBox")
 InputBox.Parent = MainMenu
@@ -157,24 +165,56 @@ local function handleCommand(command)
             end
         end
     elseif command == "esp" then
-        showNotification("ESP para jugadores activado")
-    elseif command == "espMobs" or command == "em" then
-        showNotification("ESP para mobs activado")
-    else
-        showNotification("Comando no válido")
+    -- Activar ESP para jugadores
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local esp = Instance.new("BillboardGui")
+            esp.Adornee = player.Character.HumanoidRootPart
+            esp.Size = UDim2.new(0, 100, 0, 50)
+            esp.StudsOffset = Vector3.new(0, 3, 0)
+            esp.AlwaysOnTop = true
+            esp.Parent = player.Character
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = player.Name
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextScaled = true
+            label.Parent = esp
+        end
+    end
+elseif command == "espMobs" then
+    -- Activar ESP para mobs
+    for _, object in pairs(Workspace:GetChildren()) do
+        if object:IsA("Model") and object:FindFirstChild("Humanoid") and object.Humanoid.Health > 0 then
+            local esp = Instance.new("BillboardGui")
+            esp.Adornee = object:FindFirstChild("HumanoidRootPart") or object:FindFirstChild("Head")
+            esp.Size = UDim2.new(0, 100, 0, 50)
+            esp.StudsOffset = Vector3.new(0, 3, 0)
+            esp.AlwaysOnTop = true
+            esp.Parent = object
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = object.Name
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextScaled = true
+            label.Parent = esp
+        end
     end
 end
+end
 
-LocalPlayer.Chatted:Connect(function(message)
-    if string.sub(message, 1, 1) == ";" then
-        local cmd = string.sub(message, 2):lower()
-        handleCommand(cmd)
-    end
-end)
-
+-- Detecta la entrada de texto y ejecuta el comando
 InputBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        handleCommand(InputBox.Text:lower())
-        InputBox.Text = ""
+        local command = InputBox.Text:lower()
+        handleCommand(command)
+        InputBox.Text = "" -- Limpiar el cuadro de texto después de ejecutar el comando
     end
 end)
+
+-- Mostrar una notificación de bienvenida
+showNotification("¡Bienvenido al sistema de comandos!")

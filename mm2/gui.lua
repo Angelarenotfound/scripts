@@ -12,6 +12,7 @@ local ToggleESPButton = Instance.new("TextButton")
 local ToggleAimbotButton = Instance.new("TextButton")
 local WalkSpeedInput = Instance.new("TextBox")
 local Title = Instance.new("TextLabel")
+local ToggleVisibilityButton = Instance.new("TextButton")
 
 -- Propiedades GUI
 ScreenGui.Name = "AdonisExceptGui"
@@ -21,18 +22,18 @@ ScreenGui.IgnoreGuiInset = true
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderSizePixel = 3
-MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 125)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -62)
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 255)  -- Borde azul brillante
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = true
 
 Title.Name = "Title"
 Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.Size = UDim2.new(1, 0, 0, 25)
 Title.Font = Enum.Font.SourceSansBold
 Title.Text = "Adonis Except"
@@ -40,33 +41,39 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextStrokeTransparency = 0
 Title.TextSize = 20
 
-ToggleESPButton.Name = "ToggleESPButton"
-ToggleESPButton.Parent = MainFrame
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleESPButton.Position = UDim2.new(0.1, 0, 0.3, 0)
-ToggleESPButton.Text = "Activar ESP"
-ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESPButton.TextSize = 14
+-- Decorar botones con bordes brillantes y esquinas redondeadas
+local function styleButton(button, text, position)
+    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button.BorderColor3 = Color3.fromRGB(0, 0, 255)  -- Borde azul brillante
+    button.Size = UDim2.new(0.8, 0, 0, 25)
+    button.Position = position
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
 
-ToggleAimbotButton.Name = "ToggleAimbotButton"
-ToggleAimbotButton.Parent = MainFrame
-ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-ToggleAimbotButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.5, 0)
-ToggleAimbotButton.Text = "Activar Aimbot"
-ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAimbotButton.TextSize = 14
+    -- Añadir esquinas redondeadas
+    local uicorner = Instance.new("UICorner", button)
+    uicorner.CornerRadius = UDim.new(0.3, 0)
+end
 
-WalkSpeedInput.Name = "WalkSpeedInput"
-WalkSpeedInput.Parent = MainFrame
-WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-WalkSpeedInput.Size = UDim2.new(0.8, 0, 0, 25)
-WalkSpeedInput.Position = UDim2.new(0.1, 0, 0.7, 0)
+styleButton(ToggleESPButton, "Activar ESP", UDim2.new(0.1, 0, 0.3, 0))
+styleButton(ToggleAimbotButton, "Activar Aimbot", UDim2.new(0.1, 0, 0.5, 0))
+styleButton(WalkSpeedInput, "", UDim2.new(0.1, 0, 0.7, 0))
 WalkSpeedInput.PlaceholderText = "Velocidad (default 16)"
-WalkSpeedInput.Text = ""
-WalkSpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-WalkSpeedInput.TextSize = 14
+
+-- Botón para ocultar/mostrar el GUI
+ToggleVisibilityButton.Name = "ToggleVisibilityButton"
+ToggleVisibilityButton.Parent = MainFrame
+styleButton(ToggleVisibilityButton, "Ocultar GUI", UDim2.new(0.1, 0, 0.9, 0))
+
+-- Función para ocultar/mostrar el GUI
+local function toggleVisibility()
+    MainFrame.Visible = not MainFrame.Visible
+    ToggleVisibilityButton.Text = MainFrame.Visible and "Ocultar GUI" or "Mostrar GUI"
+end
+
+-- Evento del botón de ocultar/mostrar
+ToggleVisibilityButton.MouseButton1Click:Connect(toggleVisibility)
 
 -- Variables de control
 local espEnabled = false
@@ -100,7 +107,7 @@ end
 
 -- Función para actualizar el ESP
 local function updateESP()
-    if not espEnabled then return end  -- No actualizar si está deshabilitado
+    if not espEnabled then return end
     for _, player in pairs(Players:GetPlayers()) do
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local hasKnife = player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife")
@@ -132,7 +139,6 @@ local function toggleESP()
     espEnabled = not espEnabled
     ToggleESPButton.Text = espEnabled and "Desactivar ESP" or "Activar ESP"
     if not espEnabled then
-        -- Limpiar marcadores si se desactiva
         for _, player in pairs(Players:GetPlayers()) do
             if player.Character and player.Character:FindFirstChild("ESPMarker") then
                 player.Character.ESPMarker:Destroy()
@@ -163,7 +169,6 @@ local function toggleAimbot()
     end
 end
 
--- Aimbot con la pistola en mano
 RunService.RenderStepped:Connect(function()
     if aimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Gun") then
         local targetPlayer = getPlayerWithKnife()
@@ -181,7 +186,6 @@ local function applyWalkSpeed(speed)
     end
 end
 
--- Función para aplicar la velocidad ingresada
 WalkSpeedInput.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         local inputSpeed = tonumber(WalkSpeedInput.Text)
@@ -194,16 +198,13 @@ WalkSpeedInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- Aplicar velocidad en cada respawn
 LocalPlayer.CharacterAdded:Connect(function(character)
     character:WaitForChild("Humanoid").Died:Connect(function()
-        -- Al reaparecer, volver a aplicar la velocidad seleccionada
         local humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
-        humanoid:GetPropertyChangedSignal("Parent"):Wait()  -- Esperar a reaparecer
+        humanoid:GetPropertyChangedSignal("Parent"):Wait()
         applyWalkSpeed(walkSpeedValue)
     end)
 end)
 
--- Eventos de los botones
 ToggleESPButton.MouseButton1Click:Connect(toggleESP)
 ToggleAimbotButton.MouseButton1Click:Connect(toggleAimbot)

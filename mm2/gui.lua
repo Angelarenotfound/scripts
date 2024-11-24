@@ -20,20 +20,22 @@ ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 
+-- Main Frame
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MainFrame.BorderSizePixel = 3
-MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 255)  -- Borde azul brillante
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 125)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -62)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = true
 
+-- Título
 Title.Name = "Title"
 Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Title.Size = UDim2.new(1, 0, 0, 25)
 Title.Font = Enum.Font.SourceSansBold
 Title.Text = "Adonis Except"
@@ -41,32 +43,48 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextStrokeTransparency = 0
 Title.TextSize = 20
 
--- Decorar botones con bordes brillantes y esquinas redondeadas
-local function styleButton(button, text, position)
-    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    button.BorderColor3 = Color3.fromRGB(0, 0, 255)  -- Borde azul brillante
-    button.Size = UDim2.new(0.8, 0, 0, 25)
-    button.Position = position
-    button.Text = text
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = 14
+-- Botón de Toggle ESP
+ToggleESPButton.Name = "ToggleESPButton"
+ToggleESPButton.Parent = MainFrame
+ToggleESPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleESPButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+ToggleESPButton.Text = "Activar ESP"
+ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleESPButton.TextSize = 14
 
-    -- Añadir esquinas redondeadas
-    local uicorner = Instance.new("UICorner", button)
-    uicorner.CornerRadius = UDim.new(0.3, 0)
-end
+-- Botón de Toggle Aimbot
+ToggleAimbotButton.Name = "ToggleAimbotButton"
+ToggleAimbotButton.Parent = MainFrame
+ToggleAimbotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleAimbotButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleAimbotButton.Position = UDim2.new(0.1, 0, 0.5, 0)
+ToggleAimbotButton.Text = "Activar Aimbot"
+ToggleAimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleAimbotButton.TextSize = 14
 
-styleButton(ToggleESPButton, "Activar ESP", UDim2.new(0.1, 0, 0.3, 0))
-styleButton(ToggleAimbotButton, "Activar Aimbot", UDim2.new(0.1, 0, 0.5, 0))
-styleButton(WalkSpeedInput, "", UDim2.new(0.1, 0, 0.7, 0))
+-- Input de WalkSpeed
+WalkSpeedInput.Name = "WalkSpeedInput"
+WalkSpeedInput.Parent = MainFrame
+WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+WalkSpeedInput.Size = UDim2.new(0.8, 0, 0, 25)
+WalkSpeedInput.Position = UDim2.new(0.1, 0, 0.7, 0)
 WalkSpeedInput.PlaceholderText = "Velocidad (default 16)"
+WalkSpeedInput.Text = ""
+WalkSpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+WalkSpeedInput.TextSize = 14
 
--- Botón para ocultar/mostrar el GUI
+-- Botón para ocultar/mostrar GUI (fuera del MainFrame)
 ToggleVisibilityButton.Name = "ToggleVisibilityButton"
-ToggleVisibilityButton.Parent = MainFrame
-styleButton(ToggleVisibilityButton, "Ocultar GUI", UDim2.new(0.1, 0, 0.9, 0))
+ToggleVisibilityButton.Parent = ScreenGui  -- Ahora está fuera de MainFrame
+ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleVisibilityButton.Size = UDim2.new(0.2, 0, 0, 25)
+ToggleVisibilityButton.Position = UDim2.new(0.4, 0, 0.9, 0)
+ToggleVisibilityButton.Text = "Ocultar/Mostrar GUI"
+ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleVisibilityButton.TextSize = 14
 
--- Función para ocultar/mostrar el GUI
+-- Función para ocultar/mostrar la GUI
 local function toggleVisibility()
     MainFrame.Visible = not MainFrame.Visible
     ToggleVisibilityButton.Text = MainFrame.Visible and "Ocultar GUI" or "Mostrar GUI"
@@ -78,8 +96,6 @@ ToggleVisibilityButton.MouseButton1Click:Connect(toggleVisibility)
 -- Variables de control
 local espEnabled = false
 local aimbotEnabled = false
-local updateInterval = 1
-local lastUpdate = 0
 local walkSpeedValue = defaultWalkSpeed
 
 -- Función para crear el marcador ESP

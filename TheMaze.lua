@@ -25,8 +25,8 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- Fondo oscuro
 MainFrame.BorderSizePixel = 3
 MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.Size = UDim2.new(0, 250, 0, 150)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
+MainFrame.Size = UDim2.new(0, 250, 0, 200)  -- Aumentamos el tamaño
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = true
@@ -176,13 +176,18 @@ ToggleESPButton.MouseButton1Click:Connect(function()
     if espEnabled then
         -- Crear ESP para las entidades
         createESP(game:GetService("Workspace").TheOrotund, "Skeleton", Color3.new(1, 0, 0))  -- Esqueleto
-        createESP(game:GetService("Workspace").TheCajoler, "Short", Color3.new(1, 1, 1))     -- Criatura enmascarada
+        createESP(game:GetService("Workspace").TheCajoler, "Short", Color3.new(1, 1, 1))  -- Criatura enmascarada
     else
-        -- Eliminar ESP (esto es opcional, depende de cómo quieras manejarlo)
-        for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
-            if v:IsA("BillboardGui") then
-                v:Destroy()
+        -- Eliminar los ESPs cuando se desactiva
+        for _, a in pairs(game:GetService("Workspace"):GetDescendants()) do
+            if a:IsA("BillboardGui") then
+                a:Destroy()  -- Eliminar los ESPs creados
             end
         end
     end
 end)
+
+-- Fin de la función de activación/desactivación del ESP
+
+-- Aseguramos que el GUI se muestre correctamente
+ScreenGui.Enabled = true

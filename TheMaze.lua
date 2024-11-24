@@ -66,12 +66,26 @@ LoadingText.TextAlign = Enum.TextAnchor.MiddleCenter
 -- Botón de Activar/Desactivar Axe
 ToggleAxeButton.Name = "ToggleAxeButton"
 ToggleAxeButton.Parent = MainFrame
-ToggleAxeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleAxeButton.Size = UDim2.new(0.8, 0, 0, 30)
+ToggleAxeButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleAxeButton.Size = UDim2.new(0.8, 0, 0, 35)
 ToggleAxeButton.Position = UDim2.new(0.1, 0, 0.3, 0)
 ToggleAxeButton.Text = "Activate"
 ToggleAxeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAxeButton.TextSize = 14
+ToggleAxeButton.TextStrokeTransparency = 0.6
+ToggleAxeButton.BorderRadius = UDim.new(0, 15)
+ToggleAxeButton.AutoButtonColor = false
+
+-- Efecto de brillo en el borde del botón
+ToggleAxeButton.MouseEnter:Connect(function()
+    ToggleAxeButton.TextColor3 = Color3.fromRGB(100, 255, 255)  -- Azul brillante al pasar el ratón
+    ToggleAxeButton.BorderColor3 = Color3.fromRGB(0, 200, 255)  -- Brillo en el borde
+end)
+
+ToggleAxeButton.MouseLeave:Connect(function()
+    ToggleAxeButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Blanco por defecto
+    ToggleAxeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Borde normal
+end)
 
 -- Variable para activar/desactivar el script del Axe
 local axeEnabled = false
@@ -110,12 +124,26 @@ end)
 -- Crear un botón fuera del MainFrame para ocultar/mostrar el GUI
 ToggleVisibilityButton.Name = "ToggleVisibilityButton"
 ToggleVisibilityButton.Parent = ScreenGui -- Ahora está en ScreenGui, no en MainFrame
-ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleVisibilityButton.Size = UDim2.new(0.8, 0, 0, 30)
+ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleVisibilityButton.Size = UDim2.new(0.8, 0, 0, 35)
 ToggleVisibilityButton.Position = UDim2.new(0.5, -100, 0.9, 0) -- Reubicado para fuera del MainFrame
 ToggleVisibilityButton.Text = "Ocultar/Mostrar GUI"
 ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleVisibilityButton.TextSize = 14
+ToggleVisibilityButton.TextStrokeTransparency = 0.6
+ToggleVisibilityButton.BorderRadius = UDim.new(0, 15)
+ToggleVisibilityButton.AutoButtonColor = false
+
+-- Efecto de brillo en el borde del botón
+ToggleVisibilityButton.MouseEnter:Connect(function()
+    ToggleVisibilityButton.TextColor3 = Color3.fromRGB(100, 255, 255)  -- Azul brillante al pasar el ratón
+    ToggleVisibilityButton.BorderColor3 = Color3.fromRGB(0, 200, 255)  -- Brillo en el borde
+end)
+
+ToggleVisibilityButton.MouseLeave:Connect(function()
+    ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Blanco por defecto
+    ToggleVisibilityButton.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Borde normal
+end)
 
 -- Función para ocultar/mostrar la GUI
 local function toggleVisibility()
@@ -152,42 +180,64 @@ local function createESP(item, text, color)
     TextLabel.Text = text
     TextLabel.TextColor3 = color
     TextLabel.TextScaled = true
-    TextLabel.TextSize = 14
-    TextLabel.TextWrapped = true
+    TextLabel.TextStrokeTransparency = 0.5  -- Agrega un borde alrededor del texto
+    TextLabel.TextAlign = Enum.TextAnchor.MiddleCenter
+    TextLabel.TextXAlignment = Enum.TextXAlignment.Center
+    TextLabel.TextYAlignment = Enum.TextYAlignment.Center
 end
 
--- Variable para activar/desactivar el ESP
-local espEnabled = false
+-- Crear ESP en todos los objetos
+local function enableESP()
+    for _, obj in pairs(game:GetService("Workspace"):GetChildren()) do
+        if obj:FindFirstChild("HumanoidRootPart") then
+            createESP(obj, "ESP", Color3.fromRGB(0, 255, 255))  -- Usar un color de ESP predeterminado (cian)
+        end
+    end
+end
 
--- Botón para activar/desactivar ESP
+-- Botón para activar o desactivar ESP
 ToggleESPButton.Name = "ToggleESPButton"
 ToggleESPButton.Parent = MainFrame
-ToggleESPButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 30)
-ToggleESPButton.Position = UDim2.new(0.1, 0, 0.6, 0)
-ToggleESPButton.Text = "Activate ESP"
+ToggleESPButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleESPButton.Size = UDim2.new(0.8, 0, 0, 35)
+ToggleESPButton.Position = UDim2.new(0.1, 0, 0.7, 0)  -- Colocado debajo del primer botón
+ToggleESPButton.Text = "Toggle ESP"
 ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleESPButton.TextSize = 14
+ToggleESPButton.TextStrokeTransparency = 0.6
+ToggleESPButton.BorderRadius = UDim.new(0, 15)
+ToggleESPButton.AutoButtonColor = false
 
--- Función para alternar el estado del ESP
+-- Efecto de brillo en el borde del botón de ESP
+ToggleESPButton.MouseEnter:Connect(function()
+    ToggleESPButton.TextColor3 = Color3.fromRGB(100, 255, 255)  -- Azul brillante al pasar el ratón
+    ToggleESPButton.BorderColor3 = Color3.fromRGB(0, 200, 255)  -- Brillo en el borde
+end)
+
+ToggleESPButton.MouseLeave:Connect(function()
+    ToggleESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Blanco por defecto
+    ToggleESPButton.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Borde normal
+end)
+
+-- Función para alternar el ESP
+local espEnabled = false
 ToggleESPButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    ToggleESPButton.Text = espEnabled and "Deactivate ESP" or "Activate ESP"
+    ToggleESPButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
     if espEnabled then
-        -- Crear ESP para las entidades
-        createESP(game:GetService("Workspace").TheOrotund, "Skeleton", Color3.new(1, 0, 0))  -- Esqueleto
-        createESP(game:GetService("Workspace").TheCajoler, "Short", Color3.new(1, 1, 1))  -- Criatura enmascarada
+        enableESP()  -- Llamar la función para activar ESP
     else
-        -- Eliminar los ESPs cuando se desactiva
-        for _, a in pairs(game:GetService("Workspace"):GetDescendants()) do
-            if a:IsA("BillboardGui") then
-                a:Destroy()  -- Eliminar los ESPs creados
+        -- Eliminar los ESP existentes
+        for _, billboard in pairs(game:GetService("Workspace"):GetDescendants()) do
+            if billboard:IsA("BillboardGui") then
+                billboard:Destroy()
             end
         end
     end
 end)
 
--- Fin de la función de activación/desactivación del ESP
-
--- Aseguramos que el GUI se muestre correctamente
-ScreenGui.Enabled = true
+-- Controlar la visibilidad de la GUI desde el ToggleVisibilityButton
+ToggleVisibilityButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+    ToggleVisibilityButton.Text = MainFrame.Visible and "Ocultar GUI" or "Mostrar GUI"
+end)

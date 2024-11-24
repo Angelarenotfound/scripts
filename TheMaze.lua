@@ -40,14 +40,6 @@ Title.TextStrokeTransparency = 0
 Title.TextSize = 20
 
 -- Animación de entrada para el título
-Title.Text = "Adonis Except" -- Set the title text
-Title.TextColor3 = Color3.fromRGB(255, 255, 255) -- White for Adonis
-
-Title.TextStrokeTransparency = 0
-Title.TextSize = 20
-Title.TextScaled = true
-
--- Crear animación de entrada
 local tweenService = game:GetService("TweenService")
 local titleTween = tweenService:Create(Title, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
     Position = UDim2.new(0.5, -100, 0.5, -62), 
@@ -55,16 +47,10 @@ local titleTween = tweenService:Create(Title, TweenInfo.new(0.5, Enum.EasingStyl
 })
 titleTween:Play()
 
--- Función para alternar el color de "Except" a rojo
-local function changeTitleColor()
-    -- Espera breve y luego cambia a color rojo para Except
-    wait(0.5)
-    Title.Text = "Adonis Except"
-    Title.TextColor3 = Color3.fromRGB(255, 0, 0) -- "Except" en rojo
-end
-
--- Llamar a la función para cambiar el color después de la animación
-changeTitleColor()
+-- Cambiar el color de "Except" a rojo
+wait(0.5) -- Espera a que la animación termine
+Title.Text = "Adonis Except"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0) -- "Except" en rojo
 
 -- Botón de Activar/Desactivar Axe
 ToggleAxeButton.Name = "ToggleAxeButton"
@@ -72,26 +58,17 @@ ToggleAxeButton.Parent = MainFrame
 ToggleAxeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 ToggleAxeButton.Size = UDim2.new(0.8, 0, 0, 25)
 ToggleAxeButton.Position = UDim2.new(0.1, 0, 0.3, 0)
-ToggleAxeButton.Text = "Activar/Desactivar Axe"
+ToggleAxeButton.Text = "Activate"
 ToggleAxeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleAxeButton.TextSize = 14
-
--- Botón para ocultar/mostrar GUI
-ToggleVisibilityButton.Name = "ToggleVisibilityButton"
-ToggleVisibilityButton.Parent = MainFrame
-ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-ToggleVisibilityButton.Size = UDim2.new(0.8, 0, 0, 25)
-ToggleVisibilityButton.Position = UDim2.new(0.1, 0, 0.7, 0)
-ToggleVisibilityButton.Text = "Ocultar/Mostrar GUI"
-ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleVisibilityButton.TextSize = 14
 
 -- Variable para activar/desactivar el script del Axe
 local axeEnabled = false
 
--- Función para activar o desactivar el script del Axe
+-- Función para alternar el texto del botón de Activar/Desactivar Axe
 ToggleAxeButton.MouseButton1Click:Connect(function()
     axeEnabled = not axeEnabled
+    ToggleAxeButton.Text = axeEnabled and "Deactivate" or "Activate"
     if axeEnabled then
         -- Activar el script del Axe
         while true do
@@ -114,7 +91,21 @@ ToggleAxeButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Función para ocultar o mostrar la GUI
-ToggleVisibilityButton.MouseButton1Click:Connect(function()
+-- Botón para ocultar/mostrar GUI
+ToggleVisibilityButton.Name = "ToggleVisibilityButton"
+ToggleVisibilityButton.Parent = MainFrame
+ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ToggleVisibilityButton.Size = UDim2.new(0.8, 0, 0, 25)
+ToggleVisibilityButton.Position = UDim2.new(0.1, 0, 0.9, 0)
+ToggleVisibilityButton.Text = "Ocultar/Mostrar GUI"
+ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleVisibilityButton.TextSize = 14
+
+-- Función para ocultar/mostrar la GUI
+local function toggleVisibility()
     MainFrame.Visible = not MainFrame.Visible
-end)
+    ToggleVisibilityButton.Text = MainFrame.Visible and "Ocultar GUI" or "Mostrar GUI"
+end
+
+-- Evento del botón de ocultar/mostrar
+ToggleVisibilityButton.MouseButton1Click:Connect(toggleVisibility)

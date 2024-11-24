@@ -76,10 +76,11 @@ WalkSpeedInput.TextSize = 14
 
 -- Botón para ocultar/mostrar GUI (fuera del MainFrame)
 ToggleVisibilityButton.Name = "ToggleVisibilityButton"
-ToggleVisibilityButton.Parent = ScreenGui  -- Ahora está fuera de MainFrame
+ToggleVisibilityButton.Parent = ScreenGui
 ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-ToggleVisibilityButton.Size = UDim2.new(0.2, 0, 0, 25)
-ToggleVisibilityButton.Position = UDim2.new(0.4, 0, 0.9, 0)
+ToggleVisibilityButton.Size = UDim2.new(0.2, 0, 0, 25)  -- 20% del ancho de la pantalla
+ToggleVisibilityButton.Position = UDim2.new(0.5, 0, 0, 0)  -- Centrado horizontal y pegado arriba
+ToggleVisibilityButton.AnchorPoint = Vector2.new(0.5, 0)  -- Ancla el punto medio del botón horizontalmente
 ToggleVisibilityButton.Text = "Ocultar/Mostrar GUI"
 ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleVisibilityButton.TextSize = 14
@@ -97,8 +98,9 @@ ToggleVisibilityButton.MouseButton1Click:Connect(toggleVisibility)
 local espEnabled = false
 local aimbotEnabled = false
 local walkSpeedValue = defaultWalkSpeed
+local lastUpdate = 0
+local updateInterval = 0.1
 
--- Función para crear el marcador ESP
 local function createMarker(player, color)
     if player.Character:FindFirstChild("ESPMarker") then
         player.Character.ESPMarker:Destroy()

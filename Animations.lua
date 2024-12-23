@@ -66,13 +66,15 @@ local Animations = {
     }
 }
 
--- Notification System
+-- Enhanced Notification System
 local NotificationSystem = {}
+local ActiveNotifications = {}
 
 function NotificationSystem.new()
     local notification = Instance.new("ScreenGui")
     local container = Instance.new("Frame")
     local message = Instance.new("TextLabel")
+    local decoration = Instance.new("Frame")
     
     notification.Name = "Notification"
     notification.Parent = CoreGui
@@ -80,9 +82,17 @@ function NotificationSystem.new()
     container.Name = "Container"
     container.Parent = notification
     container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    container.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    container.Position = UDim2.new(1, 20, 0.8, 0)
+    container.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    container.Position = UDim2.new(0.5, -100, 1, 20)
     container.Size = UDim2.new(0, 200, 0, 50)
+    container.AnchorPoint = Vector2.new(0.5, 1)
+    
+    decoration.Name = "Decoration"
+    decoration.Parent = container
+    decoration.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration.BorderSizePixel = 0
+    decoration.Size = UDim2.new(1, 0, 0, 2)
+    decoration.Position = UDim2.new(0, 0, 0, 0)
     
     message.Name = "Message"
     message.Parent = container
@@ -103,19 +113,44 @@ function NotificationSystem:Notify(text, duration)
     
     message.Text = text
     
+    -- Adjust position based on active notifications
+    local offset = #ActiveNotifications * 60
+    container.Position = UDim2.new(0.5, -100, 1, 20 + offset)
+    
+    table.insert(ActiveNotifications, notification)
+    
+    -- Slide in
     local slideIn = TweenService:Create(container, 
         TweenInfo.new(0.5, Enum.EasingStyle.Quart),
-        {Position = UDim2.new(0.85, 0, 0.8, 0)}
+        {Position = UDim2.new(0.5, -100, 1, -60 - offset)}
     )
     
+    -- Slide out
     local slideOut = TweenService:Create(container,
         TweenInfo.new(0.5, Enum.EasingStyle.Quart),
-        {Position = UDim2.new(1.1, 0, 0.8, 0)}
+        {Position = UDim2.new(0.5, -100, 1, 20)}
     )
     
     slideIn:Play()
     task.wait(duration)
     slideOut:Play()
+    
+    -- Remove from active notifications
+    for i, notif in ipairs(ActiveNotifications) do
+        if notif == notification then
+            table.remove(ActiveNotifications, i)
+            break
+        end
+    end
+    
+    -- Adjust positions of remaining notifications
+    for i, notif in ipairs(ActiveNotifications) do
+        TweenService:Create(notif.Container,
+            TweenInfo.new(0.5, Enum.EasingStyle.Quart),
+            {Position = UDim2.new(0.5, -100, 1, -60 - ((i-1) * 60))}
+        ):Play()
+    end
+    
     slideOut.Completed:Wait()
     notification:Destroy()
 end
@@ -128,6 +163,10 @@ local function createLoadingScreen()
     local loadingBar = Instance.new("Frame")
     local loadingFill = Instance.new("Frame")
     local status = Instance.new("TextLabel")
+    local decoration = Instance.new("Frame")
+    local decoration2 = Instance.new("Frame")
+    local decoration3 = Instance.new("Frame")
+    local decoration4 = Instance.new("Frame")
     
     loading.Name = "LoadingScreen"
     loading.Parent = CoreGui
@@ -138,14 +177,43 @@ local function createLoadingScreen()
     background.BorderSizePixel = 0
     background.Size = UDim2.new(1, 0, 1, 0)
     
+    -- Decorative elements
+    decoration.Name = "Decoration1"
+    decoration.Parent = background
+    decoration.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration.BorderSizePixel = 0
+    decoration.Size = UDim2.new(0, 3, 0, 100)
+    decoration.Position = UDim2.new(0.2, 0, 0.3, 0)
+    
+    decoration2.Name = "Decoration2"
+    decoration2.Parent = background
+    decoration2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration2.BorderSizePixel = 0
+    decoration2.Size = UDim2.new(0, 3, 0, 100)
+    decoration2.Position = UDim2.new(0.8, 0, 0.3, 0)
+    
+    decoration3.Name = "Decoration3"
+    decoration3.Parent = background
+    decoration3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration3.BorderSizePixel = 0
+    decoration3.Size = UDim2.new(0, 100, 0, 3)
+    decoration3.Position = UDim2.new(0.5, -50, 0.2, 0)
+    
+    decoration4.Name = "Decoration4"
+    decoration4.Parent = background
+    decoration4.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration4.BorderSizePixel = 0
+    decoration4.Size = UDim2.new(0, 100, 0, 3)
+    decoration4.Position = UDim2.new(0.5, -50, 0.8, 0)
+    
     title.Name = "Title"
     title.Parent = background
     title.BackgroundTransparency = 1
     title.Position = UDim2.new(0.5, -150, 0.4, -20)
     title.Size = UDim2.new(0, 300, 0, 40)
     title.Font = Enum.Font.GothamBold
-    title.Text = "Adonis"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.RichText = true
+    title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
     title.TextSize = 32
     
     loadingBar.Name = "LoadingBar"
@@ -184,76 +252,133 @@ local function createMainGui()
     local teleportInput = Instance.new("TextBox")
     local animationsButton = Instance.new("TextButton")
     local animationsFrame = Instance.new("Frame")
+    local toggleButton = Instance.new("TextButton")
+    local decoration1 = Instance.new("Frame")
+    local decoration2 = Instance.new("Frame")
+    local decoration3 = Instance.new("Frame")
+    local decoration4 = Instance.new("Frame")
     
     screenGui.Name = "AnimationsGui"
     screenGui.Parent = CoreGui
+    
+    -- External Toggle Button
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Parent = screenGui
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    toggleButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
+    toggleButton.Position = UDim2.new(0, 15, 0.5, -25)
+    toggleButton.Size = UDim2.new(0, 50, 0, 50)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.Text = "≡"
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.TextSize = 30
     
     mainFrame.Name = "MainFrame"
     mainFrame.Parent = screenGui
     mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     mainFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
     mainFrame.Position = UDim2.new(0, 15, 0, 15)
-    mainFrame.Size = UDim2.new(0, 200, 0, 180)
+    mainFrame.Size = UDim2.new(0, 300, 0, 350)
+    
+    -- Decorative elements
+    decoration1.Name = "Decoration1"
+    decoration1.Parent = mainFrame
+    decoration1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration1.BorderSizePixel = 0
+    decoration1.Size = UDim2.new(0, 3, 1, 0)
+    decoration1.Position = UDim2.new(0, 0, 0, 0)
+    
+    decoration2.Name = "Decoration2"
+    decoration2.Parent = mainFrame
+    decoration2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration2.BorderSizePixel = 0
+    decoration2.Size = UDim2.new(0, 3, 1, 0)
+    decoration2.Position = UDim2.new(1, -3, 0, 0)
+    
+    decoration3.Name = "Decoration3"
+    decoration3.Parent = mainFrame
+    decoration3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration3.BorderSizePixel = 0
+    decoration3.Size = UDim2.new(1, 0, 0, 3)
+    decoration3.Position = UDim2.new(0, 0, 0, 0)
+    
+    decoration4.Name = "Decoration4"
+    decoration4.Parent = mainFrame
+    decoration4.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration4.BorderSizePixel = 0
+    decoration4.Size = UDim2.new(1, 0, 0, 3)
+    decoration4.Position = UDim2.new(0, 0, 1, -3)
     
     title.Name = "Title"
     title.Parent = mainFrame
     title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     title.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    title.Size = UDim2.new(1, 0, 0, 30)
+    title.Size = UDim2.new(1, 0, 0, 50)
     title.Font = Enum.Font.GothamBold
-    title.Text = "Adonis"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextSize = 16
+    title.RichText = true
+    title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
+    title.TextSize = 24
     
     container.Name = "Container"
     container.Parent = mainFrame
     container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     container.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    container.Position = UDim2.new(0, 0, 0, 30)
-    container.Size = UDim2.new(1, 0, 1, -30)
+    container.Position = UDim2.new(0, 0, 0, 50)
+    container.Size = UDim2.new(1, 0, 1, -50)
     
     speedInput.Name = "SpeedInput"
     speedInput.Parent = container
     speedInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     speedInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
     speedInput.Position = UDim2.new(0.1, 0, 0.1, 0)
-    speedInput.Size = UDim2.new(0.8, 0, 0, 30)
+    speedInput.Size = UDim2.new(0.8, 0, 0, 50)
     speedInput.Font = Enum.Font.GothamSemibold
     speedInput.PlaceholderText = "Speed (16 default)"
     speedInput.Text = ""
     speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    speedInput.TextSize = 14
+    speedInput.TextSize = 16
     
     teleportInput.Name = "TeleportInput"
     teleportInput.Parent = container
     teleportInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     teleportInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    teleportInput.Position = UDim2.new(0.1, 0, 0.4, 0)
-    teleportInput.Size = UDim2.new(0.8, 0, 0, 30)
+    teleportInput.Position = UDim2.new(0.1, 0, 0.35, 0)
+    teleportInput.Size = UDim2.new(0.8, 0, 0, 50)
     teleportInput.Font = Enum.Font.GothamSemibold
     teleportInput.PlaceholderText = "Player name to teleport"
     teleportInput.Text = ""
     teleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    teleportInput.TextSize = 14
+    teleportInput.TextSize = 16
     
     animationsButton.Name = "AnimationsButton"
     animationsButton.Parent = container
     animationsButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     animationsButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    animationsButton.Position = UDim2.new(0.1, 0, 0.7, 0)
-    animationsButton.Size = UDim2.new(0.8, 0, 0, 30)
+    animationsButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+    animationsButton.Size = UDim2.new(0.8, 0, 0, 50)
     animationsButton.Font = Enum.Font.GothamSemibold
     animationsButton.Text = "Animations"
     animationsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    animationsButton.TextSize = 14
+    animationsButton.TextSize = 16
     
     animationsFrame.Name = "AnimationsFrame"
     animationsFrame.Parent = screenGui
     animationsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     animationsFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    animationsFrame.Position = UDim2.new(0, 230, 0, 15)
-    animationsFrame.Size = UDim2.new(0, 180, 0, 200)
+    animationsFrame.Position = UDim2.new(0, 330, 0, 15)
+    animationsFrame.Size = UDim2.new(0, 250, 0, 350)
     animationsFrame.Visible = false
+    
+    -- Add decorations to animations frame
+    local animDec1 = decoration1:Clone()
+    local animDec2 = decoration2:Clone()
+    local animDec3 = decoration3:Clone()
+    local animDec4 = decoration4:Clone()
+    
+    animDec1.Parent = animationsFrame
+    animDec2.Parent = animationsFrame
+    animDec3.Parent = animationsFrame
+    animDec4.Parent = animationsFrame
     
     return {
         ScreenGui = screenGui,
@@ -262,7 +387,8 @@ local function createMainGui()
         SpeedInput = speedInput,
         TeleportInput = teleportInput,
         AnimationsButton = animationsButton,
-        AnimationsFrame = animationsFrame
+        AnimationsFrame = animationsFrame,
+        ToggleButton = toggleButton
     }
 end
 
@@ -330,51 +456,108 @@ local function init()
     local loading = createLoadingScreen()
     local loadingFill = loading.Background.LoadingBar.LoadingFill
     local status = loading.Background.Status
-    
-    -- Loading sequence
-    local loadingSteps = {
-        "Initializing...",
-        "Loading animations...",
-        "Setting up GUI...",
-        "Configuring settings...",
-        "Finishing up..."
+    local decorations = {
+        loading.Background.Decoration1,
+        loading.Background.Decoration2,
+        loading.Background.Decoration3,
+        loading.Background.Decoration4
     }
     
+    -- Enhanced loading sequence with animations
+    local loadingSteps = {
+        "Initializing system...",
+        "Loading animations...",
+        "Configuring interface...",
+        "Setting up controls...",
+        "Preparing components...",
+        "Loading resources...",
+        "Optimizing performance...",
+        "Finalizing setup...",
+        "Almost ready...",
+        "Launching interface..."
+    }
+    
+    -- Animate decorative elements during loading
+    spawn(function()
+        while loading.Parent do
+            for _, dec in ipairs(decorations) do
+                if dec.Name:find("1") or dec.Name:find("2") then
+                    -- Vertical decorations
+                    TweenService:Create(dec, TweenInfo.new(1), {
+                        Position = dec.Position + UDim2.new(0, 0, 0, 10)
+                    }):Play()
+                else
+                    -- Horizontal decorations
+                    TweenService:Create(dec, TweenInfo.new(1), {
+                        Position = dec.Position + UDim2.new(0.1, 0, 0, 0)
+                    }):Play()
+                end
+            end
+            wait(1)
+            for _, dec in ipairs(decorations) do
+                if dec.Name:find("1") or dec.Name:find("2") then
+                    TweenService:Create(dec, TweenInfo.new(1), {
+                        Position = dec.Position - UDim2.new(0, 0, 0, 10)
+                    }):Play()
+                else
+                    TweenService:Create(dec, TweenInfo.new(1), {
+                        Position = dec.Position - UDim2.new(0.1, 0, 0, 0)
+                    }):Play()
+                end
+            end
+            wait(1)
+        end
+    end)
+    
     for i, text in ipairs(loadingSteps) do
-        TweenService:Create(loadingFill, TweenInfo.new(0.5), {
-            Size = UDim2.new(i/5, 0, 1, 0)
+        TweenService:Create(loadingFill, TweenInfo.new(1), {
+            Size = UDim2.new(i/10, 0, 1, 0)
         }):Play()
         status.Text = text
-        task.wait(0.5)
+        wait(1)
     end
     
-    task.wait(0.5)
+    wait(1)
     loading:Destroy()
     
     -- Create main GUI
     local gui = createMainGui()
     
     -- Create animation buttons
-    local buttonPosition = 0
+    local buttonSpacing = 0.15
+    local buttonPosition = 0.1
     for name, anims in pairs(Animations) do
         local button = Instance.new("TextButton")
         button.Name = name
         button.Parent = gui.AnimationsFrame
         button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         button.BorderColor3 = Color3.fromRGB(60, 60, 60)
-        button.Position = UDim2.new(0.1, 0, 0.1 + (buttonPosition * 0.2), 0)
-        button.Size = UDim2.new(0.8, 0, 0, 30)
+        button.Position = UDim2.new(0.1, 0, buttonPosition, 0)
+        button.Size = UDim2.new(0.8, 0, 0, 50)
         button.Font = Enum.Font.GothamSemibold
         button.Text = name
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextSize = 14
+        button.TextSize = 16
+        
+        -- Button hover effect
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.3), {
+                BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            }):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.3), {
+                BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            }):Play()
+        end)
         
         button.MouseButton1Click:Connect(function()
             setAnimations(anims)
             NotificationSystem:Notify(name .. " animations applied!", 2)
         end)
         
-        buttonPosition = buttonPosition + 1
+        buttonPosition = buttonPosition + buttonSpacing
     end
     
     -- Speed input handling
@@ -410,45 +593,61 @@ local function init()
         gui.AnimationsFrame.Visible = AnimationsVisible
         TweenService:Create(gui.AnimationsFrame, TweenInfo.new(0.3), {
             Position = AnimationsVisible and 
-                UDim2.new(0, 230, 0, 15) or 
-                UDim2.new(0, 430, 0, 15)
+                UDim2.new(0, 330, 0, 15) or 
+                UDim2.new(0, 600, 0, 15)
         }):Play()
     end)
     
-    -- Mobile touch handling
-    local function handleTouch(input)
+    -- GUI Toggle handling
+    local guiVisible = true
+    gui.ToggleButton.MouseButton1Click:Connect(function()
+        guiVisible = not guiVisible
+        gui.MainFrame.Visible = guiVisible
+        gui.AnimationsFrame.Visible = guiVisible and AnimationsVisible
+        
+        TweenService:Create(gui.ToggleButton, TweenInfo.new(0.3), {
+            Rotation = guiVisible and 0 or 180
+        }):Play()
+    end)
+    
+    -- Enhanced mobile dragging
+    local function handleDragging(input)
         if input.UserInputType == Enum.UserInputType.Touch then
-            if input.UserInputState == Enum.UserInputState.Begin then
-                local guiObjects = gui.ScreenGui:GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
-                for _, obj in pairs(guiObjects) do
-                    if obj:IsDescendantOf(gui.MainFrame) then
-                        Dragging = true
-                        DragStart = input.Position
-                        StartPos = gui.MainFrame.Position
-                        LastTouch = input
-                        break
-                    end
+            local position = input.Position
+            local guiObjects = gui.ScreenGui:GetGuiObjectsAtPosition(position.X, position.Y)
+            
+            for _, obj in pairs(guiObjects) do
+                if obj == gui.Title then
+                    Dragging = true
+                    DragStart = position
+                    StartPos = gui.MainFrame.Position
+                    LastTouch = input
+                    break
                 end
-            elseif input.UserInputState == Enum.UserInputState.End then
-                if input == LastTouch then
-                    Dragging = false
-                    LastTouch = nil
-                end
-            elseif input.UserInputState == Enum.UserInputState.Change and Dragging and input == LastTouch then
-                local delta = input.Position - DragStart
-                gui.MainFrame.Position = UDim2.new(
-                    StartPos.X.Scale,
-                    StartPos.X.Offset + delta.X,
-                    StartPos.Y.Scale,
-                    StartPos.Y.Offset + delta.Y
-                )
             end
         end
     end
     
-    UserInputService.TouchStarted:Connect(handleTouch)
-    UserInputService.TouchMoved:Connect(handleTouch)
-    UserInputService.TouchEnded:Connect(handleTouch)
+    UserInputService.TouchStarted:Connect(handleDragging)
+    
+    UserInputService.TouchMoved:Connect(function(input)
+        if Dragging and input == LastTouch then
+            local delta = input.Position - DragStart
+            gui.MainFrame.Position = UDim2.new(
+                StartPos.X.Scale,
+                StartPos.X.Offset + delta.X,
+                StartPos.Y.Scale,
+                StartPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    UserInputService.TouchEnded:Connect(function(input)
+        if input == LastTouch then
+            Dragging = false
+            LastTouch = nil
+        end
+    end)
     
     -- Character respawn handling
     Player.CharacterAdded:Connect(function(char)

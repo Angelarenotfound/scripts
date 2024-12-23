@@ -167,16 +167,15 @@ local function createLoadingScreen()
     local decoration2 = Instance.new("Frame")
     local decoration3 = Instance.new("Frame")
     local decoration4 = Instance.new("Frame")
-    
     loading.Name = "LoadingScreen"
     loading.Parent = CoreGui
-    
+
     background.Name = "Background"
     background.Parent = loading
     background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     background.BorderSizePixel = 0
-    background.Size = UDim2.new(1, 0, 1, 0)
-    
+    background.Size = UDim2.new(1, 0, 1, 0) -- Cambia el tamaño a 1, 0, 1, 0
+
     -- Decorative elements
     decoration.Name = "Decoration1"
     decoration.Parent = background
@@ -246,7 +245,7 @@ end
 local function createMainGui()
     local screenGui = Instance.new("ScreenGui")
     local mainFrame = Instance.new("Frame")
-    local title = Instance.new("TextButton")
+    local title = Instance.new("TextLabel")
     local container = Instance.new("Frame")
     local speedInput = Instance.new("TextBox")
     local teleportInput = Instance.new("TextBox")
@@ -257,7 +256,6 @@ local function createMainGui()
     local decoration2 = Instance.new("Frame")
     local decoration3 = Instance.new("Frame")
     local decoration4 = Instance.new("Frame")
-
     screenGui.Name = "AnimationsGui"
     screenGui.Parent = CoreGui
 
@@ -278,7 +276,9 @@ local function createMainGui()
     mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     mainFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
     mainFrame.Position = UDim2.new(0, 15, 0, 15)
-    mainFrame.Size = UDim2.new(0, 250, 0, 300) -- Ajusta el tamaño del frame principal
+    mainFrame.Size = UDim2.new(0, 250, 0, 300)
+    mainFrame.ClipsDescendants = true
+    mainFrame.CornerRadius = UDim.new(0, 10)
 
     -- Decorative elements
     decoration1.Name = "Decoration1"
@@ -318,6 +318,7 @@ local function createMainGui()
     title.RichText = true
     title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
     title.TextSize = 24
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
     container.Name = "Container"
     container.Parent = mainFrame
@@ -331,7 +332,7 @@ local function createMainGui()
     speedInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     speedInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
     speedInput.Position = UDim2.new(0.1, 0, 0.1, 0)
-    speedInput.Size = UDim2.new(0.8, 0, 0, 40) -- Ajusta el tamaño del input
+    speedInput.Size = UDim2.new(0.8, 0, 0, 40)
     speedInput.Font = Enum.Font.GothamSemibold
     speedInput.PlaceholderText = "Speed (16 default)"
     speedInput.Text = ""
@@ -343,7 +344,7 @@ local function createMainGui()
     teleportInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     teleportInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
     teleportInput.Position = UDim2.new(0.1, 0, 0.35, 0)
-    teleportInput.Size = UDim2.new(0.8, 0, 0, 40) -- Ajusta el tamaño del input
+    teleportInput.Size = UDim2.new(0.8, 0, 0, 40)
     teleportInput.Font = Enum.Font.GothamSemibold
     teleportInput.PlaceholderText = "Player name to teleport"
     teleportInput.Text = ""
@@ -355,7 +356,7 @@ local function createMainGui()
     animationsButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     animationsButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
     animationsButton.Position = UDim2.new(0.1, 0, 0.6, 0)
-    animationsButton.Size = UDim2.new(0.8, 0, 0, 40) -- Ajusta el tamaño del botón
+    animationsButton.Size = UDim2.new(0.8, 0, 0, 40)
     animationsButton.Font = Enum.Font.GothamSemibold
     animationsButton.Text = "Animations"
     animationsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -453,7 +454,7 @@ end
 -- Initialize
 local function init()
     local loading = createLoadingScreen()
-    local loadingFill = loading.Background.LoadingBar.LoadingFill
+    loading.Background.Size = UDim2.new(1, 0, 1, 0)
     local status = loading.Background.Status
     local decorations = {
         loading.Background.Decoration1,

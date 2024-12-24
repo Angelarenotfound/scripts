@@ -16,34 +16,363 @@ local DragStart = nil
 local StartPos = nil
 local LastTouch = nil
 local SavedSpeed = 16
-local AnimationsVisible = false
-local ActiveNotifications = {}
+local CurrentSection = "Home"
 
--- Animation IDs
+-- Loading Screen
+local Loading = Instance.new("ScreenGui")
+Loading.Name = "LoadingScreen"
+Loading.Parent = CoreGui
+Loading.DisplayOrder = 999
+Loading.IgnoreGuiInset = true -- Makes it truly fullscreen
+
+local Background = Instance.new("Frame")
+Background.Name = "Background"
+Background.Parent = Loading
+Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Background.BorderSizePixel = 0
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = Background
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.5, -200, 0.4, -30)
+Title.Size = UDim2.new(0, 400, 0, 60)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Adonis Except"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 48
+
+local LoadingBar = Instance.new("Frame")
+LoadingBar.Name = "LoadingBar"
+LoadingBar.Parent = Background
+LoadingBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LoadingBar.BorderSizePixel = 0
+LoadingBar.Position = UDim2.new(0.5, -200, 0.5, -10)
+LoadingBar.Size = UDim2.new(0, 400, 0, 20)
+
+local LoadingFill = Instance.new("Frame")
+LoadingFill.Name = "LoadingFill"
+LoadingFill.Parent = LoadingBar
+LoadingFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+LoadingFill.BorderSizePixel = 0
+LoadingFill.Size = UDim2.new(0, 0, 1, 0)
+
+local Status = Instance.new("TextLabel")
+Status.Name = "Status"
+Status.Parent = Background
+Status.BackgroundTransparency = 1
+Status.Position = UDim2.new(0.5, -200, 0.5, 20)
+Status.Size = UDim2.new(0, 400, 0, 30)
+Status.Font = Enum.Font.GothamSemibold
+Status.Text = "Initializing..."
+Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+Status.TextSize = 18
+
+-- Main GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdonisExceptGUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- Top bar
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+local TopBarCorner = UICorner:Clone()
+TopBarCorner.Parent = TopBar
+
+-- Title in top bar
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Name = "Title"
+TitleBar.Parent = TopBar
+TitleBar.BackgroundTransparency = 1
+TitleBar.Position = UDim2.new(0, 15, 0, 0)
+TitleBar.Size = UDim2.new(1, -30, 1, 0)
+TitleBar.Font = Enum.Font.GothamBold
+TitleBar.Text = "Adonis Except"
+TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.TextSize = 20
+TitleBar.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Sections container
+local SectionsFrame = Instance.new("Frame")
+SectionsFrame.Name = "Sections"
+SectionsFrame.Parent = MainFrame
+SectionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SectionsFrame.BorderSizePixel = 0
+SectionsFrame.Position = UDim2.new(0, 0, 0, 40)
+SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
+
+local SectionsCorner = UICorner:Clone()
+SectionsCorner.Parent = SectionsFrame
+
+-- Separator
+local Separator = Instance.new("Frame")
+Separator.Name = "Separator"
+Separator.Parent = MainFrame
+Separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Separator.BorderSizePixel = 0
+Separator.Position = UDim2.new(0, 150, 0, 40)
+Separator.Size = UDim2.new(0, 2, 1, -40)
+
+-- Content frame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "Content"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Position = UDim2.new(0, 152, 0, 40)
+ContentFrame.Size = UDim2.new(1, -152, 1, -40)
+
+-- Create section buttons
+local function createSectionButton(name, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = SectionsFrame
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.BorderSizePixel = 0
+    button.Position = UDim2.new(0, 10, 0, position)
+    button.Size = UDim2.new(1, -20, 0, 40)
+    button.Font = Enum.Font.GothamSemibold
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    
+    local buttonCorner = UICorner:Clone()
+    buttonCorner.Parent = button
+    
+    button.MouseButton1Click:Connect(function()
+        CurrentSection = name
+        -- Update content based on section
+        updateContent(name)
+    end)
+    
+    return button
+end
+
+-- Create sections
+local sections = {
+    {name = "Home", pos = 10},
+    {name = "Animations", pos = 60},
+    {name = "Local", pos = 110},
+    {name = "Credits", pos = 160}
+}
+
+for _, section in ipairs(sections) do
+    createSectionButton(section.name, section.pos)
+end
+
+-- Content frames
+local HomeFrame = Instance.new("Frame")
+HomeFrame.Name = "HomeFrame"
+HomeFrame.Parent = ContentFrame
+HomeFrame.BackgroundTransparency = 1
+HomeFrame.Size = UDim2.new(1, 0, 1, 0)
+
+local AnimationsFrame = Instance.new("ScrollingFrame")
+AnimationsFrame.Name = "AnimationsFrame"
+AnimationsFrame.Parent = ContentFrame
+AnimationsFrame.BackgroundTransparency = 1
+AnimationsFrame.Size = UDim2.new(1, 0, 1, 0)
+AnimationsFrame.CanvasSize = UDim2.new(0, 0, 0, (#orderedAnimations * 50) + 40)
+AnimationsFrame.ScrollBarThickness = 6
+AnimationsFrame.Visible = false
+
+local LocalFrame = Instance.new("Frame")
+LocalFrame.Name = "LocalFrame"
+LocalFrame.Parent = ContentFrame
+LocalFrame.BackgroundTransparency = 1
+LocalFrame.Size = UDim2.new(1, 0, 1, 0)
+LocalFrame.Visible = false
+
+local CreditsFrame = Instance.new("Frame")
+CreditsFrame.Name = "CreditsFrame"
+CreditsFrame.Parent = ContentFrame
+CreditsFrame.BackgroundTransparency = 1
+CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
+CreditsFrame.Visible = false
+
+-- Setup Home content
+local UserImage = Instance.new("ImageLabel")
+UserImage.Name = "UserImage"
+UserImage.Parent = HomeFrame
+UserImage.BackgroundTransparency = 1
+UserImage.Position = UDim2.new(0, 20, 0, 20)
+UserImage.Size = UDim2.new(0, 100, 0, 100)
+UserImage.Image = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+
+local UserImageCorner = UICorner:Clone()
+UserImageCorner.CornerRadius = UDim.new(1, 0)
+UserImageCorner.Parent = UserImage
+
+local UserName = Instance.new("TextLabel")
+UserName.Name = "UserName"
+UserName.Parent = HomeFrame
+UserName.BackgroundTransparency = 1
+UserName.Position = UDim2.new(0, 140, 0, 20)
+UserName.Size = UDim2.new(0, 200, 0, 30)
+UserName.Font = Enum.Font.GothamBold
+UserName.Text = Player.Name
+UserName.TextColor3 = Color3.fromRGB(255, 255, 255)
+UserName.TextSize = 24
+UserName.TextXAlignment = Enum.TextXAlignment.Left
+
+local UserDisplayName = Instance.new("TextLabel")
+UserDisplayName.Name = "UserDisplayName"
+UserDisplayName.Parent = HomeFrame
+UserDisplayName.BackgroundTransparency = 1
+UserDisplayName.Position = UDim2.new(0, 140, 0, 50)
+UserDisplayName.Size = UDim2.new(0, 200, 0, 20)
+UserDisplayName.Font = Enum.Font.GothamSemibold
+UserDisplayName.Text = "@" .. Player.DisplayName
+UserDisplayName.TextColor3 = Color3.fromRGB(200, 200, 200)
+UserDisplayName.TextSize = 16
+UserDisplayName.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup Credits content
+local CreditsTitle = Instance.new("TextLabel")
+CreditsTitle.Name = "CreditsTitle"
+CreditsTitle.Parent = CreditsFrame
+CreditsTitle.BackgroundTransparency = 1
+CreditsTitle.Position = UDim2.new(0, 20, 0, 20)
+CreditsTitle.Size = UDim2.new(1, -40, 0, 40)
+CreditsTitle.Font = Enum.Font.GothamBold
+CreditsTitle.Text = "Credits"
+CreditsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+CreditsTitle.TextSize = 24
+CreditsTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local CreditsText = Instance.new("TextLabel")
+CreditsText.Name = "CreditsText"
+CreditsText.Parent = CreditsFrame
+CreditsText.BackgroundTransparency = 1
+CreditsText.Position = UDim2.new(0, 20, 0, 70)
+CreditsText.Size = UDim2.new(1, -40, 0, 60)
+CreditsText.Font = Enum.Font.GothamSemibold
+CreditsText.Text = "Created by:\nAngelarenotfound\n100% Adonis Except"
+CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
+CreditsText.TextSize = 16
+CreditsText.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup Local content
+local SpeedInput = Instance.new("TextBox")
+SpeedInput.Name = "SpeedInput"
+SpeedInput.Parent = LocalFrame
+SpeedInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SpeedInput.Position = UDim2.new(0, 20, 0, 20)
+SpeedInput.Size = UDim2.new(0, 200, 0, 40)
+SpeedInput.Font = Enum.Font.GothamSemibold
+SpeedInput.PlaceholderText = "Speed (Default: 16)"
+SpeedInput.Text = ""
+SpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedInput.TextSize = 14
+
+local SpeedInputCorner = UICorner:Clone()
+SpeedInputCorner.Parent = SpeedInput
+
+local TeleportInput = Instance.new("TextBox")
+TeleportInput.Name = "TeleportInput"
+TeleportInput.Parent = LocalFrame
+TeleportInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TeleportInput.Position = UDim2.new(0, 20, 0, 80)
+TeleportInput.Size = UDim2.new(0, 200, 0, 40)
+TeleportInput.Font = Enum.Font.GothamSemibold
+TeleportInput.PlaceholderText = "Player name to teleport"
+TeleportInput.Text = ""
+TeleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportInput.TextSize = 14
+
+local TeleportInputCorner = UICorner:Clone()
+TeleportInputCorner.Parent = TeleportInput
+
+-- Animations table
 local Animations = {
-    Ninja = {
-        Idle1 = "rbxassetid://656117400",
-        Idle2 = "rbxassetid://656118341",
-        Walk = "rbxassetid://656121766",
-        Run = "rbxassetid://656118852",
-        Fall = "rbxassetid://656115606",
-        Jump = "rbxassetid://656117878",
-        Climb = "rbxassetid://656114359",
-        Swim = "rbxassetid://656119721",
-        SwimIdle = "rbxassetid://656121397"
+    astronaut = {
+        Idle1 = "rbxassetid://891621366",
+        Idle2 = "rbxassetid://891633237",
+        Walk = "rbxassetid://891636393",
+        Run = "rbxassetid://891636393",
+        Fall = "rbxassetid://891617961",
+        Jump = "rbxassetid://891627522",
+        Climb = "rbxassetid://891609353",
+        Swim = "rbxassetid://891639666",
+        SwimIdle = "rbxassetid://891663592"
     },
-    Elder = {
+    bold = {
+        Idle1 = "rbxassetid://16738333868",
+        Idle2 = "rbxassetid://16738334710",
+        Walk = "rbxassetid://16738340646", 
+        Run = "rbxassetid://16738337225",
+        Fall = "rbxassetid://16738333171",
+        Jump = "rbxassetid://16738336650",
+        Climb = "rbxassetid://16738332169",
+        Swim = "rbxassetid://16738339158",
+        SwimIdle = "rbxassetid://16738339817"
+    },
+    bubbly = {
+        Idle1 = "rbxassetid://910004836",
+        Idle2 = "rbxassetid://910009958",
+        Walk = "rbxassetid://910034870",
+        Run = "rbxassetid://910025107",
+        Fall = "rbxassetid://910001910",
+        Jump = "rbxassetid://910016857",
+        Climb = "rbxassetid://909997997",
+        Swim = "rbxassetid://910028158",
+        SwimIdle = "rbxassetid://910030921"
+    },
+    cartoony = {
+        Idle1 = "rbxassetid://742637544",
+        Idle2 = "rbxassetid://742638445",
+        Walk = "rbxassetid://742640026",
+        Run = "rbxassetid://742638842",
+        Fall = "rbxassetid://742637151",
+        Jump = "rbxassetid://742637942",
+        Climb = "rbxassetid://742636889",
+        Swim = "rbxassetid://742639220",
+        SwimIdle = "rbxassetid://742639812"
+    },
+    elder = {
         Idle1 = "rbxassetid://845397899",
-        Idle2 = "rbxassetid://845398858",
+        Idle2 = "rbxassetid://8454005",
         Walk = "rbxassetid://845403856",
         Run = "rbxassetid://845386501",
-        Fall = "rbxassetid://845398858",
+        Fall = "rbxassetid://616005863",
         Jump = "rbxassetid://845398858",
-        Climb = "rbxassetid://845392038",
+        Climb = "rbxassetid://656114359",
         Swim = "rbxassetid://845401742",
         SwimIdle = "rbxassetid://845403127"
     },
-    Levitation = {
+    knight = {
+        Idle1 = "rbxassetid://657595757",
+        Idle2 = "rbxassetid://657568135",
+        Walk = "rbxassetid://657552124",
+        Run = "rbxassetid://657564596",
+        Fall = "rbxassetid://657600338",
+        Jump = "rbxassetid://658409194",
+        Climb = "rbxassetid://658360781",
+        Swim = "rbxassetid://657560551",
+        SwimIdle = "rbxassetid://657557095"
+    },
+    levitation = {
         Idle1 = "rbxassetid://616006778",
         Idle2 = "rbxassetid://616008087",
         Walk = "rbxassetid://616013216",
@@ -54,653 +383,294 @@ local Animations = {
         Swim = "rbxassetid://616011509",
         SwimIdle = "rbxassetid://616012453"
     },
-    Zombie = {
+    mage = {
+        Idle1 = "rbxassetid://707742142",
+        Idle2 = "rbxassetid://707855907",
+        Walk = "rbxassetid://707897309",
+        Run = "rbxassetid://707861613",
+        Fall = "rbxassetid://707829716",
+        Jump = "rbxassetid://707853694",
+        Climb = "rbxassetid://707826056",
+        Swim = "rbxassetid://707876443",
+        SwimIdle = "rbxassetid://707894699"
+    },
+    ninja = {
+        Idle1 = "rbxassetid://656117400",
+        Idle2 = "rbxassetid://656118341",
+        Walk = "rbxassetid://656121766",
+        Run = "rbxassetid://656118852",
+        Fall = "rbxassetid://656115606",
+        Jump = "rbxassetid://656117878",
+        Climb = "rbxassetid://656114359",
+        Swim = "rbxassetid://656119721",
+        SwimIdle = "rbxassetid://656121397"
+    },
+    oldschool = {
+        Idle1 = "rbxassetid://5319828216",
+        Idle2 = "rbxassetid://5319831086",
+        Walk = "rbxassetid://5319847204",
+        Run = "rbxassetid://5319844329",
+        Fall = "rbxassetid://5319839762",
+        Jump = "rbxassetid://5319841935",
+        Climb = "rbxassetid://5319816685",
+        Swim = "rbxassetid://5319850266",
+        SwimIdle = "rbxassetid://5319852613"
+    },
+    pirate = {
+        Idle1 = "rbxassetid://750781874",
+        Idle2 = "rbxassetid://750782770",
+        Walk = "rbxassetid://750785693",
+        Run = "rbxassetid://750783738",
+        Fall = "rbxassetid://750780242",
+        Jump = "rbxassetid://750782230",
+        Climb = "rbxassetid://750779899",
+        Swim = "rbxassetid://750784579",
+        SwimIdle = "rbxassetid://750785176"
+    },
+    rthro = {
+        Idle1 = "rbxassetid://2510196951",
+        Idle2 = "rbxassetid://2510197257",
+        Walk = "rbxassetid://2510202577",
+        Run = "rbxassetid://2510198475",
+        Fall = "rbxassetid://656115606",
+        Jump = "rbxassetid://656117878",
+        Climb = "rbxassetid://2510192778",
+        Swim = "rbxassetid://2510199791",
+        SwimIdle = "rbxassetid://2510201162"
+    },
+    stylish = {
+        Idle1 = "rbxassetid://616136790",
+        Idle2 = "rbxassetid://616138447",
+        Walk = "rbxassetid://616146177",
+        Run = "rbxassetid://616140816",
+        Fall = "rbxassetid://616134815",
+        Jump = "rbxassetid://616139451",
+        Climb = "rbxassetid://616133594",
+        Swim = "rbxassetid://616143378",
+        SwimIdle = "rbxassetid://616144772"
+    },
+    superhero = {
+        Idle1 = "rbxassetid://616111295",
+        Idle2 = "rbxassetid://616113536",
+        Walk = "rbxassetid://616122287",
+        Run = "rbxassetid://616117076",
+        Fall = "rbxassetid://616108001",
+        Jump = "rbxassetid://616115533",
+        Climb = "rbxassetid://616104706",
+        Swim = "rbxassetid://616119360",
+        SwimIdle = "rbxassetid://616120861"
+    },
+    toy = {
+        Idle1 = "rbxassetid://782841498",
+        Idle2 = "rbxassetid://782845736",
+        Walk = "rbxassetid://782843345",
+        Run = "rbxassetid://782842708",
+        Fall = "rbxassetid://782846423",
+        Jump = "rbxassetid://782847020",
+        Climb = "rbxassetid://782843869",
+        Swim = "rbxassetid://782844582",
+        SwimIdle = "rbxassetid://782845186"
+    },
+    vampire = {
+        Idle1 = "rbxassetid://1083445855",
+        Idle2 = "rbxassetid://1083450166",
+        Walk = "rbxassetid://1083473930",
+        Run = "rbxassetid://1083462077",
+        Fall = "rbxassetid://1083443587",
+        Jump = "rbxassetid://1083455352",
+        Climb = "rbxassetid://1083439238",
+        Swim = "rbxassetid://1083464683",
+        SwimIdle = "rbxassetid://1083467779"
+    },
+    werewolf = {
+        Idle1 = "rbxassetid://1083195517",
+        Idle2 = "rbxassetid://1083214717",
+        Walk = "rbxassetid://1083178339",
+        Run = "rbxassetid://1083216690",
+        Fall = "rbxassetid://1083189019",
+        Jump = "rbxassetid://1083218792",
+        Climb = "rbxassetid://1083182000",
+        Swim = "rbxassetid://1083222527",
+        SwimIdle = "rbxassetid://1083222527"
+    },
+    zombie = {
         Idle1 = "rbxassetid://616158929",
         Idle2 = "rbxassetid://616160636",
         Walk = "rbxassetid://616168032",
         Run = "rbxassetid://616163682",
         Fall = "rbxassetid://616157476",
         Jump = "rbxassetid://616161997",
-        Climb = "rbxassetid://616156119",
+        Climb = "rbxassetid://18537363391",
         Swim = "rbxassetid://616165109",
         SwimIdle = "rbxassetid://616166655"
+    },
+    adidas = {
+        Idle1 = "rbxassetid://18537376492",
+        Idle2 = "rbxassetid://18537371272",
+        Walk = "rbxassetid://18537392113",
+        Run = "rbxassetid://18537384940",
+        Fall = "rbxassetid://18537367238",
+        Jump = "rbxassetid://18537380791",
+        Climb = "rbxassetid://18537363391",
+        Swim = "rbxassetid://18537389531",
+        SwimIdle = "rbxassetid://18537387180"
+    },
+    faker6 = {
+        Idle1 = "rbxassetid://12521158637",
+        Idle2 = "rbxassetid://12521162526",
+        Walk = "rbxassetid://126997486407971",
+        Run = "rbxassetid://126997486407971",
+        Fall = "rbxassetid://12520972571",
+        Jump = "rbxassetid://12520880485",
+        Climb = "rbxassetid://12520982150",
+        Swim = "rbxassetid://12520993168",
+        SwimIdle = "rbxassetid://2510201162"
+    },
+    girlcombo1 = {
+        Idle1 = "rbxassetid://16738333868",
+        Idle2 = "rbxassetid://16738334710",
+        Walk = "rbxassetid://910034870",
+        Run = "rbxassetid://910025107",
+        Fall = "rbxassetid://5319839762",
+        Jump = "rbxassetid://5319841935",
+        Climb = "rbxassetid://5319816685",
+        Swim = "rbxassetid://2510199791",
+        SwimIdle = "rbxassetid://5319852613"
+    },
+    girlcombo2 = {
+        Idle1 = "rbxassetid://616136790",
+        Idle2 = "rbxassetid://616138447",
+        Walk = "rbxassetid://910034870",
+        Run = "rbxassetid://910025107",
+        Fall = "rbxassetid://5319839762",
+        Jump = "rbxassetid://5319841935",
+        Climb = "rbxassetid://5319816685",
+        Swim = "rbxassetid://5319850266",
+        SwimIdle = "rbxassetid://5319852613"
+    },
+    tryhardcombo1 = {
+        Idle1 = "rbxassetid://5319828216",
+        Idle2 = "rbxassetid://5319831086",
+        Walk = "rbxassetid://707897309",
+        Run = "rbxassetid://707861613",
+        Fall = "rbxassetid://5319839762",
+        Jump = "rbxassetid://5319841935",
+        Climb = "rbxassetid://5319816685",
+        Swim = "rbxassetid://5319850266",
+        SwimIdle = "rbxassetid://5319852613"
+    },
+    tryhardcombo2 = {
+        Idle1 = "rbxassetid://782841498",
+        Idle2 = "rbxassetid://782845736",
+        Walk = "rbxassetid://782843345",
+        Run = "rbxassetid://782842708",
+        Fall = "rbxassetid://616005863",
+        Jump = "rbxassetid://782847020",
+        Climb = "rbxassetid://707826056",
+        Swim = "rbxassetid://707876443",
+        SwimIdle = "rbxassetid://707894699"
     }
 }
 
--- Notification System
-local NotificationSystem = {}
-
-function NotificationSystem.new()
-    local notification = Instance.new("ScreenGui")
-    local container = Instance.new("Frame")
-    local message = Instance.new("TextLabel")
-    local decoration = Instance.new("Frame")
+-- Create animation buttons
+local function createAnimationButton(name, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = AnimationsFrame
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.BorderSizePixel = 0
+    button.Position = UDim2.new(0, 20, 0, position)
+    button.Size = UDim2.new(0, 180, 0, 40)
+    button.Font = Enum.Font.GothamSemibold
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
     
-    notification.Name = "Notification"
-    notification.Parent = CoreGui
+    local buttonCorner = UICorner:Clone()
+    buttonCorner.Parent = button
     
-    container.Name = "Container"
-    container.Parent = notification
-    container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    container.BorderColor3 = Color3.fromRGB(255, 0, 0)
-    container.Position = UDim2.new(0.5, -100, 1, 20)
-    container.Size = UDim2.new(0, 200, 0, 50)
-    container.AnchorPoint = Vector2.new(0.5, 1)
+    button.MouseButton1Click:Connect(function()
+        setAnimations(Animations[name:lower()])
+        -- Add notification here
+    end)
     
-    -- Add rounded corners
-    local cornerRadius = Instance.new("UICorner")
-    cornerRadius.CornerRadius = UDim.new(0, 8)
-    cornerRadius.Parent = container
-    
-    decoration.Name = "Decoration"
-    decoration.Parent = container
-    decoration.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration.BorderSizePixel = 0
-    decoration.Size = UDim2.new(1, 0, 0, 2)
-    decoration.Position = UDim2.new(0, 0, 0, 0)
-    
-    message.Name = "Message"
-    message.Parent = container
-    message.BackgroundTransparency = 1
-    message.Size = UDim2.new(1, 0, 1, 0)
-    message.Font = Enum.Font.GothamSemibold
-    message.TextColor3 = Color3.fromRGB(255, 255, 255)
-    message.TextSize = 14
-    
-    return notification
+    return button
 end
 
-function NotificationSystem:Notify(text, duration)
-    duration = duration or 3
-    local notification = self.new()
-    local container = notification.Container
-    local message = container.Message
-    
-    message.Text = text
-    
-    -- Adjust position based on active notifications
-    local offset = #ActiveNotifications * 60
-    container.Position = UDim2.new(0.5, -100, 1, 20 + offset)
-    
-    table.insert(ActiveNotifications, notification)
-    
-    -- Slide in
-    local slideIn = TweenService:Create(container, 
-        TweenInfo.new(0.5, Enum.EasingStyle.Quart),
-        {Position = UDim2.new(0.5, -100, 1, -60 - offset)}
-    )
-    
-    -- Slide out
-    local slideOut = TweenService:Create(container,
-        TweenInfo.new(0.5, Enum.EasingStyle.Quart),
-        {Position = UDim2.new(0.5, -100, 1, 20)}
-    )
-    
-    slideIn:Play()
-    task.wait(duration)
-    slideOut:Play()
-    
-    -- Remove from active notifications
-    for i, notif in ipairs(ActiveNotifications) do
-        if notif == notification then
-            table.remove(ActiveNotifications, i)
-            break
-        end
-    end
-    
-    -- Adjust positions of remaining notifications
-    for i, notif in ipairs(ActiveNotifications) do
-        TweenService:Create(notif.Container,
-            TweenInfo.new(0.5, Enum.EasingStyle.Quart),
-            {Position = UDim2.new(0.5, -100, 1, -60 - ((i-1) * 60))}
-        ):Play()
-    end
-    
-    slideOut.Completed:Wait()
-    notification:Destroy()
+local orderedAnimations = {
+    "Ninja", "Zombie", "Elder", "Levitation",
+    "Astronaut", "Bold", "Bubbly", "Cartoony",
+    "Knight", "Mage", "Oldschool", "Pirate",
+    "Rthro", "Stylish", "Superhero", "Toy",
+    "Vampire", "Werewolf", "Adidas", "Faker6",
+    "GirlCombo1", "GirlCombo2", "TryhardCombo1", "TryhardCombo2"
+}
+
+local buttonPosition = 20
+for _, name in ipairs(orderedAnimations) do
+    createAnimationButton(name, buttonPosition)
+    buttonPosition = buttonPosition + 50
 end
 
--- Loading Screen
-local function createLoadingScreen()
-    local loading = Instance.new("ScreenGui")
-    local background = Instance.new("Frame")
-    local title = Instance.new("TextLabel")
-    local loadingBar = Instance.new("Frame")
-    local loadingFill = Instance.new("Frame")
-    local status = Instance.new("TextLabel")
-    local decoration1 = Instance.new("Frame")
-    local decoration2 = Instance.new("Frame")
-    local decoration3 = Instance.new("Frame")
-    local decoration4 = Instance.new("Frame")
-    
-    loading.Name = "LoadingScreen"
-    loading.Parent = CoreGui
-    
-    background.Name = "Background"
-    background.Parent = loading
-    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BorderSizePixel = 0
-    background.Size = UDim2.new(1, 0, 1, 0)
-    
-    -- Add rounded corners to decorative elements
-    local function addRoundCorners(element)
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 4)
-        corner.Parent = element
-    end
-    
-    -- Decorative elements
-    decoration1.Name = "Decoration1"
-    decoration1.Parent = background
-    decoration1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration1.BorderSizePixel = 0
-    decoration1.Size = UDim2.new(0, 3, 0, 100)
-    decoration1.Position = UDim2.new(0.2, 0, 0.3, 0)
-    addRoundCorners(decoration1)
-    
-    decoration2.Name = "Decoration2"
-    decoration2.Parent = background
-    decoration2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration2.BorderSizePixel = 0
-    decoration2.Size = UDim2.new(0, 3, 0, 100)
-    decoration2.Position = UDim2.new(0.8, 0, 0.3, 0)
-    addRoundCorners(decoration2)
-    
-    decoration3.Name = "Decoration3"
-    decoration3.Parent = background
-    decoration3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration3.BorderSizePixel = 0
-    decoration3.Size = UDim2.new(0, 100, 0, 3)
-    decoration3.Position = UDim2.new(0.5, -50, 0.2, 0)
-    addRoundCorners(decoration3)
-    
-    decoration4.Name = "Decoration4"
-    decoration4.Parent = background
-    decoration4.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration4.BorderSizePixel = 0
-    decoration4.Size = UDim2.new(0, 100, 0, 3)
-    decoration4.Position = UDim2.new(0.5, -50, 0.8, 0)
-    addRoundCorners(decoration4)
-    
-    title.Name = "Title"
-    title.Parent = background
-    title.BackgroundTransparency = 1
-    title.Position = UDim2.new(0.5, -150, 0.4, -20)
-    title.Size = UDim2.new(0, 300, 0, 40)
-    title.Font = Enum.Font.GothamBold
-    title.RichText = true
-    title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
-    title.TextSize = 32
-    
-    loadingBar.Name = "LoadingBar"
-    loadingBar.Parent = background
-    loadingBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    loadingBar.BorderSizePixel = 0
-    loadingBar.Position = UDim2.new(0.5, -150, 0.5, -10)
-    loadingBar.Size = UDim2.new(0, 300, 0, 20)
-    addRoundCorners(loadingBar)
-    
-    loadingFill.Name = "LoadingFill"
-    loadingFill.Parent = loadingBar
-    loadingFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    loadingFill.BorderSizePixel = 0
-    loadingFill.Size = UDim2.new(0, 0, 1, 0)
-    addRoundCorners(loadingFill)
-    
-    status.Name = "Status"
-    status.Parent = background
-    status.BackgroundTransparency = 1
-    status.Position = UDim2.new(0.5, -150, 0.5, 20)
-    status.Size = UDim2.new(0, 300, 0, 20)
-    status.Font = Enum.Font.GothamSemibold
-    status.Text = "Initializing..."
-    status.TextColor3 = Color3.fromRGB(255, 255, 255)
-    status.TextSize = 16
-    
-    return loading
+-- Function to update content based on section
+function updateContent(section)
+    HomeFrame.Visible = section == "Home"
+    AnimationsFrame.Visible = section == "Animations"
+    LocalFrame.Visible = section == "Local"
+    CreditsFrame.Visible = section == "Credits"
 end
 
--- Main GUI Creation
-local function createMainGui()
-    local screenGui = Instance.new("ScreenGui")
-    local mainFrame = Instance.new("Frame")
-    local dragArea = Instance.new("Frame")
-    local title = Instance.new("TextLabel")
-    local container = Instance.new("Frame")
-    local speedInput = Instance.new("TextBox")
-    local teleportInput = Instance.new("TextBox")
-    local animationsButton = Instance.new("TextButton")
-    local animationsFrame = Instance.new("Frame")
-    local toggleButton = Instance.new("TextButton")
-    local decoration1 = Instance.new("Frame")
-    local decoration2 = Instance.new("Frame")
-    local decoration3 = Instance.new("Frame")
-    local decoration4 = Instance.new("Frame")
-    
-    -- Add rounded corners function
-    local function addRoundCorners(element, radius)
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, radius or 8)
-        corner.Parent = element
+-- Dragging functionality
+local function updateDragging(input)
+    if Dragging then
+        local delta = input.Position - DragStart
+        MainFrame.Position = UDim2.new(
+            StartPos.X.Scale,
+            StartPos.X.Offset + delta.X,
+            StartPos.Y.Scale,
+            StartPos.Y.Offset + delta.Y
+        )
     end
-    
-    screenGui.Name = "AnimationsGui"
-    screenGui.Parent = CoreGui
-    
-    mainFrame.Name = "MainFrame"
-    mainFrame.Parent = screenGui
-    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    mainFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    mainFrame.Position = UDim2.new(0, 15, 0, 15)
-    mainFrame.Size = UDim2.new(0, 250, 0, 300)
-    addRoundCorners(mainFrame, 10)
-    
-    -- Drag Area
-    dragArea.Name = "DragArea"
-    dragArea.Parent = mainFrame
-    dragArea.BackgroundTransparency = 1
-    dragArea.Size = UDim2.new(1, 0, 0, 40)
-    
-    -- Decorative elements
-    decoration1.Name = "Decoration1"
-    decoration1.Parent = mainFrame
-    decoration1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration1.BorderSizePixel = 0
-    decoration1.Size = UDim2.new(0, 3, 0, 50)
-    decoration1.Position = UDim2.new(0.15, 0, 0, 0)
-    addRoundCorners(decoration1)
-    
-    decoration2.Name = "Decoration2"
-    decoration2.Parent = mainFrame
-    decoration2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration2.BorderSizePixel = 0
-    decoration2.Size = UDim2.new(0, 3, 0, 50)
-    decoration2.Position = UDim2.new(0.85, 0, 0, 0)
-    addRoundCorners(decoration2)
-    
-    decoration3.Name = "Decoration3"
-    decoration3.Parent = mainFrame
-    decoration3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration3.BorderSizePixel = 0
-    decoration3.Size = UDim2.new(0.3, 0, 0, 3)
-    decoration3.Position = UDim2.new(0.35, 0, 0.2, 0)
-    addRoundCorners(decoration3)
-    
-    decoration4.Name = "Decoration4"
-    decoration4.Parent = mainFrame
-    decoration4.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration4.BorderSizePixel = 0
-    decoration4.Size = UDim2.new(0.3, 0, 0, 3)
-    decoration4.Position = UDim2.new(0.35, 0, 0.8, 0)
-    addRoundCorners(decoration4)
-    
-    title.Name = "Title"
-    title.Parent = mainFrame
-    title.BackgroundTransparency = 1
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Font = Enum.Font.GothamBold
-    title.RichText = true
-    title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
-    title.TextSize = 20
-    
-    container.Name = "Container"
-    container.Parent = mainFrame
-    container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    container.BorderSizePixel = 0
-    container.Position = UDim2.new(0, 0, 0, 40)
-    container.Size = UDim2.new(1, 0, 1, -40)
-    
-    speedInput.Name = "SpeedInput"
-    speedInput.Parent = container
-    speedInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    speedInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    speedInput.Position = UDim2.new(0.1, 0, 0.1, 0)
-    speedInput.Size = UDim2.new(0.8, 0, 0, 40)
-    speedInput.Font = Enum.Font.GothamSemibold
-    speedInput.PlaceholderText = "Speed (16 default)"
-    speedInput.Text = ""
-    speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    speedInput.TextSize = 14
-    addRoundCorners(speedInput)
-    
-    teleportInput.Name = "TeleportInput"
-    teleportInput.Parent = container
-    teleportInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    teleportInput.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    teleportInput.Position = UDim2.new(0.1, 0, 0.35, 0)
-    teleportInput.Size = UDim2.new(0.8, 0, 0, 40)
-    teleportInput.Font = Enum.Font.GothamSemibold
-    teleportInput.PlaceholderText = "Player name to teleport"
-    teleportInput.Text = ""
-    teleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    teleportInput.TextSize = 14
-    addRoundCorners(teleportInput)
-    
-    animationsButton.Name = "AnimationsButton"
-    animationsButton.Parent = container
-    animationsButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    animationsButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    animationsButton.Position = UDim2.new(0.1, 0, 0.6, 0)
-    animationsButton.Size = UDim2.new(0.8, 0, 0, 40)
-    animationsButton.Font = Enum.Font.GothamSemibold
-    animationsButton.Text = "Animations"
-    animationsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    animationsButton.TextSize = 14
-    addRoundCorners(animationsButton)
-    
-    animationsFrame.Name = "AnimationsFrame"
-    animationsFrame.Parent = screenGui
-    animationsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    animationsFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    animationsFrame.Position = UDim2.new(0, 280, 0, 15)
-    animationsFrame.Size = UDim2.new(0, 220, 0, 300)
-    animationsFrame.Visible = false
-    addRoundCorners(animationsFrame, 10)
-    
-    -- Add decorations to animations frame
-    local animDec1 = decoration1:Clone()
-    local animDec2 = decoration2:Clone()
-    local animDec3 = decoration3:Clone()
-    local animDec4 = decoration4:Clone()
-    
-    animDec1.Parent = animationsFrame
-    animDec2.Parent = animationsFrame
-    animDec3.Parent = animationsFrame
-    animDec4.Parent = animationsFrame
-    
-    toggleButton.Name = "ToggleButton"
-    toggleButton.Parent = screenGui
-    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    toggleButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    toggleButton.Position = UDim2.new(0, 15, 0.5, -20)
-    toggleButton.Size = UDim2.new(0, 40, 0, 40)
-    toggleButton.Font = Enum.Font.GothamBold
-    toggleButton.Text = "≡"
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.TextSize = 24
-    addRoundCorners(toggleButton)
-    
-    return {
-        ScreenGui = screenGui,
-        MainFrame = mainFrame,
-        DragArea = dragArea,
-        SpeedInput = speedInput,
-        TeleportInput = teleportInput,
-        AnimationsButton = animationsButton,
-        AnimationsFrame = animationsFrame,
-        ToggleButton = toggleButton
-    }
 end
 
--- Animation Functions
-local function setAnimations(anims)
-    local char = Player.Character
-    if not char then return end
-    
-    local animate = char:WaitForChild("Animate")
-    animate.Enabled = false
-    
-    for _, track in pairs(char:WaitForChild("Humanoid"):WaitForChild("Animator"):GetPlayingAnimationTracks()) do
-        track:Stop()
-    end
-    
-    local function setAnim(name, id)
-        local anim = animate:WaitForChild(name)
-        if name == "idle" then
-            anim:WaitForChild("Animation1").AnimationId = anims.Idle1
-            anim:WaitForChild("Animation2").AnimationId = anims.Idle2
-        else
-            local animObj = anim:GetChildren()[1]
-            if animObj then
-                animObj.AnimationId = id
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Dragging = true
+        DragStart = input.Position
+        StartPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                Dragging = false
             end
-        end
+        end)
     end
-    
-    setAnim("idle", anims.Idle1)
-    setAnim("walk", anims.Walk)
-    setAnim("run", anims.Run)
-    setAnim("jump", anims.Jump)
-    setAnim("fall", anims.Fall)
-    setAnim("climb", anims.Climb)
-    setAnim("swim", anims.Swim)
-    setAnim("swimidle", anims.SwimIdle)
-    
-    animate.Enabled = true
-end
+end)
 
--- Player Finding Function
-local function findPlayer(name)
-    name = name:lower()
-    local closest = nil
-    local closestLen = math.huge
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= Player then
-            local playerName = player.Name:lower()
-            if playerName:find(name) then
-                local len = #playerName - #name
-                if len < closestLen then
-                    closest = player
-                    closestLen = len
-                end
-            end
-        end
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        updateDragging(input)
     end
-    
-    return closest
-end
+end)
 
 -- Initialize
-local function init()
-    local loading = createLoadingScreen()
-    local loadingFill = loading.Background.LoadingBar.LoadingFill
-    local status = loading.Background.Status
-    local decorations = {
-        loading.Background.Decoration1,
-        loading.Background.Decoration2,
-        loading.Background.Decoration3,
-        loading.Background.Decoration4
-    }
-    
-    -- Enhanced loading sequence with animations
-    local loadingSteps = {
-        "Initializing system...",
-        "Loading animations...",
-        "Configuring interface...",
-        "Setting up controls...",
-        "Preparing components...",
-        "Loading resources...",
-        "Optimizing performance...",
-        "Finalizing setup...",
-        "Almost ready...",
-        "Launching interface..."
-    }
-    
-    -- Animate decorative elements during loading
-    spawn(function()
-        while loading.Parent do
-            for _, dec in ipairs(decorations) do
-                if dec.Name:find("1") or dec.Name:find("2") then
-                    TweenService:Create(dec, TweenInfo.new(1), {
-                        Position = dec.Position + UDim2.new(0, 0, 0, 10)
-                    }):Play()
-                else
-                    TweenService:Create(dec, TweenInfo.new(1), {
-                        Position = dec.Position + UDim2.new(0.1, 0, 0, 0)
-                    }):Play()
-                end
-            end
-            wait(1)
-            for _, dec in ipairs(decorations) do
-                if dec.Name:find("1") or dec.Name:find("2") then
-                    TweenService:Create(dec, TweenInfo.new(1), {
-                        Position = dec.Position - UDim2.new(0, 0, 0, 10)
-                    }):Play()
-                else
-                    TweenService:Create(dec, TweenInfo.new(1), {
-                        Position = dec.Position - UDim2.new(0.1, 0, 0, 0)
-                    }):Play()
-                end
-            end
-            wait(1)
-        end
-    end)
-    
-    for i, text in ipairs(loadingSteps) do
-        TweenService:Create(loadingFill, TweenInfo.new(1), {
-            Size = UDim2.new(i/10, 0, 1, 0)
-        }):Play()
-        status.Text = text
-        wait(1)
-    end
-    
+updateContent("Home")
+
+-- Loading sequence
+local loadingSteps = {
+    "Initializing...",
+    "Loading animations...",
+    "Setting up interface...",
+    "Configuring settings...",
+    "Almost ready...",
+    "Launching..."
+}
+
+for i, step in ipairs(loadingSteps) do
+    Status.Text = step
+    TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
+        Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
+    }):Play()
     wait(1)
-    loading:Destroy()
-    
-    -- Create main GUI
-    local gui = createMainGui()
-    
-    -- Create animation buttons
-    local buttonSpacing = 0.15
-    local buttonPosition = 0.1
-    for name, anims in pairs(Animations) do
-        local button = Instance.new("TextButton")
-        button.Name = name
-        button.Parent = gui.AnimationsFrame
-        button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        button.BorderColor3 = Color3.fromRGB(60, 60, 60)
-        button.Position = UDim2.new(0.1, 0, buttonPosition, 0)
-        button.Size = UDim2.new(0.8, 0, 0, 40)
-        button.Font = Enum.Font.GothamSemibold
-        button.Text = name
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextSize = 14
-        
-        -- Add rounded corners
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = button
-        
-        -- Button hover effect
-        button.MouseEnter:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.3), {
-                BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            }):Play()
-        end)
-        
-        button.MouseLeave:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.3), {
-                BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            }):Play()
-        end)
-        
-        button.MouseButton1Click:Connect(function()
-            setAnimations(anims)
-            NotificationSystem:Notify(name .. " animations applied!", 2)
-        end)
-        
-        buttonPosition = buttonPosition + buttonSpacing
-    end
-    
-    -- Speed input handling
-    gui.SpeedInput.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local speed = tonumber(gui.SpeedInput.Text)
-            if speed then
-                SavedSpeed = speed
-                if Player.Character then
-                    Player.Character.Humanoid.WalkSpeed = speed
-                end
-                NotificationSystem:Notify("Speed set to " .. speed, 2)
-            end
-        end
-    end)
-    
-    -- Teleport input handling
-    gui.TeleportInput.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local targetPlayer = findPlayer(gui.TeleportInput.Text)
-            if targetPlayer then
-                Player.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
-                NotificationSystem:Notify("Teleported to " .. targetPlayer.Name, 2)
-            else
-                NotificationSystem:Notify("Player not found!", 2)
-            end
-        end
-    end)
-    
-    -- Animations button handling
-    gui.AnimationsButton.MouseButton1Click:Connect(function()
-        AnimationsVisible = not AnimationsVisible
-        gui.AnimationsFrame.Visible = AnimationsVisible
-        TweenService:Create(gui.AnimationsFrame, TweenInfo.new(0.3), {
-            Position = AnimationsVisible and 
-                UDim2.new(0, 280, 0, 15) or 
-                UDim2.new(0, 500, 0, 15)
-        }):Play()
-    end)
-    
-    -- GUI Toggle handling
-    local guiVisible = true
-    gui.ToggleButton.MouseButton1Click:Connect(function()
-        guiVisible = not guiVisible
-        gui.MainFrame.Visible = guiVisible
-        gui.AnimationsFrame.Visible = guiVisible and AnimationsVisible
-        
-        TweenService:Create(gui.ToggleButton, TweenInfo.new(0.3), {
-            Rotation = guiVisible and 0 or 180
-        }):Play()
-    end)
-    
-    -- Enhanced mobile dragging
-    local function handleDragging(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local position = input.Position
-            local guiObjects = gui.ScreenGui:GetGuiObjectsAtPosition(position.X, position.Y)
-            
-            for _, obj in pairs(guiObjects) do
-                if obj == gui.DragArea then
-                    Dragging = true
-                    DragStart = position
-                    StartPos = gui.MainFrame.Position
-                    LastTouch = input
-                    break
-                end
-            end
-        end
-    end
-    
-    UserInputService.InputBegan:Connect(handleDragging)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if Dragging and (input == LastTouch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-            local delta =input.Position - DragStart
-            gui.MainFrame.Position = UDim2.new(
-                StartPos.X.Scale,
-                StartPos.X.Offset + delta.X,
-                StartPos.Y.Scale,
-                StartPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-    
-    UserInputService.InputEnded:Connect(function(input)
-        if input == LastTouch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            Dragging = false
-            LastTouch = nil
-        end
-    end)
-    
-    -- Character respawn handling
-    Player.CharacterAdded:Connect(function(char)
-        if SavedSpeed then
-            task.wait(0.5)
-            char.Humanoid.WalkSpeed = SavedSpeed
-        end
-    end)
-    
-    NotificationSystem:Notify("Script loaded successfully!", 3)
 end
 
-init()
+Loading:Destroy()

@@ -17,6 +17,7 @@ local StartPos = nil
 local LastTouch = nil
 local SavedSpeed = 16
 local AnimationsVisible = false
+local ActiveNotifications = {}
 
 -- Animation IDs
 local Animations = {
@@ -66,9 +67,8 @@ local Animations = {
     }
 }
 
--- Enhanced Notification System
+-- Notification System
 local NotificationSystem = {}
-local ActiveNotifications = {}
 
 function NotificationSystem.new()
     local notification = Instance.new("ScreenGui")
@@ -86,6 +86,11 @@ function NotificationSystem.new()
     container.Position = UDim2.new(0.5, -100, 1, 20)
     container.Size = UDim2.new(0, 200, 0, 50)
     container.AnchorPoint = Vector2.new(0.5, 1)
+    
+    -- Add rounded corners
+    local cornerRadius = Instance.new("UICorner")
+    cornerRadius.CornerRadius = UDim.new(0, 8)
+    cornerRadius.Parent = container
     
     decoration.Name = "Decoration"
     decoration.Parent = container
@@ -163,26 +168,35 @@ local function createLoadingScreen()
     local loadingBar = Instance.new("Frame")
     local loadingFill = Instance.new("Frame")
     local status = Instance.new("TextLabel")
-    local decoration = Instance.new("Frame")
+    local decoration1 = Instance.new("Frame")
     local decoration2 = Instance.new("Frame")
     local decoration3 = Instance.new("Frame")
     local decoration4 = Instance.new("Frame")
+    
     loading.Name = "LoadingScreen"
     loading.Parent = CoreGui
-
+    
     background.Name = "Background"
     background.Parent = loading
     background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     background.BorderSizePixel = 0
-    background.Size = UDim2.new(1, 0, 1, 0) -- Cambia el tamaño a 1, 0, 1, 0
-
+    background.Size = UDim2.new(1, 0, 1, 0)
+    
+    -- Add rounded corners to decorative elements
+    local function addRoundCorners(element)
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 4)
+        corner.Parent = element
+    end
+    
     -- Decorative elements
-    decoration.Name = "Decoration1"
-    decoration.Parent = background
-    decoration.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    decoration.BorderSizePixel = 0
-    decoration.Size = UDim2.new(0, 3, 0, 100)
-    decoration.Position = UDim2.new(0.2, 0, 0.3, 0)
+    decoration1.Name = "Decoration1"
+    decoration1.Parent = background
+    decoration1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    decoration1.BorderSizePixel = 0
+    decoration1.Size = UDim2.new(0, 3, 0, 100)
+    decoration1.Position = UDim2.new(0.2, 0, 0.3, 0)
+    addRoundCorners(decoration1)
     
     decoration2.Name = "Decoration2"
     decoration2.Parent = background
@@ -190,6 +204,7 @@ local function createLoadingScreen()
     decoration2.BorderSizePixel = 0
     decoration2.Size = UDim2.new(0, 3, 0, 100)
     decoration2.Position = UDim2.new(0.8, 0, 0.3, 0)
+    addRoundCorners(decoration2)
     
     decoration3.Name = "Decoration3"
     decoration3.Parent = background
@@ -197,6 +212,7 @@ local function createLoadingScreen()
     decoration3.BorderSizePixel = 0
     decoration3.Size = UDim2.new(0, 100, 0, 3)
     decoration3.Position = UDim2.new(0.5, -50, 0.2, 0)
+    addRoundCorners(decoration3)
     
     decoration4.Name = "Decoration4"
     decoration4.Parent = background
@@ -204,6 +220,7 @@ local function createLoadingScreen()
     decoration4.BorderSizePixel = 0
     decoration4.Size = UDim2.new(0, 100, 0, 3)
     decoration4.Position = UDim2.new(0.5, -50, 0.8, 0)
+    addRoundCorners(decoration4)
     
     title.Name = "Title"
     title.Parent = background
@@ -221,12 +238,14 @@ local function createLoadingScreen()
     loadingBar.BorderSizePixel = 0
     loadingBar.Position = UDim2.new(0.5, -150, 0.5, -10)
     loadingBar.Size = UDim2.new(0, 300, 0, 20)
+    addRoundCorners(loadingBar)
     
     loadingFill.Name = "LoadingFill"
     loadingFill.Parent = loadingBar
     loadingFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     loadingFill.BorderSizePixel = 0
     loadingFill.Size = UDim2.new(0, 0, 1, 0)
+    addRoundCorners(loadingFill)
     
     status.Name = "Status"
     status.Parent = background
@@ -245,6 +264,7 @@ end
 local function createMainGui()
     local screenGui = Instance.new("ScreenGui")
     local mainFrame = Instance.new("Frame")
+    local dragArea = Instance.new("Frame")
     local title = Instance.new("TextLabel")
     local container = Instance.new("Frame")
     local speedInput = Instance.new("TextBox")
@@ -256,77 +276,80 @@ local function createMainGui()
     local decoration2 = Instance.new("Frame")
     local decoration3 = Instance.new("Frame")
     local decoration4 = Instance.new("Frame")
+    
+    -- Add rounded corners function
+    local function addRoundCorners(element, radius)
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, radius or 8)
+        corner.Parent = element
+    end
+    
     screenGui.Name = "AnimationsGui"
     screenGui.Parent = CoreGui
-
-    -- External Toggle Button
-    toggleButton.Name = "ToggleButton"
-    toggleButton.Parent = screenGui
-    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    toggleButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    toggleButton.Position = UDim2.new(0, 15, 0.5, -25)
-    toggleButton.Size = UDim2.new(0, 50, 0, 50)
-    toggleButton.Font = Enum.Font.GothamBold
-    toggleButton.Text = "≡"
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.TextSize = 30
-
+    
     mainFrame.Name = "MainFrame"
     mainFrame.Parent = screenGui
     mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     mainFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
     mainFrame.Position = UDim2.new(0, 15, 0, 15)
     mainFrame.Size = UDim2.new(0, 250, 0, 300)
-    mainFrame.ClipsDescendants = true
-    mainFrame.CornerRadius = UDim.new(0, 10)
-
+    addRoundCorners(mainFrame, 10)
+    
+    -- Drag Area
+    dragArea.Name = "DragArea"
+    dragArea.Parent = mainFrame
+    dragArea.BackgroundTransparency = 1
+    dragArea.Size = UDim2.new(1, 0, 0, 40)
+    
     -- Decorative elements
     decoration1.Name = "Decoration1"
     decoration1.Parent = mainFrame
     decoration1.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     decoration1.BorderSizePixel = 0
-    decoration1.Size = UDim2.new(0, 3, 1, 0)
-    decoration1.Position = UDim2.new(0, 0, 0, 0)
-
+    decoration1.Size = UDim2.new(0, 3, 0, 50)
+    decoration1.Position = UDim2.new(0.15, 0, 0, 0)
+    addRoundCorners(decoration1)
+    
     decoration2.Name = "Decoration2"
     decoration2.Parent = mainFrame
     decoration2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     decoration2.BorderSizePixel = 0
-    decoration2.Size = UDim2.new(0, 3, 1, 0)
-    decoration2.Position = UDim2.new(1, -3, 0, 0)
-
+    decoration2.Size = UDim2.new(0, 3, 0, 50)
+    decoration2.Position = UDim2.new(0.85, 0, 0, 0)
+    addRoundCorners(decoration2)
+    
     decoration3.Name = "Decoration3"
     decoration3.Parent = mainFrame
     decoration3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     decoration3.BorderSizePixel = 0
-    decoration3.Size = UDim2.new(1, 0, 0, 3)
-    decoration3.Position = UDim2.new(0, 0, 0, 0)
-
+    decoration3.Size = UDim2.new(0.3, 0, 0, 3)
+    decoration3.Position = UDim2.new(0.35, 0, 0.2, 0)
+    addRoundCorners(decoration3)
+    
     decoration4.Name = "Decoration4"
     decoration4.Parent = mainFrame
     decoration4.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     decoration4.BorderSizePixel = 0
-    decoration4.Size = UDim2.new(1, 0, 0, 3)
-    decoration4.Position = UDim2.new(0, 0, 1, -3)
-
+    decoration4.Size = UDim2.new(0.3, 0, 0, 3)
+    decoration4.Position = UDim2.new(0.35, 0, 0.8, 0)
+    addRoundCorners(decoration4)
+    
     title.Name = "Title"
     title.Parent = mainFrame
-    title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    title.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    title.Size = UDim2.new(1, 0, 0, 50)
+    title.BackgroundTransparency = 1
+    title.Size = UDim2.new(1, 0, 0, 40)
     title.Font = Enum.Font.GothamBold
     title.RichText = true
     title.Text = '<font color="rgb(255,255,255)">Adonis</font> <font color="rgb(255,0,0)">Except</font>'
-    title.TextSize = 24
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-
+    title.TextSize = 20
+    
     container.Name = "Container"
     container.Parent = mainFrame
     container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    container.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    container.Position = UDim2.new(0, 0, 0, 50)
-    container.Size = UDim2.new(1, 0, 1, -50)
-
+    container.BorderSizePixel = 0
+    container.Position = UDim2.new(0, 0, 0, 40)
+    container.Size = UDim2.new(1, 0, 1, -40)
+    
     speedInput.Name = "SpeedInput"
     speedInput.Parent = container
     speedInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -337,8 +360,9 @@ local function createMainGui()
     speedInput.PlaceholderText = "Speed (16 default)"
     speedInput.Text = ""
     speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    speedInput.TextSize = 16
-
+    speedInput.TextSize = 14
+    addRoundCorners(speedInput)
+    
     teleportInput.Name = "TeleportInput"
     teleportInput.Parent = container
     teleportInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -349,8 +373,9 @@ local function createMainGui()
     teleportInput.PlaceholderText = "Player name to teleport"
     teleportInput.Text = ""
     teleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    teleportInput.TextSize = 16
-
+    teleportInput.TextSize = 14
+    addRoundCorners(teleportInput)
+    
     animationsButton.Name = "AnimationsButton"
     animationsButton.Parent = container
     animationsButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -360,30 +385,45 @@ local function createMainGui()
     animationsButton.Font = Enum.Font.GothamSemibold
     animationsButton.Text = "Animations"
     animationsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    animationsButton.TextSize = 16
-
+    animationsButton.TextSize = 14
+    addRoundCorners(animationsButton)
+    
     animationsFrame.Name = "AnimationsFrame"
     animationsFrame.Parent = screenGui
     animationsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     animationsFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
     animationsFrame.Position = UDim2.new(0, 280, 0, 15)
-    animationsFrame.Size = UDim2.new(0, 250, 0, 300)
+    animationsFrame.Size = UDim2.new(0, 220, 0, 300)
     animationsFrame.Visible = false
-
+    addRoundCorners(animationsFrame, 10)
+    
     -- Add decorations to animations frame
     local animDec1 = decoration1:Clone()
     local animDec2 = decoration2:Clone()
     local animDec3 = decoration3:Clone()
     local animDec4 = decoration4:Clone()
+    
     animDec1.Parent = animationsFrame
     animDec2.Parent = animationsFrame
     animDec3.Parent = animationsFrame
     animDec4.Parent = animationsFrame
-
+    
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Parent = screenGui
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    toggleButton.BorderColor3 = Color3.fromRGB(60, 60, 60)
+    toggleButton.Position = UDim2.new(0, 15, 0.5, -20)
+    toggleButton.Size = UDim2.new(0, 40, 0, 40)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.Text = "≡"
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.TextSize = 24
+    addRoundCorners(toggleButton)
+    
     return {
         ScreenGui = screenGui,
         MainFrame = mainFrame,
-        Title = title,
+        DragArea = dragArea,
         SpeedInput = speedInput,
         TeleportInput = teleportInput,
         AnimationsButton = animationsButton,
@@ -454,7 +494,7 @@ end
 -- Initialize
 local function init()
     local loading = createLoadingScreen()
-    loading.Background.Size = UDim2.new(1, 0, 1, 0)
+    local loadingFill = loading.Background.LoadingBar.LoadingFill
     local status = loading.Background.Status
     local decorations = {
         loading.Background.Decoration1,
@@ -482,12 +522,10 @@ local function init()
         while loading.Parent do
             for _, dec in ipairs(decorations) do
                 if dec.Name:find("1") or dec.Name:find("2") then
-                    -- Vertical decorations
                     TweenService:Create(dec, TweenInfo.new(1), {
                         Position = dec.Position + UDim2.new(0, 0, 0, 10)
                     }):Play()
                 else
-                    -- Horizontal decorations
                     TweenService:Create(dec, TweenInfo.new(1), {
                         Position = dec.Position + UDim2.new(0.1, 0, 0, 0)
                     }):Play()
@@ -533,11 +571,16 @@ local function init()
         button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         button.BorderColor3 = Color3.fromRGB(60, 60, 60)
         button.Position = UDim2.new(0.1, 0, buttonPosition, 0)
-        button.Size = UDim2.new(0.8, 0, 0, 50)
+        button.Size = UDim2.new(0.8, 0, 0, 40)
         button.Font = Enum.Font.GothamSemibold
         button.Text = name
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextSize = 16
+        button.TextSize = 14
+        
+        -- Add rounded corners
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
         
         -- Button hover effect
         button.MouseEnter:Connect(function()
@@ -593,8 +636,8 @@ local function init()
         gui.AnimationsFrame.Visible = AnimationsVisible
         TweenService:Create(gui.AnimationsFrame, TweenInfo.new(0.3), {
             Position = AnimationsVisible and 
-                UDim2.new(0, 330, 0, 15) or 
-                UDim2.new(0, 600, 0, 15)
+                UDim2.new(0, 280, 0, 15) or 
+                UDim2.new(0, 500, 0, 15)
         }):Play()
     end)
     
@@ -612,12 +655,12 @@ local function init()
     
     -- Enhanced mobile dragging
     local function handleDragging(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             local position = input.Position
             local guiObjects = gui.ScreenGui:GetGuiObjectsAtPosition(position.X, position.Y)
             
             for _, obj in pairs(guiObjects) do
-                if obj == gui.Title then
+                if obj == gui.DragArea then
                     Dragging = true
                     DragStart = position
                     StartPos = gui.MainFrame.Position
@@ -628,11 +671,11 @@ local function init()
         end
     end
     
-    UserInputService.TouchStarted:Connect(handleDragging)
+    UserInputService.InputBegan:Connect(handleDragging)
     
-    UserInputService.TouchMoved:Connect(function(input)
-        if Dragging and input == LastTouch then
-            local delta = input.Position - DragStart
+    UserInputService.InputChanged:Connect(function(input)
+        if Dragging and (input == LastTouch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta =input.Position - DragStart
             gui.MainFrame.Position = UDim2.new(
                 StartPos.X.Scale,
                 StartPos.X.Offset + delta.X,
@@ -642,8 +685,8 @@ local function init()
         end
     end)
     
-    UserInputService.TouchEnded:Connect(function(input)
-        if input == LastTouch then
+    UserInputService.InputEnded:Connect(function(input)
+        if input == LastTouch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             Dragging = false
             LastTouch = nil
         end

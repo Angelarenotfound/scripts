@@ -18,292 +18,6 @@ local LastTouch = nil
 local SavedSpeed = 16
 local CurrentSection = "Home"
 
--- Loading Screen
-local Loading = Instance.new("ScreenGui")
-Loading.Name = "LoadingScreen"
-Loading.Parent = CoreGui
-Loading.DisplayOrder = 999
-Loading.IgnoreGuiInset = true -- Makes it truly fullscreen
-
-local Background = Instance.new("Frame")
-Background.Name = "Background"
-Background.Parent = Loading
-Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Background.BorderSizePixel = 0
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.Position = UDim2.new(0, 0, 0, 0)
-
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Parent = Background
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, -200, 0.4, -30)
-Title.Size = UDim2.new(0, 400, 0, 60)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "Adonis Except"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 48
-
-local LoadingBar = Instance.new("Frame")
-LoadingBar.Name = "LoadingBar"
-LoadingBar.Parent = Background
-LoadingBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-LoadingBar.BorderSizePixel = 0
-LoadingBar.Position = UDim2.new(0.5, -200, 0.5, -10)
-LoadingBar.Size = UDim2.new(0, 400, 0, 20)
-
-local LoadingFill = Instance.new("Frame")
-LoadingFill.Name = "LoadingFill"
-LoadingFill.Parent = LoadingBar
-LoadingFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-LoadingFill.BorderSizePixel = 0
-LoadingFill.Size = UDim2.new(0, 0, 1, 0)
-
-local Status = Instance.new("TextLabel")
-Status.Name = "Status"
-Status.Parent = Background
-Status.BackgroundTransparency = 1
-Status.Position = UDim2.new(0.5, -200, 0.5, 20)
-Status.Size = UDim2.new(0, 400, 0, 30)
-Status.Font = Enum.Font.GothamSemibold
-Status.Text = "Initializing..."
-Status.TextColor3 = Color3.fromRGB(255, 255, 255)
-Status.TextSize = 18
-
--- Main GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdonisExceptGUI"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-MainFrame.Size = UDim2.new(0, 600, 0, 400)
-
--- Add rounded corners
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
-
--- Top bar
-local TopBar = Instance.new("Frame")
-TopBar.Name = "TopBar"
-TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-TopBar.BorderSizePixel = 0
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-
-local TopBarCorner = UICorner:Clone()
-TopBarCorner.Parent = TopBar
-
--- Title in top bar
-local TitleBar = Instance.new("TextLabel")
-TitleBar.Name = "Title"
-TitleBar.Parent = TopBar
-TitleBar.BackgroundTransparency = 1
-TitleBar.Position = UDim2.new(0, 15, 0, 0)
-TitleBar.Size = UDim2.new(1, -30, 1, 0)
-TitleBar.Font = Enum.Font.GothamBold
-TitleBar.Text = "Adonis Except"
-TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleBar.TextSize = 20
-TitleBar.TextXAlignment = Enum.TextXAlignment.Left
-
--- Sections container
-local SectionsFrame = Instance.new("Frame")
-SectionsFrame.Name = "Sections"
-SectionsFrame.Parent = MainFrame
-SectionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SectionsFrame.BorderSizePixel = 0
-SectionsFrame.Position = UDim2.new(0, 0, 0, 40)
-SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
-
-local SectionsCorner = UICorner:Clone()
-SectionsCorner.Parent = SectionsFrame
-
--- Separator
-local Separator = Instance.new("Frame")
-Separator.Name = "Separator"
-Separator.Parent = MainFrame
-Separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Separator.BorderSizePixel = 0
-Separator.Position = UDim2.new(0, 150, 0, 40)
-Separator.Size = UDim2.new(0, 2, 1, -40)
-
--- Content frame
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "Content"
-ContentFrame.Parent = MainFrame
-ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ContentFrame.BorderSizePixel = 0
-ContentFrame.Position = UDim2.new(0, 152, 0, 40)
-ContentFrame.Size = UDim2.new(1, -152, 1, -40)
-
--- Create section buttons
-local function createSectionButton(name, position)
-    local button = Instance.new("TextButton")
-    button.Name = name
-    button.Parent = SectionsFrame
-    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    button.BorderSizePixel = 0
-    button.Position = UDim2.new(0, 10, 0, position)
-    button.Size = UDim2.new(1, -20, 0, 40)
-    button.Font = Enum.Font.GothamSemibold
-    button.Text = name
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = 14
-    
-    local buttonCorner = UICorner:Clone()
-    buttonCorner.Parent = button
-    
-    button.MouseButton1Click:Connect(function()
-        CurrentSection = name
-        -- Update content based on section
-        updateContent(name)
-    end)
-    
-    return button
-end
-
--- Create sections
-local sections = {
-    {name = "Home", pos = 10},
-    {name = "Animations", pos = 60},
-    {name = "Local", pos = 110},
-    {name = "Credits", pos = 160}
-}
-
-for _, section in ipairs(sections) do
-    createSectionButton(section.name, section.pos)
-end
-
--- Content frames
-local HomeFrame = Instance.new("Frame")
-HomeFrame.Name = "HomeFrame"
-HomeFrame.Parent = ContentFrame
-HomeFrame.BackgroundTransparency = 1
-HomeFrame.Size = UDim2.new(1, 0, 1, 0)
-
-local AnimationsFrame = Instance.new("ScrollingFrame")
-AnimationsFrame.Name = "AnimationsFrame"
-AnimationsFrame.Parent = ContentFrame
-AnimationsFrame.BackgroundTransparency = 1
-AnimationsFrame.Size = UDim2.new(1, 0, 1, 0)
-AnimationsFrame.CanvasSize = UDim2.new(0, 0, 0, (#orderedAnimations * 50) + 40)
-AnimationsFrame.ScrollBarThickness = 6
-AnimationsFrame.Visible = false
-
-local LocalFrame = Instance.new("Frame")
-LocalFrame.Name = "LocalFrame"
-LocalFrame.Parent = ContentFrame
-LocalFrame.BackgroundTransparency = 1
-LocalFrame.Size = UDim2.new(1, 0, 1, 0)
-LocalFrame.Visible = false
-
-local CreditsFrame = Instance.new("Frame")
-CreditsFrame.Name = "CreditsFrame"
-CreditsFrame.Parent = ContentFrame
-CreditsFrame.BackgroundTransparency = 1
-CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
-CreditsFrame.Visible = false
-
--- Setup Home content
-local UserImage = Instance.new("ImageLabel")
-UserImage.Name = "UserImage"
-UserImage.Parent = HomeFrame
-UserImage.BackgroundTransparency = 1
-UserImage.Position = UDim2.new(0, 20, 0, 20)
-UserImage.Size = UDim2.new(0, 100, 0, 100)
-UserImage.Image = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-
-local UserImageCorner = UICorner:Clone()
-UserImageCorner.CornerRadius = UDim.new(1, 0)
-UserImageCorner.Parent = UserImage
-
-local UserName = Instance.new("TextLabel")
-UserName.Name = "UserName"
-UserName.Parent = HomeFrame
-UserName.BackgroundTransparency = 1
-UserName.Position = UDim2.new(0, 140, 0, 20)
-UserName.Size = UDim2.new(0, 200, 0, 30)
-UserName.Font = Enum.Font.GothamBold
-UserName.Text = Player.Name
-UserName.TextColor3 = Color3.fromRGB(255, 255, 255)
-UserName.TextSize = 24
-UserName.TextXAlignment = Enum.TextXAlignment.Left
-
-local UserDisplayName = Instance.new("TextLabel")
-UserDisplayName.Name = "UserDisplayName"
-UserDisplayName.Parent = HomeFrame
-UserDisplayName.BackgroundTransparency = 1
-UserDisplayName.Position = UDim2.new(0, 140, 0, 50)
-UserDisplayName.Size = UDim2.new(0, 200, 0, 20)
-UserDisplayName.Font = Enum.Font.GothamSemibold
-UserDisplayName.Text = "@" .. Player.DisplayName
-UserDisplayName.TextColor3 = Color3.fromRGB(200, 200, 200)
-UserDisplayName.TextSize = 16
-UserDisplayName.TextXAlignment = Enum.TextXAlignment.Left
-
--- Setup Credits content
-local CreditsTitle = Instance.new("TextLabel")
-CreditsTitle.Name = "CreditsTitle"
-CreditsTitle.Parent = CreditsFrame
-CreditsTitle.BackgroundTransparency = 1
-CreditsTitle.Position = UDim2.new(0, 20, 0, 20)
-CreditsTitle.Size = UDim2.new(1, -40, 0, 40)
-CreditsTitle.Font = Enum.Font.GothamBold
-CreditsTitle.Text = "Credits"
-CreditsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-CreditsTitle.TextSize = 24
-CreditsTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local CreditsText = Instance.new("TextLabel")
-CreditsText.Name = "CreditsText"
-CreditsText.Parent = CreditsFrame
-CreditsText.BackgroundTransparency = 1
-CreditsText.Position = UDim2.new(0, 20, 0, 70)
-CreditsText.Size = UDim2.new(1, -40, 0, 60)
-CreditsText.Font = Enum.Font.GothamSemibold
-CreditsText.Text = "Created by:\nAngelarenotfound\n100% Adonis Except"
-CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
-CreditsText.TextSize = 16
-CreditsText.TextXAlignment = Enum.TextXAlignment.Left
-
--- Setup Local content
-local SpeedInput = Instance.new("TextBox")
-SpeedInput.Name = "SpeedInput"
-SpeedInput.Parent = LocalFrame
-SpeedInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-SpeedInput.Position = UDim2.new(0, 20, 0, 20)
-SpeedInput.Size = UDim2.new(0, 200, 0, 40)
-SpeedInput.Font = Enum.Font.GothamSemibold
-SpeedInput.PlaceholderText = "Speed (Default: 16)"
-SpeedInput.Text = ""
-SpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedInput.TextSize = 14
-
-local SpeedInputCorner = UICorner:Clone()
-SpeedInputCorner.Parent = SpeedInput
-
-local TeleportInput = Instance.new("TextBox")
-TeleportInput.Name = "TeleportInput"
-TeleportInput.Parent = LocalFrame
-TeleportInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-TeleportInput.Position = UDim2.new(0, 20, 0, 80)
-TeleportInput.Size = UDim2.new(0, 200, 0, 40)
-TeleportInput.Font = Enum.Font.GothamSemibold
-TeleportInput.PlaceholderText = "Player name to teleport"
-TeleportInput.Text = ""
-TeleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-TeleportInput.TextSize = 14
-
-local TeleportInputCorner = UICorner:Clone()
-TeleportInputCorner.Parent = TeleportInput
-
 -- Animations table
 local Animations = {
     astronaut = {
@@ -572,6 +286,441 @@ local Animations = {
     }
 }
 
+-- Notification System
+local NotificationSystem = {}
+local ActiveNotifications = {}
+
+function NotificationSystem.new()
+    local notification = Instance.new("ScreenGui")
+    local container = Instance.new("Frame")
+    local message = Instance.new("TextLabel")
+    
+    notification.Name = "Notification"
+    notification.Parent = CoreGui
+    
+    container.Name = "Container"
+    container.Parent = notification
+    container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    container.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    container.Position = UDim2.new(0.5, -100, 1, 20)
+    container.Size = UDim2.new(0, 200, 0, 50)
+    container.AnchorPoint = Vector2.new(0.5, 1)
+    
+    local cornerRadius = Instance.new("UICorner")
+    cornerRadius.CornerRadius = UDim.new(0, 8)
+    cornerRadius.Parent = container
+    
+    message.Name = "Message"
+    message.Parent = container
+    message.BackgroundTransparency = 1
+    message.Size = UDim2.new(1, 0, 1, 0)
+    message.Font = Enum.Font.GothamSemibold
+    message.TextColor3 = Color3.fromRGB(255, 255, 255)
+    message.TextSize = 14
+    
+    return notification
+end
+
+function NotificationSystem:Notify(text, duration)
+    duration = duration or 3
+    local notification = self.new()
+    local container = notification.Container
+    local message = container.Message
+    
+    message.Text = text
+    
+    local offset = #ActiveNotifications * 60
+    container.Position = UDim2.new(0.5, -100, 1, 20 + offset)
+    
+    table.insert(ActiveNotifications, notification)
+    
+    local slideIn = TweenService:Create(container, 
+        TweenInfo.new(0.5, Enum.EasingStyle.Quart),
+        {Position = UDim2.new(0.5, -100, 1, -60 - offset)}
+    )
+    
+    local slideOut = TweenService:Create(container,
+        TweenInfo.new(0.5, Enum.EasingStyle.Quart),
+        {Position = UDim2.new(0.5, -100, 1, 20)}
+    )
+    
+    slideIn:Play()
+    task.wait(duration)
+    slideOut:Play()
+    
+    for i, notif in ipairs(ActiveNotifications) do
+        if notif == notification then
+            table.remove(ActiveNotifications, i)
+            break
+        end
+    end
+    
+    for i, notif in ipairs(ActiveNotifications) do
+        TweenService:Create(notif.Container,
+            TweenInfo.new(0.5, Enum.EasingStyle.Quart),
+            {Position = UDim2.new(0.5, -100, 1, -60 - ((i-1) * 60))}
+        ):Play()
+    end
+    
+    slideOut.Completed:Wait()
+    notification:Destroy()
+end
+
+-- Animation Function
+local function setAnimations(anims)
+    local char = Player.Character
+    if not char then return end
+    
+    local animate = char:WaitForChild("Animate")
+    animate.Enabled = false
+    
+    for _, track in pairs(char:WaitForChild("Humanoid"):WaitForChild("Animator"):GetPlayingAnimationTracks()) do
+        track:Stop()
+    end
+    
+    local function setAnim(name, id)
+        local anim = animate:WaitForChild(name)
+        if name == "idle" then
+            anim:WaitForChild("Animation1").AnimationId = anims.Idle1
+            anim:WaitForChild("Animation2").AnimationId = anims.Idle2
+        else
+            local animObj = anim:GetChildren()[1]
+            if animObj then
+                animObj.AnimationId = id
+            end
+        end
+    end
+    
+    setAnim("idle", anims.Idle1)
+    setAnim("walk", anims.Walk)
+    setAnim("run", anims.Run)
+    setAnim("jump", anims.Jump)
+    setAnim("fall", anims.Fall)
+    setAnim("climb", anims.Climb)
+    setAnim("swim", anims.Swim)
+    setAnim("swimidle", anims.SwimIdle)
+    
+    animate.Enabled = true
+    NotificationSystem:Notify("Animation applied successfully!", 2)
+end
+
+-- Player Finding Function
+local function findPlayer(name)
+    name = name:lower()
+    local closest = nil
+    local closestLen = math.huge
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= Player then
+            local playerName = player.Name:lower()
+            if playerName:find(name) then
+                local len = #playerName - #name
+                if len < closestLen then
+                    closest = player
+                    closestLen = len
+                end
+            end
+        end
+    end
+    
+    return closest
+end
+
+-- Create ordered animations list
+local orderedAnimations = {
+    "Ninja", "Zombie", "Elder", "Levitation",
+    "Astronaut", "Bold", "Bubbly", "Cartoony",
+    "Knight", "Mage", "Oldschool", "Pirate",
+    "Rthro", "Stylish", "Superhero", "Toy",
+    "Vampire", "Werewolf", "Adidas", "Faker6",
+    "GirlCombo1", "GirlCombo2", "TryhardCombo1", "TryhardCombo2"
+}
+
+-- Loading Screen
+local Loading = Instance.new("ScreenGui")
+Loading.Name = "LoadingScreen"
+Loading.Parent = CoreGui
+Loading.DisplayOrder = 999
+Loading.IgnoreGuiInset = true
+
+local Background = Instance.new("Frame")
+Background.Name = "Background"
+Background.Parent = Loading
+Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Background.BorderSizePixel = 0
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = Background
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.5, -200, 0.4, -30)
+Title.Size = UDim2.new(0, 400, 0, 60)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Adonis Except"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 48
+
+local LoadingBar = Instance.new("Frame")
+LoadingBar.Name = "LoadingBar"
+LoadingBar.Parent = Background
+LoadingBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LoadingBar.BorderSizePixel = 0
+LoadingBar.Position = UDim2.new(0.5, -200, 0.5, -10)
+LoadingBar.Size = UDim2.new(0, 400, 0, 20)
+
+local LoadingFill = Instance.new("Frame")
+LoadingFill.Name = "LoadingFill"
+LoadingFill.Parent = LoadingBar
+LoadingFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+LoadingFill.BorderSizePixel = 0
+LoadingFill.Size = UDim2.new(0, 0, 1, 0)
+
+local Status = Instance.new("TextLabel")
+Status.Name = "Status"
+Status.Parent = Background
+Status.BackgroundTransparency = 1
+Status.Position = UDim2.new(0.5, -200, 0.5, 20)
+Status.Size = UDim2.new(0, 400, 0, 30)
+Status.Font = Enum.Font.GothamSemibold
+Status.Text = "Initializing..."
+Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+Status.TextSize = 18
+
+-- Main GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdonisExceptGUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
+
+-- Add rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- Top bar
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+local TopBarCorner = UICorner:Clone()
+TopBarCorner.Parent = TopBar
+
+-- Title in top bar
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Name = "Title"
+TitleBar.Parent = TopBar
+TitleBar.BackgroundTransparency = 1
+TitleBar.Position = UDim2.new(0, 15, 0, 0)
+TitleBar.Size = UDim2.new(1, -30, 1, 0)
+TitleBar.Font = Enum.Font.GothamBold
+TitleBar.Text = "Adonis Except"
+TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.TextSize = 20
+TitleBar.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Sections container
+local SectionsFrame = Instance.new("Frame")
+SectionsFrame.Name = "Sections"
+SectionsFrame.Parent = MainFrame
+SectionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SectionsFrame.BorderSizePixel = 0
+SectionsFrame.Position = UDim2.new(0, 0, 0, 40)
+SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
+
+local SectionsCorner = UICorner:Clone()
+SectionsCorner.Parent = SectionsFrame
+
+-- Separator
+local Separator = Instance.new("Frame")
+Separator.Name = "Separator"
+Separator.Parent = MainFrame
+Separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Separator.BorderSizePixel = 0
+Separator.Position = UDim2.new(0, 150, 0, 40)
+Separator.Size = UDim2.new(0, 2, 1, -40)
+
+-- Content frame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "Content"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Position = UDim2.new(0, 152, 0, 40)
+ContentFrame.Size = UDim2.new(1, -152, 1, -40)
+
+-- Create section buttons
+local function createSectionButton(name, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = SectionsFrame
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.BorderSizePixel = 0
+    button.Position = UDim2.new(0, 10, 0, position)
+    button.Size = UDim2.new(1, -20, 0, 40)
+    button.Font = Enum.Font.GothamSemibold
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    
+    local buttonCorner = UICorner:Clone()
+    buttonCorner.Parent = button
+    
+    button.MouseButton1Click:Connect(function()
+        CurrentSection = name
+        updateContent(name)
+    end)
+    
+    return button
+end
+
+-- Create sections
+local sections = {
+    {name = "Home", pos = 10},
+    {name = "Animations", pos = 60},
+    {name = "Local", pos = 110},
+    {name = "Credits", pos = 160}
+}
+
+for _, section in ipairs(sections) do
+    createSectionButton(section.name, section.pos)
+end
+
+-- Content frames
+local HomeFrame = Instance.new("Frame")
+HomeFrame.Name = "HomeFrame"
+HomeFrame.Parent = ContentFrame
+HomeFrame.BackgroundTransparency = 1
+HomeFrame.Size = UDim2.new(1, 0, 1, 0)
+
+local AnimationsFrame = Instance.new("ScrollingFrame")
+AnimationsFrame.Name = "AnimationsFrame"
+AnimationsFrame.Parent = ContentFrame
+AnimationsFrame.BackgroundTransparency = 1
+AnimationsFrame.Size = UDim2.new(1, 0, 1, 0)
+AnimationsFrame.CanvasSize = UDim2.new(0, 0, 0, (#orderedAnimations * 50) + 40)
+AnimationsFrame.ScrollBarThickness = 6
+AnimationsFrame.Visible = false
+
+local LocalFrame = Instance.new("Frame")
+LocalFrame.Name = "LocalFrame"
+LocalFrame.Parent = ContentFrame
+LocalFrame.BackgroundTransparency = 1
+LocalFrame.Size = UDim2.new(1, 0, 1, 0)
+LocalFrame.Visible = false
+
+local CreditsFrame = Instance.new("Frame")
+CreditsFrame.Name = "CreditsFrame"
+CreditsFrame.Parent = ContentFrame
+CreditsFrame.BackgroundTransparency = 1
+CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
+CreditsFrame.Visible = false
+
+-- Setup Home content
+local UserImage = Instance.new("ImageLabel")
+UserImage.Name = "UserImage"
+UserImage.Parent = HomeFrame
+UserImage.BackgroundTransparency = 1
+UserImage.Position = UDim2.new(0, 20, 0, 20)
+UserImage.Size = UDim2.new(0, 100, 0, 100)
+UserImage.Image = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+
+local UserImageCorner = UICorner:Clone()
+UserImageCorner.CornerRadius = UDim.new(1, 0)
+UserImageCorner.Parent = UserImage
+
+local UserName = Instance.new("TextLabel")
+UserName.Name = "UserName"
+UserName.Parent = HomeFrame
+UserName.BackgroundTransparency = 1
+UserName.Position = UDim2.new(0, 140, 0, 20)
+UserName.Size = UDim2.new(0, 200, 0, 30)
+UserName.Font = Enum.Font.GothamBold
+UserName.Text = Player.Name
+UserName.TextColor3 = Color3.fromRGB(255, 255, 255)
+UserName.TextSize = 24
+UserName.TextXAlignment = Enum.TextXAlignment.Left
+
+local UserDisplayName = Instance.new("TextLabel")
+UserDisplayName.Name = "UserDisplayName"
+UserDisplayName.Parent = HomeFrame
+UserDisplayName.BackgroundTransparency = 1
+UserDisplayName.Position = UDim2.new(0, 140, 0, 50)
+UserDisplayName.Size = UDim2.new(0, 200, 0, 20)
+UserDisplayName.Font = Enum.Font.GothamSemibold
+UserDisplayName.Text = "@" .. Player.DisplayName
+UserDisplayName.TextColor3 = Color3.fromRGB(200, 200, 200)
+UserDisplayName.TextSize = 16
+UserDisplayName.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup Credits content
+local CreditsTitle = Instance.new("TextLabel")
+CreditsTitle.Name = "CreditsTitle"
+CreditsTitle.Parent = CreditsFrame
+CreditsTitle.BackgroundTransparency = 1
+CreditsTitle.Position = UDim2.new(0, 20, 0, 20)
+CreditsTitle.Size = UDim2.new(1, -40, 0, 40)
+CreditsTitle.Font = Enum.Font.GothamBold
+CreditsTitle.Text = "Credits"
+CreditsTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+CreditsTitle.TextSize = 24
+CreditsTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local CreditsText = Instance.new("TextLabel")
+CreditsText.Name = "CreditsText"
+CreditsText.Parent = CreditsFrame
+CreditsText.BackgroundTransparency = 1
+CreditsText.Position = UDim2.new(0, 20, 0, 70)
+CreditsText.Size = UDim2.new(1, -40, 0, 60)
+CreditsText.Font = Enum.Font.GothamSemibold
+CreditsText.Text = "Created by:\nAngelarenotfound\n100% Adonis Except"
+CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
+CreditsText.TextSize = 16
+CreditsText.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup Local content
+local SpeedInput = Instance.new("TextBox")
+SpeedInput.Name = "SpeedInput"
+SpeedInput.Parent = LocalFrame
+SpeedInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SpeedInput.Position = UDim2.new(0, 20, 0, 20)
+SpeedInput.Size = UDim2.new(0, 200, 0, 40)
+SpeedInput.Font = Enum.Font.GothamSemibold
+SpeedInput.PlaceholderText = "Speed (Default: 16)"
+SpeedInput.Text = ""
+SpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedInput.TextSize = 14
+
+local SpeedInputCorner = UICorner:Clone()
+SpeedInputCorner.Parent = SpeedInput
+
+local TeleportInput = Instance.new("TextBox")
+TeleportInput.Name = "TeleportInput"
+TeleportInput.Parent = LocalFrame
+TeleportInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TeleportInput.Position = UDim2.new(0, 20, 0, 80)
+TeleportInput.Size = UDim2.new(0, 200, 0, 40)
+TeleportInput.Font = Enum.Font.GothamSemibold
+TeleportInput.PlaceholderText = "Player name to teleport"
+TeleportInput.Text = ""
+TeleportInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportInput.TextSize = 14
+
+local TeleportInputCorner = UICorner:Clone()
+TeleportInputCorner.Parent = TeleportInput
+
 -- Create animation buttons
 local function createAnimationButton(name, position)
     local button = Instance.new("TextButton")
@@ -591,21 +740,13 @@ local function createAnimationButton(name, position)
     
     button.MouseButton1Click:Connect(function()
         setAnimations(Animations[name:lower()])
-        -- Add notification here
+        NotificationSystem:Notify(name .. " animation applied!", 2)
     end)
     
     return button
 end
 
-local orderedAnimations = {
-    "Ninja", "Zombie", "Elder", "Levitation",
-    "Astronaut", "Bold", "Bubbly", "Cartoony",
-    "Knight", "Mage", "Oldschool", "Pirate",
-    "Rthro", "Stylish", "Superhero", "Toy",
-    "Vampire", "Werewolf", "Adidas", "Faker6",
-    "GirlCombo1", "GirlCombo2", "TryhardCombo1", "TryhardCombo2"
-}
-
+-- Create animation buttons in order
 local buttonPosition = 20
 for _, name in ipairs(orderedAnimations) do
     createAnimationButton(name, buttonPosition)
@@ -613,26 +754,35 @@ for _, name in ipairs(orderedAnimations) do
 end
 
 -- Function to update content based on section
-function updateContent(section)
-    HomeFrame.Visible = section == "Home"
-    AnimationsFrame.Visible = section == "Animations"
-    LocalFrame.Visible = section == "Local"
-    CreditsFrame.Visible = section == "Credits"
-end
-
--- Dragging functionality
-local function updateDragging(input)
-    if Dragging then
-        local delta = input.Position - DragStart
-        MainFrame.Position = UDim2.new(
-            StartPos.X.Scale,
-            StartPos.X.Offset + delta.X,
-            StartPos.Y.Scale,
-            StartPos.Y.Offset + delta.Y
-        )
+local function updateContent(section)
+    print("Sección seleccionada:", section)
+    print("HomeFrame:", HomeFrame)
+    print("AnimationsFrame:", AnimationsFrame)
+    print("LocalFrame:", LocalFrame)
+    print("CreditsFrame:", CreditsFrame)
+    if HomeFrame then
+        HomeFrame.Visible = section == "Home"
+    else
+        print("HomeFrame no está definido")
+    end
+    if AnimationsFrame then
+        AnimationsFrame.Visible = section == "Animations"
+    else
+        print("AnimationsFrame no está definido")
+    end
+    if LocalFrame then
+        LocalFrame.Visible = section == "Local"
+    else
+        print("LocalFrame no está definido")
+    end
+    if CreditsFrame then
+        CreditsFrame.Visible = section == "Credits"
+    else
+        print("CreditsFrame no está definido")
     end
 end
 
+-- Dragging functionality
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Dragging = true
@@ -647,30 +797,83 @@ TopBar.InputBegan:Connect(function(input)
 end)
 
 TopBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        updateDragging(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or 
+        input.UserInputType == Enum.UserInputType.Touch) and Dragging then
+        local delta = input.Position - DragStart
+        MainFrame.Position = UDim2.new(
+            StartPos.X.Scale,
+            StartPos.X.Offset + delta.X,
+            StartPos.Y.Scale,
+            StartPos.Y.Offset + delta.Y
+        )
     end
 end)
 
--- Initialize
-updateContent("Home")
+-- Speed and Teleport functionality
+SpeedInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local speed = tonumber(SpeedInput.Text)
+        if speed then
+            SavedSpeed = speed
+            if Player.Character then
+                Player.Character.Humanoid.WalkSpeed = speed
+            end
+            NotificationSystem:Notify("Speed set to " .. speed, 2)
+        end
+    end
+end)
 
--- Loading sequence
-local loadingSteps = {
-    "Initializing...",
-    "Loading animations...",
-    "Setting up interface...",
-    "Configuring settings...",
-    "Almost ready...",
-    "Launching..."
-}
+TeleportInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local targetPlayer = findPlayer(TeleportInput.Text)
+        if targetPlayer then
+            Player.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
+            NotificationSystem:Notify("Teleported to " .. targetPlayer.Name, 2)
+        else
+            NotificationSystem:Notify("Player not found!", 2)
+        end
+    end
+end)
 
-for i, step in ipairs(loadingSteps) do
-    Status.Text = step
-    TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
-        Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
-    }):Play()
-    wait(1)
+-- Character respawn handling
+Player.CharacterAdded:Connect(function(char)
+    if SavedSpeed then
+        task.wait(0.5)
+        char.Humanoid.WalkSpeed = SavedSpeed
+    end
+end)
+
+if updateContent then
+    updateContent("Home")
+else
+    print("La función updateContent no está definida")
 end
 
-Loading:Destroy()
+-- Loading sequence
+local function runLoadingSequence()
+    local loadingSteps = {
+        "Initializing...",
+        "Loading animations...",
+        "Setting up interface...",
+        "Configuring settings...",
+        "Almost ready...",
+        "Launching..."
+    }
+
+    for i, step in ipairs(loadingSteps) do
+        pcall(function()
+            Status.Text = step
+            TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
+                Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
+            }):Play()
+        end)
+        task.wait(1)
+    end
+
+    task.wait(0.5)
+    Loading:Destroy()
+    NotificationSystem:Notify("Script loaded successfully!", 3)
+end
+
+-- Start the loading sequence
+spawn(runLoadingSequence)

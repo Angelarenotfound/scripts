@@ -394,8 +394,8 @@ local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = Background
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, -200, 0.4, -30)
-Title.Size = UDim2.new(0, 400, 0, 60)
+Title.Position = UDim2.new(0.5, -150, 0.4, -30) -- Adjusted X position
+Title.Size = UDim2.new(0, 150, 0, 60) -- Adjusted width
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Adonis"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -405,10 +405,10 @@ local ExceptText = Instance.new("TextLabel")
 ExceptText.Name = "ExceptText"
 ExceptText.Parent = Background
 ExceptText.BackgroundTransparency = 1
-ExceptText.Position = UDim2.new(0.5, -50, 0.4, -30)
-ExceptText.Size = UDim2.new(0, 400, 0, 60)
+ExceptText.Position = UDim2.new(0.5, 0, 0.4, -30)
+ExceptText.Size = UDim2.new(0, 150, 0, 60)
 ExceptText.Font = Enum.Font.GothamBold
-ExceptText.Text = " Except"
+ExceptText.Text = "Except"
 ExceptText.TextColor3 = Color3.fromRGB(255, 0, 0)
 ExceptText.TextSize = 48
 
@@ -701,6 +701,68 @@ TeleportInput.TextSize = 14
 local TeleportInputCorner = UICorner:Clone()
 TeleportInputCorner.Parent = TeleportInput
 
+local function createLocalButton(name, position, callback)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = LocalFrame
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.Position = UDim2.new(0, 20, 0, position)
+    button.Size = UDim2.new(0, 200, 0, 40)
+    button.Font = Enum.Font.GothamSemibold
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    
+    local buttonCorner = UICorner:Clone()
+    buttonCorner.Parent = button
+    
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+-- Rejoin button
+createLocalButton("Rejoin", 140, function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
+end)
+
+-- Server Hop button
+createLocalButton("Server Hop", 190, function()
+    local servers = {}
+    local req = game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100")
+    local data = game:GetService("HttpService"):JSONDecode(req)
+    
+    for _, server in ipairs(data.data) do
+        if server.playing < server.maxPlayers and server.id ~= game.JobId then
+            table.insert(servers, server.id)
+        end
+    end
+    
+    if #servers > 0 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)])
+    else
+        NotificationSystem:Notify("No servers found!", 2)
+    end
+end)
+
+-- Low Server Hop button
+createLocalButton("Low Server Hop", 240, function()
+    local servers = {}
+    local req = game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+    local data = game:GetService("HttpService"):JSONDecode(req)
+    
+    for _, server in ipairs(data.data) do
+        if server.playing < server.maxPlayers/2 and server.id ~= game.JobId then
+            table.insert(servers, server.id)
+        end
+    end
+    
+    if #servers > 0 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)])
+    else
+        NotificationSystem:Notify("No low population servers found!", 2)
+    end
+end)
+
 -- Create animation buttons
 local function createAnimationButton(name, position)
     local button = Instance.new("TextButton")
@@ -841,21 +903,27 @@ local function runLoadingSequence()
     }
 
     for i, step in ipairs(loadingSteps) do
-        Status.Text = step
-        TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
-            Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
-        }):Play()
-        task.wait(1)
+        if Status then -- Add nil check
+            Status.Text = step
+            if LoadingFill then -- Add nil check
+                TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
+                    Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
+                }):Play()
+            end
+        end
+        task.wait(0.5) -- Reduced wait time
     end
 
     task.wait(0.5)
-    Loading:Destroy()
+    if Loading then -- Add nil check
+        Loading:Destroy()
+    end
     NotificationSystem:Notify("Script loaded successfully!", 3)
 end
 
 -- Initialize GUI
 updateContent("Home")
-spawn(runLoadingSequence)
-
--- Make updateContent global for debugging
+pcall(function()
+    spawn(runLoadingSequence)
+end)
 _G.updateContent = updateContent

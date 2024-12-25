@@ -285,7 +285,15 @@ local Animations = {
     }
 }
 
--- Notification System
+local orderedAnimations = {
+    "Ninja", "Zombie", "Elder", "Levitation",
+    "Astronaut", "Bold", "Bubbly", "Cartoony",
+    "Knight", "Mage", "Oldschool", "Pirate",
+    "Rthro", "Stylish", "Superhero", "Toy",
+    "Vampire", "Werewolf", "Adidas", "Faker6",
+    "GirlCombo1", "GirlCombo2", "TryhardCombo1", "TryhardCombo2"
+}
+
 local NotificationSystem = {}
 local ActiveNotifications = {}
 
@@ -365,7 +373,44 @@ function NotificationSystem:Notify(text, duration)
     notification:Destroy()
 end
 
--- Loading Screen (Updated)
+local function setAnimations(anims)
+    local char = Player.Character
+    if not char then return end
+    
+    local animate = char:WaitForChild("Animate")
+    animate.Enabled = false
+    
+    for _, track in pairs(char:WaitForChild("Humanoid"):WaitForChild("Animator"):GetPlayingAnimationTracks()) do
+        track:Stop()
+    end
+    
+    local function setAnim(name, id)
+        local anim = animate:WaitForChild(name)
+        if name == "idle" then
+            anim:WaitForChild("Animation1").AnimationId = anims.Idle1
+            anim:WaitForChild("Animation2").AnimationId = anims.Idle2
+        else
+            local animObj = anim:GetChildren()[1]
+            if animObj then
+                animObj.AnimationId = id
+            end
+        end
+    end
+    
+    setAnim("idle", anims.Idle1)
+    setAnim("walk", anims.Walk)
+    setAnim("run", anims.Run)
+    setAnim("jump", anims.Jump)
+    setAnim("fall", anims.Fall)
+    setAnim("climb", anims.Climb)
+    setAnim("swim", anims.Swim)
+    setAnim("swimidle", anims.SwimIdle)
+    
+    animate.Enabled = true
+    NotificationSystem:Notify("Animation applied successfully!", 2)
+end
+
+-- Loading Screen
 local Loading = Instance.new("ScreenGui")
 Loading.Name = "LoadingScreen"
 Loading.Parent = CoreGui
@@ -380,7 +425,6 @@ Background.BorderSizePixel = 0
 Background.Size = UDim2.new(1, 0, 1, 0)
 Background.Position = UDim2.new(0, 0, 0, 0)
 
--- Decoración superior
 local TopDecoration = Instance.new("Frame")
 TopDecoration.Name = "TopDecoration"
 TopDecoration.Parent = Background
@@ -389,13 +433,12 @@ TopDecoration.BorderSizePixel = 0
 TopDecoration.Position = UDim2.new(0, 0, 0, 0)
 TopDecoration.Size = UDim2.new(1, 0, 0, 2)
 
--- Título actualizado con "Except" en rojo
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = Background
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0.5, -150, 0.4, -30) -- Adjusted X position
-Title.Size = UDim2.new(0, 150, 0, 60) -- Adjusted width
+Title.Position = UDim2.new(0.5, -150, 0.4, -30)
+Title.Size = UDim2.new(0, 150, 0, 60)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Adonis"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -438,7 +481,7 @@ Status.Text = "Initializing..."
 Status.TextColor3 = Color3.fromRGB(255, 255, 255)
 Status.TextSize = 18
 
--- Main GUI (Updated size)
+-- Main GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdonisExceptGUI"
 ScreenGui.Parent = CoreGui
@@ -449,51 +492,17 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -150) -- Adjusted for new size
-MainFrame.Size = UDim2.new(0, 450, 0, 300) -- 3/4 of original size
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 450, 0, 300)
 
--- Add rounded corners
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "Content"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Position = UDim2.new(0, 152, 0, 40)
+ContentFrame.Size = UDim2.new(1, -152, 1, -40)
 
--- Top bar
-local TopBar = Instance.new("Frame")
-TopBar.Name = "TopBar"
-TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-TopBar.BorderSizePixel = 0
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-
-local TopBarCorner = UICorner:Clone()
-TopBarCorner.Parent = TopBar
-
--- Title in top bar
-local TitleBar = Instance.new("TextLabel")
-TitleBar.Name = "Title"
-TitleBar.Parent = TopBar
-TitleBar.BackgroundTransparency = 1
-TitleBar.Position = UDim2.new(0, 15, 0, 0)
-TitleBar.Size = UDim2.new(1, -30, 1, 0)
-TitleBar.Font = Enum.Font.GothamBold
-TitleBar.Text = "Adonis Except"
-TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleBar.TextSize = 20
-TitleBar.TextXAlignment = Enum.TextXAlignment.Left
-
--- Sections container
-local SectionsFrame = Instance.new("Frame")
-SectionsFrame.Name = "Sections"
-SectionsFrame.Parent = MainFrame
-SectionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SectionsFrame.BorderSizePixel = 0
-SectionsFrame.Position = UDim2.new(0, 0, 0, 40)
-SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
-
-local SectionsCorner = UICorner:Clone()
-SectionsCorner.Parent = SectionsFrame
-
--- Content frames
 local HomeFrame = Instance.new("Frame")
 HomeFrame.Name = "HomeFrame"
 HomeFrame.Parent = ContentFrame
@@ -524,25 +533,52 @@ CreditsFrame.BackgroundTransparency = 1
 CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
 CreditsFrame.Visible = false
 
--- Function to update content (Fixed)
-function updateContent(section)
-    HomeFrame.Visible = false
-    AnimationsFrame.Visible = false
-    LocalFrame.Visible = false
-    CreditsFrame.Visible = false
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+local TopBarCorner = UICorner:Clone()
+TopBarCorner.Parent = TopBar
+
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Name = "Title"
+TitleBar.Parent = TopBar
+TitleBar.BackgroundTransparency = 1
+TitleBar.Position = UDim2.new(0, 15, 0, 0)
+TitleBar.Size = UDim2.new(1, -30, 1, 0)
+TitleBar.Font = Enum.Font.GothamBold
+TitleBar.Text = "Adonis Except"
+TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.TextSize = 20
+TitleBar.TextXAlignment = Enum.TextXAlignment.Left
+
+local SectionsFrame = Instance.new("Frame")
+SectionsFrame.Name = "Sections"
+SectionsFrame.Parent = MainFrame
+SectionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SectionsFrame.BorderSizePixel = 0
+SectionsFrame.Position = UDim2.new(0, 0, 0, 40)
+SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
+
+local SectionsCorner = UICorner:Clone()
+SectionsCorner.Parent = SectionsFrame
+
+local function updateContent(section)
+    if not HomeFrame or not AnimationsFrame or not LocalFrame or not CreditsFrame then return end
     
-    if section == "Home" then
-        HomeFrame.Visible = true
-    elseif section == "Animations" then
-        AnimationsFrame.Visible = true
-    elseif section == "Local" then
-        LocalFrame.Visible = true
-    elseif section == "Credits" then
-        CreditsFrame.Visible = true
-    end
+    HomeFrame.Visible = section == "Home"
+    AnimationsFrame.Visible = section == "Animations"
+    LocalFrame.Visible = section == "Local"
+    CreditsFrame.Visible = section == "Credits"
 end
 
--- Create section buttons with fixed functionality
 local function createSectionButton(name, position)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -567,7 +603,6 @@ local function createSectionButton(name, position)
     return button
 end
 
--- Create sections
 local sections = {
     {name = "Home", pos = 10},
     {name = "Animations", pos = 60},
@@ -579,36 +614,6 @@ for _, section in ipairs(sections) do
     createSectionButton(section.name, section.pos)
 end
 
-local HomeFrame = Instance.new("Frame")
-HomeFrame.Name = "HomeFrame"
-HomeFrame.Parent = ContentFrame
-HomeFrame.BackgroundTransparency = 1
-HomeFrame.Size = UDim2.new(1, 0, 1, 0)
-
-local AnimationsFrame = Instance.new("ScrollingFrame")
-AnimationsFrame.Name = "AnimationsFrame"
-AnimationsFrame.Parent = ContentFrame
-AnimationsFrame.BackgroundTransparency = 1
-AnimationsFrame.Size = UDim2.new(1, 0, 1, 0)
-AnimationsFrame.CanvasSize = UDim2.new(0, 0, 0, (#orderedAnimations * 50) + 40)
-AnimationsFrame.ScrollBarThickness = 6
-AnimationsFrame.Visible = false
-
-local LocalFrame = Instance.new("Frame")
-LocalFrame.Name = "LocalFrame"
-LocalFrame.Parent = ContentFrame
-LocalFrame.BackgroundTransparency = 1
-LocalFrame.Size = UDim2.new(1, 0, 1, 0)
-LocalFrame.Visible = false
-
-local CreditsFrame = Instance.new("Frame")
-CreditsFrame.Name = "CreditsFrame"
-CreditsFrame.Parent = ContentFrame
-CreditsFrame.BackgroundTransparency = 1
-CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
-CreditsFrame.Visible = false
-
--- Setup Home content
 local UserImage = Instance.new("ImageLabel")
 UserImage.Name = "UserImage"
 UserImage.Parent = HomeFrame
@@ -625,7 +630,7 @@ local UserName = Instance.new("TextLabel")
 UserName.Name = "UserName"
 UserName.Parent = HomeFrame
 UserName.BackgroundTransparency = 1
-UserName.Position = UDim2.new(0, 140, 0, 20)
+UserName.Position = UDim2.new(0, 140,0, 20)
 UserName.Size = UDim2.new(0, 200, 0, 30)
 UserName.Font = Enum.Font.GothamBold
 UserName.Text = Player.Name
@@ -645,7 +650,6 @@ UserDisplayName.TextColor3 = Color3.fromRGB(200, 200, 200)
 UserDisplayName.TextSize = 16
 UserDisplayName.TextXAlignment = Enum.TextXAlignment.Left
 
--- Setup Credits content
 local CreditsTitle = Instance.new("TextLabel")
 CreditsTitle.Name = "CreditsTitle"
 CreditsTitle.Parent = CreditsFrame
@@ -670,7 +674,6 @@ CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
 CreditsText.TextSize = 16
 CreditsText.TextXAlignment = Enum.TextXAlignment.Left
 
--- Setup Local content
 local SpeedInput = Instance.new("TextBox")
 SpeedInput.Name = "SpeedInput"
 SpeedInput.Parent = LocalFrame
@@ -720,12 +723,10 @@ local function createLocalButton(name, position, callback)
     return button
 end
 
--- Rejoin button
 createLocalButton("Rejoin", 140, function()
     game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
 end)
 
--- Server Hop button
 createLocalButton("Server Hop", 190, function()
     local servers = {}
     local req = game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100")
@@ -744,7 +745,6 @@ createLocalButton("Server Hop", 190, function()
     end
 end)
 
--- Low Server Hop button
 createLocalButton("Low Server Hop", 240, function()
     local servers = {}
     local req = game:HttpGetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
@@ -763,7 +763,6 @@ createLocalButton("Low Server Hop", 240, function()
     end
 end)
 
--- Create animation buttons
 local function createAnimationButton(name, position)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -788,43 +787,12 @@ local function createAnimationButton(name, position)
     return button
 end
 
--- Create animation buttons in order
 local buttonPosition = 20
 for _, name in ipairs(orderedAnimations) do
     createAnimationButton(name, buttonPosition)
     buttonPosition = buttonPosition + 50
 end
 
--- Function to update content based on section
-local function updateContent(section)
-    print("Sección seleccionada:", section)
-    print("HomeFrame:", HomeFrame)
-    print("AnimationsFrame:", AnimationsFrame)
-    print("LocalFrame:", LocalFrame)
-    print("CreditsFrame:", CreditsFrame)
-    if HomeFrame then
-        HomeFrame.Visible = section == "Home"
-    else
-        print("HomeFrame no está definido")
-    end
-    if AnimationsFrame then
-        AnimationsFrame.Visible = section == "Animations"
-    else
-        print("AnimationsFrame no está definido")
-    end
-    if LocalFrame then
-        LocalFrame.Visible = section == "Local"
-    else
-        print("LocalFrame no está definido")
-    end
-    if CreditsFrame then
-        CreditsFrame.Visible = section == "Credits"
-    else
-        print("CreditsFrame no está definido")
-    end
-end
-
--- Dragging functionality
 TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Dragging = true
@@ -851,7 +819,6 @@ TopBar.InputChanged:Connect(function(input)
     end
 end)
 
--- Speed and Teleport functionality
 SpeedInput.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         local speed = tonumber(SpeedInput.Text)
@@ -867,7 +834,7 @@ end)
 
 TeleportInput.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        local targetPlayer = findPlayer(TeleportInput.Text)
+        local targetPlayer = Players:FindFirstChild(TeleportInput.Text)
         if targetPlayer then
             Player.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
             NotificationSystem:Notify("Teleported to " .. targetPlayer.Name, 2)
@@ -877,7 +844,6 @@ TeleportInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- Character respawn handling
 Player.CharacterAdded:Connect(function(char)
     if SavedSpeed then
         task.wait(0.5)
@@ -885,14 +851,9 @@ Player.CharacterAdded:Connect(function(char)
     end
 end)
 
-if updateContent then
-    updateContent("Home")
-else
-    print("La función updateContent no está definida")
-end
-
--- Loading sequence
 local function runLoadingSequence()
+    if not Status or not LoadingFill or not Loading then return end
+    
     local loadingSteps = {
         "Initializing...",
         "Loading animations...",
@@ -903,27 +864,22 @@ local function runLoadingSequence()
     }
 
     for i, step in ipairs(loadingSteps) do
-        if Status then -- Add nil check
-            Status.Text = step
-            if LoadingFill then -- Add nil check
-                TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
-                    Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
-                }):Play()
-            end
-        end
-        task.wait(0.5) -- Reduced wait time
+        Status.Text = step
+        local tween = TweenService:Create(LoadingFill, 
+            TweenInfo.new(0.3, Enum.EasingStyle.Linear), 
+            {Size = UDim2.new(i/#loadingSteps, 0, 1, 0)}
+        )
+        tween:Play()
+        tween.Completed:Wait()
+        task.wait(0.2)
     end
-
+    
     task.wait(0.5)
-    if Loading then -- Add nil check
-        Loading:Destroy()
-    end
+    Loading:Destroy()
     NotificationSystem:Notify("Script loaded successfully!", 3)
 end
 
--- Initialize GUI
-updateContent("Home")
-pcall(function()
-    spawn(runLoadingSequence)
+spawn(function()
+    updateContent("Home")
+    runLoadingSequence()
 end)
-_G.updateContent = updateContent

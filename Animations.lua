@@ -18,7 +18,6 @@ local LastTouch = nil
 local SavedSpeed = 16
 local CurrentSection = "Home"
 
--- Animations table
 local Animations = {
     astronaut = {
         Idle1 = "rbxassetid://891621366",
@@ -366,77 +365,7 @@ function NotificationSystem:Notify(text, duration)
     notification:Destroy()
 end
 
--- Animation Function
-local function setAnimations(anims)
-    local char = Player.Character
-    if not char then return end
-    
-    local animate = char:WaitForChild("Animate")
-    animate.Enabled = false
-    
-    for _, track in pairs(char:WaitForChild("Humanoid"):WaitForChild("Animator"):GetPlayingAnimationTracks()) do
-        track:Stop()
-    end
-    
-    local function setAnim(name, id)
-        local anim = animate:WaitForChild(name)
-        if name == "idle" then
-            anim:WaitForChild("Animation1").AnimationId = anims.Idle1
-            anim:WaitForChild("Animation2").AnimationId = anims.Idle2
-        else
-            local animObj = anim:GetChildren()[1]
-            if animObj then
-                animObj.AnimationId = id
-            end
-        end
-    end
-    
-    setAnim("idle", anims.Idle1)
-    setAnim("walk", anims.Walk)
-    setAnim("run", anims.Run)
-    setAnim("jump", anims.Jump)
-    setAnim("fall", anims.Fall)
-    setAnim("climb", anims.Climb)
-    setAnim("swim", anims.Swim)
-    setAnim("swimidle", anims.SwimIdle)
-    
-    animate.Enabled = true
-    NotificationSystem:Notify("Animation applied successfully!", 2)
-end
-
--- Player Finding Function
-local function findPlayer(name)
-    name = name:lower()
-    local closest = nil
-    local closestLen = math.huge
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= Player then
-            local playerName = player.Name:lower()
-            if playerName:find(name) then
-                local len = #playerName - #name
-                if len < closestLen then
-                    closest = player
-                    closestLen = len
-                end
-            end
-        end
-    end
-    
-    return closest
-end
-
--- Create ordered animations list
-local orderedAnimations = {
-    "Ninja", "Zombie", "Elder", "Levitation",
-    "Astronaut", "Bold", "Bubbly", "Cartoony",
-    "Knight", "Mage", "Oldschool", "Pirate",
-    "Rthro", "Stylish", "Superhero", "Toy",
-    "Vampire", "Werewolf", "Adidas", "Faker6",
-    "GirlCombo1", "GirlCombo2", "TryhardCombo1", "TryhardCombo2"
-}
-
--- Loading Screen
+-- Loading Screen (Updated)
 local Loading = Instance.new("ScreenGui")
 Loading.Name = "LoadingScreen"
 Loading.Parent = CoreGui
@@ -451,6 +380,16 @@ Background.BorderSizePixel = 0
 Background.Size = UDim2.new(1, 0, 1, 0)
 Background.Position = UDim2.new(0, 0, 0, 0)
 
+-- Decoración superior
+local TopDecoration = Instance.new("Frame")
+TopDecoration.Name = "TopDecoration"
+TopDecoration.Parent = Background
+TopDecoration.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+TopDecoration.BorderSizePixel = 0
+TopDecoration.Position = UDim2.new(0, 0, 0, 0)
+TopDecoration.Size = UDim2.new(1, 0, 0, 2)
+
+-- Título actualizado con "Except" en rojo
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = Background
@@ -458,9 +397,20 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0.5, -200, 0.4, -30)
 Title.Size = UDim2.new(0, 400, 0, 60)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Adonis Except"
+Title.Text = "Adonis"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 48
+
+local ExceptText = Instance.new("TextLabel")
+ExceptText.Name = "ExceptText"
+ExceptText.Parent = Background
+ExceptText.BackgroundTransparency = 1
+ExceptText.Position = UDim2.new(0.5, -50, 0.4, -30)
+ExceptText.Size = UDim2.new(0, 400, 0, 60)
+ExceptText.Font = Enum.Font.GothamBold
+ExceptText.Text = " Except"
+ExceptText.TextColor3 = Color3.fromRGB(255, 0, 0)
+ExceptText.TextSize = 48
 
 local LoadingBar = Instance.new("Frame")
 LoadingBar.Name = "LoadingBar"
@@ -488,7 +438,7 @@ Status.Text = "Initializing..."
 Status.TextColor3 = Color3.fromRGB(255, 255, 255)
 Status.TextSize = 18
 
--- Main GUI
+-- Main GUI (Updated size)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdonisExceptGUI"
 ScreenGui.Parent = CoreGui
@@ -499,8 +449,8 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-MainFrame.Size = UDim2.new(0, 600, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -150) -- Adjusted for new size
+MainFrame.Size = UDim2.new(0, 450, 0, 300) -- 3/4 of original size
 
 -- Add rounded corners
 local UICorner = Instance.new("UICorner")
@@ -543,25 +493,56 @@ SectionsFrame.Size = UDim2.new(0, 150, 1, -40)
 local SectionsCorner = UICorner:Clone()
 SectionsCorner.Parent = SectionsFrame
 
--- Separator
-local Separator = Instance.new("Frame")
-Separator.Name = "Separator"
-Separator.Parent = MainFrame
-Separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Separator.BorderSizePixel = 0
-Separator.Position = UDim2.new(0, 150, 0, 40)
-Separator.Size = UDim2.new(0, 2, 1, -40)
+-- Content frames
+local HomeFrame = Instance.new("Frame")
+HomeFrame.Name = "HomeFrame"
+HomeFrame.Parent = ContentFrame
+HomeFrame.BackgroundTransparency = 1
+HomeFrame.Size = UDim2.new(1, 0, 1, 0)
+HomeFrame.Visible = true
 
--- Content frame
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "Content"
-ContentFrame.Parent = MainFrame
-ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ContentFrame.BorderSizePixel = 0
-ContentFrame.Position = UDim2.new(0, 152, 0, 40)
-ContentFrame.Size = UDim2.new(1, -152, 1, -40)
+local AnimationsFrame = Instance.new("ScrollingFrame")
+AnimationsFrame.Name = "AnimationsFrame"
+AnimationsFrame.Parent = ContentFrame
+AnimationsFrame.BackgroundTransparency = 1
+AnimationsFrame.Size = UDim2.new(1, 0, 1, 0)
+AnimationsFrame.CanvasSize = UDim2.new(0, 0, 0, (#orderedAnimations * 50) + 40)
+AnimationsFrame.ScrollBarThickness = 6
+AnimationsFrame.Visible = false
 
--- Create section buttons
+local LocalFrame = Instance.new("Frame")
+LocalFrame.Name = "LocalFrame"
+LocalFrame.Parent = ContentFrame
+LocalFrame.BackgroundTransparency = 1
+LocalFrame.Size = UDim2.new(1, 0, 1, 0)
+LocalFrame.Visible = false
+
+local CreditsFrame = Instance.new("Frame")
+CreditsFrame.Name = "CreditsFrame"
+CreditsFrame.Parent = ContentFrame
+CreditsFrame.BackgroundTransparency = 1
+CreditsFrame.Size = UDim2.new(1, 0, 1, 0)
+CreditsFrame.Visible = false
+
+-- Function to update content (Fixed)
+function updateContent(section)
+    HomeFrame.Visible = false
+    AnimationsFrame.Visible = false
+    LocalFrame.Visible = false
+    CreditsFrame.Visible = false
+    
+    if section == "Home" then
+        HomeFrame.Visible = true
+    elseif section == "Animations" then
+        AnimationsFrame.Visible = true
+    elseif section == "Local" then
+        LocalFrame.Visible = true
+    elseif section == "Credits" then
+        CreditsFrame.Visible = true
+    end
+end
+
+-- Create section buttons with fixed functionality
 local function createSectionButton(name, position)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -598,7 +579,6 @@ for _, section in ipairs(sections) do
     createSectionButton(section.name, section.pos)
 end
 
--- Content frames
 local HomeFrame = Instance.new("Frame")
 HomeFrame.Name = "HomeFrame"
 HomeFrame.Parent = ContentFrame
@@ -861,12 +841,10 @@ local function runLoadingSequence()
     }
 
     for i, step in ipairs(loadingSteps) do
-        pcall(function()
-            Status.Text = step
-            TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
-                Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
-            }):Play()
-        end)
+        Status.Text = step
+        TweenService:Create(LoadingFill, TweenInfo.new(0.5), {
+            Size = UDim2.new(i/#loadingSteps, 0, 1, 0)
+        }):Play()
         task.wait(1)
     end
 
@@ -875,5 +853,9 @@ local function runLoadingSequence()
     NotificationSystem:Notify("Script loaded successfully!", 3)
 end
 
--- Start the loading sequence
+-- Initialize GUI
+updateContent("Home")
 spawn(runLoadingSequence)
+
+-- Make updateContent global for debugging
+_G.updateContent = updateContent

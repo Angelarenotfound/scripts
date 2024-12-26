@@ -574,6 +574,7 @@ TopBar.BorderColor3 = Color3.fromRGB(255, 255, 255)
 TopBar.BorderSizePixel = 1
 TopBar.Size = UDim2.new(1, 0, 0, 40)
 TopBar.Position = UDim2.new(0, 0, 0, 0)
+TopBar.Active = true
 
 local TopBarCorner = UICorner:Clone()
 TopBarCorner.Parent = TopBar
@@ -1109,6 +1110,90 @@ local function updateAEText()
     AEText.RichText = true
     AEText.Text = string.format('<font color="rgb(255,255,255)">%s</font><font color="rgb(255,0,0)">%s</font>', firstLetter, secondLetter)
 end
+
+local function beginDrag(input)
+    local inputPosition = input.Position
+    if input.UserInputType == Enum.UserInputType.Touch then
+        inputPosition = Vector2.new(input.Position.X, input.Position.Y)
+        LastTouch = input -- Guardamos la referencia del toque
+    end
+    
+    Dragging = true
+    DragStart = inputPosition
+    StartPos = MainFrame.Position
+end
+
+local function doDrag(input)
+    if not Dragging then return end
+    
+    local inputPosition = input.Position
+    if input.UserInputType == Enum.UserInputType.Touch then
+        inputPosition = Vector2.new(input.Position.X, input.Position.Y)
+    end
+    
+    local delta = inputPosition - DragStart
+    local targetPosition = UDim2.new(
+        StartPos.X.Scale,
+        StartPos.X.Offset + delta.X,
+        StartPos.Y.Scale,
+        StartPos.Y.Offset + delta.Y
+    )
+    
+    -- Asegurarse de que el frame no se salga de la pantalla
+    local minX = 0
+    local minY = 0
+    local maxX = workspace.CurrentCamera.ViewportSize.X - MainFrame.AbsoluteSize.X
+    local maxY = workspace.CurrentCamera.ViewportSize.Y - MainFrame.AbsoluteSize.Y
+    
+    targetPosition = UDim2.new(
+        0,
+        math.clamp(targetPosition.X.Offset, minX, maxX),
+        0,
+        math.clamp(targetPosition.Y.Offset, minY, maxY)
+    )
+    
+    MainFrame.Position = targetPosition
+end
+
+local function endDrag()
+    Dragging = false
+    DragStart = nil
+    StartPos = nil
+    LastTouch = nil
+end
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+       input.UserInputType == Enum.UserInputType.Touch then
+        beginDrag(input)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or 
+       (input.UserInputType == Enum.UserInputType.Touch and LastTouch and input == LastTouch) then
+        doDrag(input)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+       (input.UserInputType == Enum.UserInputType.Touch and LastTouch and input == LastTouch) then
+        endDrag()
+    end
+end)
+
+UserInputService.TouchEnded:Connect(function(touch)
+    if LastTouch and touch == LastTouch then
+        endDrag()
+    end
+end)
+
+MainFrame.AncestryChanged:Connect(function()
+    if not MainFrame:IsDescendantOf(game) then
+        endDrag()
+    end
+end)
 
 updateAEText()
 

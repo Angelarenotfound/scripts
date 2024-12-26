@@ -572,6 +572,8 @@ TopBar.Parent = MainFrame
 TopBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 TopBar.BorderColor3 = Color3.fromRGB(255, 255, 255)
 TopBar.BorderSizePixel = 1
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.Position = UDim2.new(0, 0, 0, 0)
 
 local TopBarCorner = UICorner:Clone()
 TopBarCorner.Parent = TopBar
@@ -581,7 +583,7 @@ local TitleBar = Instance.new("TextLabel")
 TitleBar.Name = "Title"
 TitleBar.Parent = TopBar
 TitleBar.BackgroundTransparency = 1
-TitleBar.Position = UDim2.new(0, 15, 0, 0)
+TitleBar.Position = UDim2.new(0, 25, 0, 8)
 TitleBar.Size = UDim2.new(1, -30, 1, 0)
 TitleBar.Font = Enum.Font.GothamBold
 TitleBar.Text = "Adonis Except"
@@ -856,31 +858,21 @@ ToggleButton.Name = "ToggleButton"
 ToggleButton.Parent = ScreenGui
 ToggleButton.Size = UDim2.new(0, 60, 0, 30)
 ToggleButton.Position = UDim2.new(0, 10, 0.5, -15)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ToggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.BorderSizePixel = 1
 ToggleButton.Font = Enum.Font.GothamBold
 ToggleButton.TextSize = 14
 ToggleButton.AutoButtonColor = false
 
-local AText = Instance.new("TextLabel")
-AText.Parent = ToggleButton
-AText.BackgroundTransparency = 1
-AText.Size = UDim2.new(0.5, 0, 1, 0)
-AText.Font = Enum.Font.GothamBold
-AText.Text = "A"
-AText.TextColor3 = Color3.fromRGB(255, 255, 255)
-AText.TextSize = 14
-
-local EText = Instance.new("TextLabel")
-EText.Parent = ToggleButton
-EText.BackgroundTransparency = 1
-EText.Position = UDim2.new(0.5, 0, 0, 0)
-EText.Size = UDim2.new(0.5, 0, 1, 0)
-EText.Font = Enum.Font.GothamBold
-EText.Text = "E"
-EText.TextColor3 = Color3.fromRGB(255, 0, 0)
-EText.TextSize = 14
+local AEText = Instance.new("TextLabel")
+AEText.Parent = ToggleButton
+AEText.BackgroundTransparency = 1
+AEText.Size = UDim2.new(1, 0, 1, 0)
+AEText.Font = Enum.Font.GothamBold
+AEText.Text = "AE"
+AEText.TextColor3 = Color3.fromRGB(255, 255, 255)
+AEText.TextSize = 14
 
 local function createESP(player)
     if player == Player then return end
@@ -1109,6 +1101,16 @@ for _, button in ipairs(SectionsFrame:GetChildren()) do
         button.BorderSizePixel = 1
     end
 end
+
+local function updateAEText()
+    local text = AEText.Text
+    local firstLetter = text:sub(1,1)
+    local secondLetter = text:sub(2,2)
+    AEText.RichText = true
+    AEText.Text = string.format('<font color="rgb(255,255,255)">%s</font><font color="rgb(255,0,0)">%s</font>', firstLetter, secondLetter)
+end
+
+updateAEText()
 
 spawn(function()
     updateContent("Home")

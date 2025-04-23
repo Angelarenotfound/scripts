@@ -4,10 +4,10 @@ internal.sections = {}
 internal.currentSection = nil
 internal.firstSection = nil
 
-function AE:Start(title, size, dragg)
+function AE:Start(title, size, dragg, background)
     size = size or 1
     dragg = dragg or false
-    
+
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
     local TopBar = Instance.new("Frame")
@@ -31,6 +31,17 @@ function AE:Start(title, size, dragg)
     MainFrame.Position = UDim2.new(0.15, 0, 0.1, 0)
     MainFrame.Size = UDim2.new(0.7 * size, 0, 0.85 * size, 0)
     MainFrame.ClipsDescendants = true
+
+    if background then
+        local BackgroundImage = Instance.new("ImageLabel")
+        BackgroundImage.Name = "Background"
+        BackgroundImage.Parent = MainFrame
+        BackgroundImage.BackgroundTransparency = 1
+        BackgroundImage.Size = UDim2.new(1, 0, 1, 0)
+        BackgroundImage.Image = background
+        BackgroundImage.ScaleType = Enum.ScaleType.Stretch
+        BackgroundImage.ZIndex = 0
+    end
 
     local MainCorner = Instance.new("UICorner")
     MainCorner.CornerRadius = UDim.new(0.08, 0)
@@ -166,7 +177,7 @@ function AE:Start(title, size, dragg)
     internal.RightContent = RightContent
     internal.MainFrame = MainFrame
     internal.ScreenGui = ScreenGui
-    
+
     return self
 end
 
@@ -177,21 +188,21 @@ function AE:Section(sectionName)
     local sectionStroke = Instance.new("UIStroke")
     local activeIndicator = Instance.new("Frame")
     local indicatorCorner = Instance.new("UICorner")
-    
+
     sectionFrame.Name = sectionName.."Section"
     sectionFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     sectionFrame.Size = UDim2.new(0.9, 0, 0, 35)
     sectionFrame.AutoButtonColor = false
     sectionFrame.LayoutOrder = #internal.LeftContent:GetChildren()
     sectionFrame.Text = ""
-    
+
     sectionCorner.CornerRadius = UDim.new(0, 6)
     sectionCorner.Parent = sectionFrame
-    
+
     sectionStroke.Color = Color3.fromRGB(60, 60, 60)
     sectionStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     sectionStroke.Parent = sectionFrame
-    
+
     sectionTitle.Name = "SectionTitle"
     sectionTitle.Parent = sectionFrame
     sectionTitle.BackgroundTransparency = 1
@@ -201,17 +212,17 @@ function AE:Section(sectionName)
     sectionTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
     sectionTitle.TextSize = 14
     sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-    
+
     activeIndicator.Name = "ActiveIndicator"
     activeIndicator.Parent = sectionFrame
-    activeIndicator.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    activeIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     activeIndicator.Size = UDim2.new(0.05, 0, 0.7, 0)
     activeIndicator.Position = UDim2.new(0.025, 0, 0.15, 0)
     activeIndicator.Visible = false
-    
+
     indicatorCorner.CornerRadius = UDim.new(0, 4)
     indicatorCorner.Parent = activeIndicator
-    
+
     internal.sections[sectionName] = {
         frame = sectionFrame,
         elements = {},
@@ -222,46 +233,42 @@ function AE:Section(sectionName)
         Name = sectionName,
         Frame = sectionFrame
     }
-    
+
     sectionFrame.MouseButton1Click:Connect(function()
         internal.selectSection(sectionName)
     end)
-    
+
     sectionFrame.Parent = internal.LeftContent
-    
-    -- Si es la primera sección, la guardamos para seleccionarla después
+
     if internal.firstSection == nil then
         internal.firstSection = sectionName
     end
-    
+
     return section
 end
 
--- Función interna para seleccionar una sección
 function internal.selectSection(sectionName)
     for name, section in pairs(internal.sections) do
-        section.frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        section.frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         section.frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(180, 180, 180)
         section.indicator.Visible = false
     end
-    
-    internal.sections[sectionName].frame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+
+    internal.sections[sectionName].frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     internal.sections[sectionName].frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(220, 220, 220)
     internal.sections[sectionName].indicator.Visible = true
-    
-    -- Limpiar el panel derecho
+
     for _, child in ipairs(internal.RightContent:GetChildren()) do
         if child:IsA("GuiObject") and not child:IsA("UIListLayout") then
             child:Destroy()
         end
     end
-    
-    -- Añadir los elementos de la sección seleccionada
+
     for _, elementData in ipairs(internal.sections[sectionName].elements) do
         local element = elementData.create()
         element.Parent = internal.RightContent
     end
-    
+
     internal.currentSection = sectionName
 end
 
@@ -277,30 +284,29 @@ function AE:button(buttonText, section, callback)
                 button.Text = buttonText
                 button.Size = UDim2.new(0.95, 0, 0, 35)
                 button.Position = UDim2.new(0.025, 0, 0, 0)
-                button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
                 button.TextColor3 = Color3.fromRGB(200, 200, 200)
                 button.Font = Enum.Font.Gotham
                 button.TextSize = 14
                 button.AutoButtonColor = true
-                
+
                 local buttonCorner = Instance.new("UICorner")
                 buttonCorner.CornerRadius = UDim.new(0, 4)
                 buttonCorner.Parent = button
-                
+
                 local buttonStroke = Instance.new("UIStroke")
-                buttonStroke.Color = Color3.fromRGB(80, 80, 80)
+                buttonStroke.Color = Color3.fromRGB(40, 40, 40)
                 buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 buttonStroke.Parent = button
-                
+
                 button.MouseButton1Click:Connect(callback or function() end)
-                
+
                 return button
             end
         }
-        
+
         table.insert(internal.sections[section.Name].elements, buttonData)
-        
-        -- Si esta sección es la actual, crear y mostrar el botón ahora
+
         if internal.currentSection == section.Name then
             local button = buttonData.create()
             button.Parent = internal.RightContent
@@ -320,17 +326,17 @@ function AE:Menu(title, section, options, defaultOption)
                 menuContainer.Name = title.."Menu"
                 menuContainer.Size = UDim2.new(0.95, 0, 0, 70)
                 menuContainer.Position = UDim2.new(0.025, 0, 0, 0)
-                menuContainer.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-                
+                menuContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
                 local menuCorner = Instance.new("UICorner")
                 menuCorner.CornerRadius = UDim.new(0, 4)
                 menuCorner.Parent = menuContainer
-                
+
                 local menuStroke = Instance.new("UIStroke")
-                menuStroke.Color = Color3.fromRGB(80, 80, 80)
+                menuStroke.Color = Color3.fromRGB(40, 40, 40)
                 menuStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 menuStroke.Parent = menuContainer
-                
+
                 local menuTitle = Instance.new("TextLabel")
                 menuTitle.Name = "MenuTitle"
                 menuTitle.Parent = menuContainer
@@ -340,63 +346,97 @@ function AE:Menu(title, section, options, defaultOption)
                 menuTitle.Text = title
                 menuTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
                 menuTitle.TextSize = 14
-                
-                local optionsContainer = Instance.new("Frame")
-                optionsContainer.Name = "OptionsContainer"
-                optionsContainer.Parent = menuContainer
-                optionsContainer.BackgroundTransparency = 1
-                optionsContainer.Position = UDim2.new(0, 0, 0, 25)
-                optionsContainer.Size = UDim2.new(1, 0, 0, 35)
-                
-                local optionsLayout = Instance.new("UIListLayout")
-                optionsLayout.Parent = optionsContainer
-                optionsLayout.FillDirection = Enum.FillDirection.Horizontal
-                optionsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-                optionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                optionsLayout.Padding = UDim.new(0, 5)
-                
+
                 local selectedOption = defaultOption or (options and options[1] or "")
+                
+                local dropdownButton = Instance.new("TextButton")
+                dropdownButton.Name = "DropdownButton"
+                dropdownButton.Parent = menuContainer
+                dropdownButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                dropdownButton.Position = UDim2.new(0.05, 0, 0.45, 0)
+                dropdownButton.Size = UDim2.new(0.9, 0, 0, 30)
+                dropdownButton.Font = Enum.Font.Gotham
+                dropdownButton.Text = selectedOption
+                dropdownButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+                dropdownButton.TextSize = 14
+                dropdownButton.TextXAlignment = Enum.TextXAlignment.Left
+                dropdownButton.TextTruncate = Enum.TextTruncate.AtEnd
+                
+                local dropdownPadding = Instance.new("UIPadding")
+                dropdownPadding.Parent = dropdownButton
+                dropdownPadding.PaddingLeft = UDim.new(0, 10)
+                
+                local buttonCorner = Instance.new("UICorner")
+                buttonCorner.CornerRadius = UDim.new(0, 4)
+                buttonCorner.Parent = dropdownButton
+                
+                local dropdownList = Instance.new("Frame")
+                dropdownList.Name = "DropdownList"
+                dropdownList.Parent = menuContainer
+                dropdownList.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                dropdownList.Position = UDim2.new(0.05, 0, 0.9, 0)
+                dropdownList.Size = UDim2.new(0.9, 0, 0, #options * 30)
+                dropdownList.Visible = false
+                dropdownList.ZIndex = 10
+                dropdownList.ClipsDescendants = true
+                
+                local listCorner = Instance.new("UICorner")
+                listCorner.CornerRadius = UDim.new(0, 4)
+                listCorner.Parent = dropdownList
+                
+                local listLayout = Instance.new("UIListLayout")
+                listLayout.Parent = dropdownList
+                listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                listLayout.Padding = UDim.new(0, 0)
                 
                 for i, option in ipairs(options or {}) do
                     local optionButton = Instance.new("TextButton")
                     optionButton.Name = option.."Option"
-                    optionButton.Parent = optionsContainer
-                    optionButton.Size = UDim2.new(1/#options, -5, 1, -10)
+                    optionButton.Parent = dropdownList
+                    optionButton.Size = UDim2.new(1, 0, 0, 30)
                     optionButton.Text = option
                     optionButton.Font = Enum.Font.Gotham
-                    optionButton.TextSize = 12
+                    optionButton.TextSize = 14
+                    optionButton.TextXAlignment = Enum.TextXAlignment.Left
+                    optionButton.LayoutOrder = i
+                    optionButton.ZIndex = 10
+                    
+                    local optionPadding = Instance.new("UIPadding")
+                    optionPadding.Parent = optionButton
+                    optionPadding.PaddingLeft = UDim.new(0, 10)
                     
                     if option == selectedOption then
-                        optionButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                        optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        optionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                        optionButton.TextColor3 = Color3.fromRGB(255, 0, 0)
                     else
-                        optionButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+                        optionButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
                         optionButton.TextColor3 = Color3.fromRGB(180, 180, 180)
                     end
-                    
-                    local optionCorner = Instance.new("UICorner")
-                    optionCorner.CornerRadius = UDim.new(0, 4)
-                    optionCorner.Parent = optionButton
-                    
+
                     optionButton.MouseButton1Click:Connect(function()
-                        for _, child in ipairs(optionsContainer:GetChildren()) do
+                        for _, child in ipairs(dropdownList:GetChildren()) do
                             if child:IsA("TextButton") then
-                                child.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+                                child.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
                                 child.TextColor3 = Color3.fromRGB(180, 180, 180)
                             end
                         end
+
+                        optionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                        optionButton.TextColor3 = Color3.fromRGB(255, 0, 0)
                         
-                        optionButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                        optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        
+                        dropdownButton.Text = option
                         menuData.selected = option
-                        
-                        -- Llamar al callback con la opción seleccionada si existe
+                        dropdownList.Visible = false
+
                         if menuData.callback then
                             menuData.callback(option)
                         end
                     end)
                 end
+                
+                dropdownButton.MouseButton1Click:Connect(function()
+                    dropdownList.Visible = not dropdownList.Visible
+                end)
                 
                 return menuContainer
             end,
@@ -404,25 +444,521 @@ function AE:Menu(title, section, options, defaultOption)
                 menuData.callback = callback
             end
         }
-        
+
         table.insert(internal.sections[section.Name].elements, menuData)
-        
-        -- Si esta sección es la actual, crear y mostrar el menú ahora
+
         if internal.currentSection == section.Name then
             local menu = menuData.create()
             menu.Parent = internal.RightContent
         end
-        
-        -- Retornar una interfaz para configurar el callback después
+
         return {
             setCallback = menuData.setCallback
         }
     end
 end
 
--- Un task.defer para seleccionar la primera sección después de la creación
-task.defer(function()
-    if internal.firstSection then
+function AE:Input(title, section, defaultValue, placeholder, callback)
+    if internal.sections[section.Name] then
+        local inputData = {
+            type = "input",
+            title = title,
+            value = defaultValue or "",
+            create = function()
+                local inputContainer = Instance.new("Frame")
+                inputContainer.Name = title.."Input"
+                inputContainer.Size = UDim2.new(0.95, 0, 0, 70)
+                inputContainer.Position = UDim2.new(0.025, 0, 0, 0)
+                inputContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+                local inputCorner = Instance.new("UICorner")
+                inputCorner.CornerRadius = UDim.new(0, 4)
+                inputCorner.Parent = inputContainer
+
+                local inputStroke = Instance.new("UIStroke")
+                inputStroke.Color = Color3.fromRGB(40, 40, 40)
+                inputStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                inputStroke.Parent = inputContainer
+
+                local inputTitle = Instance.new("TextLabel")
+                inputTitle.Name = "InputTitle"
+                inputTitle.Parent = inputContainer
+                inputTitle.BackgroundTransparency = 1
+                inputTitle.Size = UDim2.new(1, 0, 0, 25)
+                inputTitle.Font = Enum.Font.GothamMedium
+                inputTitle.Text = title
+                inputTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+                inputTitle.TextSize = 14
+
+                local inputBox = Instance.new("TextBox")
+                inputBox.Name = "InputBox"
+                inputBox.Parent = inputContainer
+                inputBox.Position = UDim2.new(0.05, 0, 0.45, 0)
+                inputBox.Size = UDim2.new(0.9, 0, 0, 30)
+                inputBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                inputBox.Text = defaultValue or ""
+                inputBox.PlaceholderText = placeholder or "Enter text..."
+                inputBox.Font = Enum.Font.Gotham
+                inputBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+                inputBox.TextSize = 14
+                inputBox.TextXAlignment = Enum.TextXAlignment.Left
+                inputBox.ClipsDescendants = true
+                inputBox.ClearTextOnFocus = false
+
+                local boxCorner = Instance.new("UICorner")
+                boxCorner.CornerRadius = UDim.new(0, 4)
+                boxCorner.Parent = inputBox
+
+                local boxPadding = Instance.new("UIPadding")
+                boxPadding.Parent = inputBox
+                boxPadding.PaddingLeft = UDim.new(0, 10)
+
+                inputBox.FocusLost:Connect(function(enterPressed)
+                    inputData.value = inputBox.Text
+                    if callback then
+                        callback(inputBox.Text, enterPressed)
+                    end
+                end)
+
+                return inputContainer
+            end,
+            setCallback = function(newCallback)
+                callback = newCallback
+            end,
+            getValue = function()
+                return inputData.value
+            end,
+            setValue = function(newValue)
+                inputData.value = newValue
+                
+                if internal.currentSection == section.Name then
+                    local inputContainer = internal.RightContent:FindFirstChild(title.."Input")
+                    if inputContainer then
+                        local inputBox = inputContainer:FindFirstChild("InputBox")
+                        if inputBox then
+                            inputBox.Text = newValue
+                        end
+                    end
+                end
+            end
+        }
+
+        table.insert(internal.sections[section.Name].elements, inputData)
+
+        if internal.currentSection == section.Name then
+            local input = inputData.create()
+            input.Parent = internal.RightContent
+        end
+
+        return {
+            setCallback = inputData.setCallback,
+            getValue = inputData.getValue,
+            setValue = inputData.setValue
+        }
+    end
+end
+
+function AE:Slider(title, section, min, max, defaultValue, callback)
+    if internal.sections[section.Name] then
+        min = min or 0
+        max = max or 100
+        defaultValue = defaultValue or min
+
+        local sliderData = {
+            type = "slider",
+            title = title,
+            min = min,
+            max = max,
+            value = math.clamp(defaultValue, min, max),
+            create = function()
+                local sliderContainer = Instance.new("Frame")
+                sliderContainer.Name = title.."Slider"
+                sliderContainer.Size = UDim2.new(0.95, 0, 0, 70)
+                sliderContainer.Position = UDim2.new(0.025, 0, 0, 0)
+                sliderContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+                local sliderCorner = Instance.new("UICorner")
+                sliderCorner.CornerRadius = UDim.new(0, 4)
+                sliderCorner.Parent = sliderContainer
+
+                local sliderStroke = Instance.new("UIStroke")
+                sliderStroke.Color = Color3.fromRGB(40, 40, 40)
+                sliderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                sliderStroke.Parent = sliderContainer
+
+                local sliderTitle = Instance.new("TextLabel")
+                sliderTitle.Name = "SliderTitle"
+                sliderTitle.Parent = sliderContainer
+                sliderTitle.BackgroundTransparency = 1
+                sliderTitle.Size = UDim2.new(0.7, 0, 0, 25)
+                sliderTitle.Font = Enum.Font.GothamMedium
+                sliderTitle.Text = title
+                sliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+                sliderTitle.TextSize = 14
+                sliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+                sliderTitle.Position = UDim2.new(0.05, 0, 0, 0)
+
+                local valueLabel = Instance.new("TextLabel")
+                valueLabel.Name = "ValueLabel"
+                valueLabel.Parent = sliderContainer
+                valueLabel.BackgroundTransparency = 1
+                valueLabel.Size = UDim2.new(0.2, 0, 0, 25)
+                valueLabel.Position = UDim2.new(0.75, 0, 0, 0)
+                valueLabel.Font = Enum.Font.GothamMedium
+                valueLabel.Text = tostring(sliderData.value)
+                valueLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+                valueLabel.TextSize = 14
+                valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+                local sliderTrack = Instance.new("Frame")
+                sliderTrack.Name = "SliderTrack"
+                sliderTrack.Parent = sliderContainer
+                sliderTrack.Position = UDim2.new(0.05, 0, 0.6, 0)
+                sliderTrack.Size = UDim2.new(0.9, 0, 0, 6)
+                sliderTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+                local trackCorner = Instance.new("UICorner")
+                trackCorner.CornerRadius = UDim.new(0, 3)
+                trackCorner.Parent = sliderTrack
+
+                local sliderFill = Instance.new("Frame")
+                sliderFill.Name = "SliderFill"
+                sliderFill.Parent = sliderTrack
+                sliderFill.Position = UDim2.new(0, 0, 0, 0)
+                sliderFill.Size = UDim2.new((sliderData.value - min) / (max - min), 0, 1, 0)
+                sliderFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+                local fillCorner = Instance.new("UICorner")
+                fillCorner.CornerRadius = UDim.new(0, 3)
+                fillCorner.Parent = sliderFill
+
+                local sliderThumb = Instance.new("Frame")
+                sliderThumb.Name = "SliderThumb"
+                sliderThumb.Parent = sliderTrack
+                sliderThumb.AnchorPoint = Vector2.new(0.5, 0.5)
+                sliderThumb.Position = UDim2.new((sliderData.value - min) / (max - min), 0, 0.5, 0)
+                sliderThumb.Size = UDim2.new(0, 12, 0, 12)
+                sliderThumb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+                local thumbCorner = Instance.new("UICorner")
+                thumbCorner.CornerRadius = UDim.new(1, 0)
+                thumbCorner.Parent = sliderThumb
+
+                local dragging = false
+
+                local function updateSlider(input)
+                    local trackPos = sliderTrack.AbsolutePosition.X
+                    local trackWidth = sliderTrack.AbsoluteSize.X
+                    local mousePos = input.Position.X
+                    
+                    local relativePos = math.clamp((mousePos - trackPos) / trackWidth, 0, 1)
+                    local newValue = min + (relativePos * (max - min))
+                    newValue = math.floor(newValue + 0.5) -- Round to nearest integer
+                    
+                    sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
+                    sliderThumb.Position = UDim2.new(relativePos, 0, 0.5, 0)
+                    valueLabel.Text = tostring(newValue)
+                    
+                    sliderData.value = newValue
+                    
+                    if callback then
+                        callback(newValue)
+                    end
+                end
+
+                sliderTrack.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        dragging = true
+                        updateSlider(input)
+                    end
+                end)
+
+                sliderTrack.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        dragging = false
+                    end
+                end)
+
+                sliderTrack.InputChanged:Connect(function(input)
+                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                        updateSlider(input)
+                    end
+                end)
+
+                return sliderContainer
+            end,
+            setCallback = function(newCallback)
+                callback = newCallback
+            end,
+            getValue = function()
+                return sliderData.value
+            end,
+            setValue = function(newValue)
+                newValue = math.clamp(newValue, min, max)
+                sliderData.value = newValue
+                
+                if internal.currentSection == section.Name then
+                    local sliderContainer = internal.RightContent:FindFirstChild(title.."Slider")
+                    if sliderContainer then
+                        local valueLabel = sliderContainer:FindFirstChild("ValueLabel")
+                        local sliderTrack = sliderContainer:FindFirstChild("SliderTrack")
+                        local sliderFill = sliderTrack and sliderTrack:FindFirstChild("SliderFill")
+                        local sliderThumb = sliderTrack and sliderTrack:FindFirstChild("SliderThumb")
+                        
+                        if valueLabel then
+                            valueLabel.Text = tostring(newValue)
+                        end
+                        
+                        if sliderFill then
+                            sliderFill.Size = UDim2.new((newValue - min) / (max - min), 0, 1, 0)
+                        end
+                        
+                        if sliderThumb then
+                            sliderThumb.Position = UDim2.new((newValue - min) / (max - min), 0, 0.5, 0)
+                        end
+                    end
+                end
+                
+                if callback then
+                    callback(newValue)
+                end
+            end
+        }
+
+        table.insert(internal.sections[section.Name].elements, sliderData)
+
+        if internal.currentSection == section.Name then
+            local slider = sliderData.create()
+            slider.Parent = internal.RightContent
+        end
+
+        return {
+            setCallback = sliderData.setCallback,
+            getValue = sliderData.getValue,
+            setValue = sliderData.setValue
+        }
+    end
+end
+
+function AE:Toggle(title, section, defaultValue, callback)
+    if internal.sections[section.Name] then
+        local toggleData = {
+            type = "toggle",
+            title = title,
+            value = defaultValue or false,
+            create = function()
+                local toggleContainer = Instance.new("Frame")
+                toggleContainer.Name = title.."Toggle"
+                toggleContainer.Size = UDim2.new(0.95, 0, 0, 40)
+                toggleContainer.Position = UDim2.new(0.025, 0, 0, 0)
+                toggleContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+                local toggleCorner = Instance.new("UICorner")
+                toggleCorner.CornerRadius = UDim.new(0, 4)
+                toggleCorner.Parent = toggleContainer
+
+                local toggleStroke = Instance.new("UIStroke")
+                toggleStroke.Color = Color3.fromRGB(40, 40, 40)
+                toggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                toggleStroke.Parent = toggleContainer
+
+                local toggleTitle = Instance.new("TextLabel")
+                toggleTitle.Name = "ToggleTitle"
+                toggleTitle.Parent = toggleContainer
+                toggleTitle.BackgroundTransparency = 1
+                toggleTitle.Size = UDim2.new(0.8, 0, 1, 0)
+                toggleTitle.Position = UDim2.new(0.05, 0, 0, 0)
+                toggleTitle.Font = Enum.Font.GothamMedium
+                toggleTitle.Text = title
+                toggleTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+                toggleTitle.TextSize = 14
+                toggleTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+                local toggleButton = Instance.new("Frame")
+                toggleButton.Name = "ToggleButton"
+                toggleButton.Parent = toggleContainer
+                toggleButton.AnchorPoint = Vector2.new(0, 0.5)
+                toggleButton.Position = UDim2.new(0.85, 0, 0.5, 0)
+                toggleButton.Size = UDim2.new(0, 36, 0, 20)
+                toggleButton.BackgroundColor3 = toggleData.value and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(40, 40, 40)
+
+                local buttonCorner = Instance.new("UICorner")
+                buttonCorner.CornerRadius = UDim.new(1, 0)
+                buttonCorner.Parent = toggleButton
+
+                local toggleIndicator = Instance.new("Frame")
+                toggleIndicator.Name = "ToggleIndicator"
+                toggleIndicator.Parent = toggleButton
+                toggleIndicator.AnchorPoint = Vector2.new(0.5, 0.5)
+                toggleIndicator.Position = toggleData.value and UDim2.new(0.7, 0, 0.5, 0) or UDim2.new(0.3, 0, 0.5, 0)
+                toggleIndicator.Size = UDim2.new(0, 16, 0, 16)
+                toggleIndicator.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+
+                local indicatorCorner = Instance.new("UICorner")
+                indicatorCorner.CornerRadius = UDim.new(1, 0)
+                indicatorCorner.Parent = toggleIndicator
+
+                local clickArea = Instance.new("TextButton")
+                clickArea.Name = "ClickArea"
+                clickArea.Parent = toggleContainer
+                clickArea.BackgroundTransparency = 1
+                clickArea.Size = UDim2.new(1, 0, 1, 0)
+                clickArea.Text = ""
+
+                clickArea.MouseButton1Click:Connect(function()
+                    toggleData.value = not toggleData.value
+                    toggleButton.BackgroundColor3 = toggleData.value and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(40, 40, 40)
+                    toggleIndicator:TweenPosition(
+                        toggleData.value and UDim2.new(0.7, 0, 0.5, 0) or UDim2.new(0.3, 0, 0.5, 0),
+                        Enum.EasingDirection.InOut,
+                        Enum.EasingStyle.Quad,
+                        0.2,
+                        true
+                    )
+                    
+                    if callback then
+                        callback(toggleData.value)
+                    end
+                end)
+
+                return toggleContainer
+            end,
+            setCallback = function(newCallback)
+                callback = newCallback
+            end,
+            getValue = function()
+                return toggleData.value
+            end,
+            setValue = function(newValue)
+                toggleData.value = newValue
+                
+                if internal.currentSection == section.Name then
+                    local toggleContainer = internal.RightContent:FindFirstChild(title.."Toggle")
+                    if toggleContainer then
+                        local toggleButton = toggleContainer:FindFirstChild("ToggleButton")
+                        local toggleIndicator = toggleButton and toggleButton:FindFirstChild("ToggleIndicator")
+                        
+                        if toggleButton then
+                            toggleButton.BackgroundColor3 = toggleData.value and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(40, 40, 40)
+                        end
+                        
+                        if toggleIndicator then
+                            toggleIndicator:TweenPosition(
+                                toggleData.value and UDim2.new(0.7, 0, 0.5, 0) or UDim2.new(0.3, 0, 0.5, 0),
+                                Enum.EasingDirection.InOut,
+                                Enum.EasingStyle.Quad,
+                                0.2,
+                                true
+                            )
+                        end
+                    end
+                end
+                
+                if callback then
+                    callback(toggleData.value)
+                end
+            end
+        }
+
+        table.insert(internal.sections[section.Name].elements, toggleData)
+
+        if internal.currentSection == section.Name then
+            local toggle = toggleData.create()
+            toggle.Parent = internal.RightContent
+        end
+
+        return {
+            setCallback = toggleData.setCallback,
+            getValue = toggleData.getValue,
+            setValue = toggleData.setValue
+        }
+    end
+end
+
+function AE:Label(text, section)
+    if internal.sections[section.Name] then
+        local labelData = {
+            type = "label",
+            text = text,
+            create = function()
+                local label = Instance.new("TextLabel")
+                label.Name = "Label"
+                label.Size = UDim2.new(0.95, 0, 0, 30)
+                label.Position = UDim2.new(0.025, 0, 0, 0)
+                label.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(200, 200, 200)
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 14
+                
+                local labelCorner = Instance.new("UICorner")
+                labelCorner.CornerRadius = UDim.new(0, 4)
+                labelCorner.Parent = label
+                
+                local labelStroke = Instance.new("UIStroke")
+                labelStroke.Color = Color3.fromRGB(40, 40, 40)
+                labelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                labelStroke.Parent = label
+                
+                return label
+            end,
+            setText = function(newText)
+                labelData.text = newText
+                
+                if internal.currentSection == section.Name then
+                    local label = internal.RightContent:FindFirstChild("Label")
+                    if label then
+                        label.Text = newText
+                    end
+                end
+            end
+        }
+
+        table.insert(internal.sections[section.Name].elements, labelData)
+
+        if internal.currentSection == section.Name then
+            local label = labelData.create()
+            label.Parent = internal.RightContent
+        end
+
+        return {
+            setText = labelData.setText
+        }
+    end
+end
+
+function AE:Separator(section)
+    if internal.sections[section.Name] then
+        local separatorData = {
+            type = "separator",
+            create = function()
+                local separator = Instance.new("Frame")
+                separator.Name = "Separator"
+                separator.Size = UDim2.new(0.95, 0, 0, 2)
+                separator.Position = UDim2.new(0.025, 0, 0, 0)
+                separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                
+                local separatorCorner = Instance.new("UICorner")
+                separatorCorner.CornerRadius = UDim.new(0, 1)
+                separatorCorner.Parent = separator
+                
+                return separator
+            end
+        }
+
+        table.insert(internal.sections[section.Name].elements, separatorData)
+
+        if internal.currentSection == section.Name then
+            local separator = separatorData.create()
+            separator.Parent = internal.RightContent
+        end
+    end
+end
+
+-- Al final del archivo, iniciamos la primera sección por defecto
+game.Players.LocalPlayer:WaitForChild("PlayerGui").ChildAdded:Connect(function(child)
+    if child.Name == internal.ScreenGui and internal.firstSection then
+        wait(0.1) -- Pequeña espera para asegurar que todos los elementos estén cargados
         internal.selectSection(internal.firstSection)
     end
 end)

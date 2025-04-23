@@ -351,11 +351,15 @@ end
 
 function AE:Menu(title, section, options, defaultOption)
     if internal.sections[section.Name] then
+        options = options or {}
+        defaultOption = defaultOption or (options[1] or "")
+        
         local menuData = {
             type = "menu",
             title = title,
-            options = options or {},
-            selected = defaultOption or (options and options[1] or ""),
+            options = options,
+            selected = defaultOption,
+            callback = nil,
             create = function()
                 local menuContainer = Instance.new("Frame")
                 menuContainer.Name = title.."Menu"
@@ -382,7 +386,7 @@ function AE:Menu(title, section, options, defaultOption)
                 menuTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
                 menuTitle.TextSize = 14
 
-                local selectedOption = defaultOption or (options and options[1] or "")
+                local selectedOption = defaultOption
 
                 local dropdownButton = Instance.new("TextButton")
                 dropdownButton.Name = "DropdownButton"
@@ -424,7 +428,7 @@ function AE:Menu(title, section, options, defaultOption)
                 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
                 listLayout.Padding = UDim.new(0, 0)
 
-                for i, option in ipairs(options or {}) do
+                for i, option in ipairs(options) do
                     local optionButton = Instance.new("TextButton")
                     optionButton.Name = option.."Option"
                     optionButton.Parent = dropdownList
@@ -472,7 +476,7 @@ function AE:Menu(title, section, options, defaultOption)
                 local function closeDropdown()
                     dropdownList.Visible = false
                 end
-                
+
                 dropdownButton.MouseButton1Click:Connect(function()
                     if dropdownList.Visible then
                         dropdownList.Visible = false
@@ -484,14 +488,14 @@ function AE:Menu(title, section, options, defaultOption)
                                 local position = input.Position
                                 local guiObjects = game.Players.LocalPlayer:GetGuiObjectsAtPosition(position.X, position.Y)
                                 local clickedOnMenu = false
-                                
+
                                 for _, obj in ipairs(guiObjects) do
                                     if obj == dropdownButton or obj:IsDescendantOf(dropdownList) then
                                         clickedOnMenu = true
                                         break
                                     end
                                 end
-                                
+
                                 if not clickedOnMenu then
                                     closeDropdown()
                                     connection:Disconnect()
@@ -625,14 +629,15 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
     if internal.sections[section.Name] then
         min = min or 0
         max = max or 100
-        defaultValue = defaultValue or min
+        defaultValue = math.clamp(defaultValue or min, min, max)
 
         local sliderData = {
             type = "slider",
             title = title,
             min = min,
             max = max,
-            value = math.clamp(defaultValue, min, max),
+            value = defaultValue,
+            callback = callback,
             create = function()
                 local sliderContainer = Instance.new("Frame")
                 sliderContainer.Name = title.."Slider"
@@ -724,8 +729,8 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
 
                     sliderData.value = newValue
 
-                    if callback then
-                        callback(newValue)
+                    if sliderData.callback then
+                        sliderData.callback(newValue)
                     end
                 end
 
@@ -751,7 +756,7 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
                 return sliderContainer
             end,
             setCallback = function(newCallback)
-                callback = newCallback
+                sliderData.callback = newCallback
             end,
             getValue = function()
                 return sliderData.value
@@ -765,25 +770,28 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
                     if sliderContainer then
                         local valueLabel = sliderContainer:FindFirstChild("ValueLabel")
                         local sliderTrack = sliderContainer:FindFirstChild("SliderTrack")
-                        local sliderFill = sliderTrack and sliderTrack:FindFirstChild("SliderFill")
-                        local sliderThumb = sliderTrack and sliderTrack:FindFirstChild("SliderThumb")
-
+                        
                         if valueLabel then
                             valueLabel.Text = tostring(newValue)
                         end
-
-                        if sliderFill then
-                            sliderFill.Size = UDim2.new((newValue - min) / (max - min), 0, 1, 0)
-                        end
-
-                        if sliderThumb then
-                            sliderThumb.Position = UDim2.new((newValue - min) / (max - min), 0, 0.5, 0)
+                        
+                        if sliderTrack then
+                            local sliderFill = sliderTrack:FindFirstChild("SliderFill")
+                            local sliderThumb = sliderTrack:FindFirstChild("SliderThumb")
+                            
+                            if sliderFill then
+                                sliderFill.Size = UDim2.new((newValue - min) / (max - min), 0, 1, 0)
+                            end
+                            
+                            if sliderThumb then
+                                sliderThumb.Position = UDim2.new((newValue - min) / (max - min), 0, 0.5, 0)
+                            end
                         end
                     end
                 end
 
-                if callback then
-                    callback(newValue)
+                if sliderData.callback then
+                    sliderData.callback(newValue)
                 end
             end
         }

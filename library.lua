@@ -3,6 +3,37 @@ local internal = {}
 internal.sections = {}
 internal.currentSection = nil
 internal.firstSection = nil
+local initialized = false
+
+function internal.selectSection(sectionName)
+    if not internal.sections[sectionName] then
+        print("Error: Sección '"..sectionName.."' no encontrada")
+        return
+    end
+    
+    for name, section in pairs(internal.sections) do
+        section.frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        section.frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(180, 180, 180)
+        section.indicator.Visible = false
+    end
+
+    internal.sections[sectionName].frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    internal.sections[sectionName].frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(220, 220, 220)
+    internal.sections[sectionName].indicator.Visible = true
+
+    for _, child in ipairs(internal.RightContent:GetChildren()) do
+        if child:IsA("GuiObject") and not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
+    end
+
+    for _, elementData in ipairs(internal.sections[sectionName].elements) do
+        local element = elementData.create()
+        element.Parent = internal.RightContent
+    end
+
+    internal.currentSection = sectionName
+end
 
 function AE:Start(title, size, dragg, background)
     size = size or 1
@@ -82,8 +113,19 @@ function AE:Start(title, size, dragg, background)
     LeftContent.BackgroundTransparency = 1
     LeftContent.Size = UDim2.new(1, 0, 1, 0)
 
+    local LeftScroll = Instance.new("ScrollingFrame")
+    LeftScroll.Name = "LeftScroll"
+    LeftScroll.Parent = LeftContent
+    LeftScroll.BackgroundTransparency = 1
+    LeftScroll.Size = UDim2.new(1, 0, 1, 0)
+    LeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    LeftScroll.ScrollBarThickness = 4
+    LeftScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+    LeftScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    LeftScroll.BorderSizePixel = 0
+
     LeftLayout.Name = "LeftLayout"
-    LeftLayout.Parent = LeftContent
+    LeftLayout.Parent = LeftScroll
     LeftLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     LeftLayout.SortOrder = Enum.SortOrder.LayoutOrder
     LeftLayout.Padding = UDim.new(0, 5)
@@ -108,8 +150,19 @@ function AE:Start(title, size, dragg, background)
     RightContent.BackgroundTransparency = 1
     RightContent.Size = UDim2.new(1, 0, 1, 0)
 
+    local RightScroll = Instance.new("ScrollingFrame")
+    RightScroll.Name = "RightScroll"
+    RightScroll.Parent = RightContent
+    RightScroll.BackgroundTransparency = 1
+    RightScroll.Size = UDim2.new(1, 0, 1, 0)
+    RightScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    RightScroll.ScrollBarThickness = 4
+    RightScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+    RightScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    RightScroll.BorderSizePixel = 0
+
     RightLayout.Name = "RightLayout"
-    RightLayout.Parent = RightContent
+    RightLayout.Parent = RightScroll
     RightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     RightLayout.Padding = UDim.new(0, 5)
 
@@ -173,11 +226,18 @@ function AE:Start(title, size, dragg, background)
         end)
     end
 
-    internal.LeftContent = LeftContent
-    internal.RightContent = RightContent
+    internal.LeftContent = LeftScroll
+    internal.RightContent = RightScroll
     internal.MainFrame = MainFrame
     internal.ScreenGui = ScreenGui
 
+    task.delay(0.1, function()
+        if internal.firstSection and not initialized then
+            initialized = true
+            internal.selectSection(internal.firstSection)
+        end
+    end)
+    
     return self
 end
 
@@ -245,31 +305,6 @@ function AE:Section(sectionName)
     end
 
     return section
-end
-
-function internal.selectSection(sectionName)
-    for name, section in pairs(internal.sections) do
-        section.frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        section.frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(180, 180, 180)
-        section.indicator.Visible = false
-    end
-
-    internal.sections[sectionName].frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    internal.sections[sectionName].frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(220, 220, 220)
-    internal.sections[sectionName].indicator.Visible = true
-
-    for _, child in ipairs(internal.RightContent:GetChildren()) do
-        if child:IsA("GuiObject") and not child:IsA("UIListLayout") then
-            child:Destroy()
-        end
-    end
-
-    for _, elementData in ipairs(internal.sections[sectionName].elements) do
-        local element = elementData.create()
-        element.Parent = internal.RightContent
-    end
-
-    internal.currentSection = sectionName
 end
 
 function AE:button(buttonText, section, callback)
@@ -348,7 +383,7 @@ function AE:Menu(title, section, options, defaultOption)
                 menuTitle.TextSize = 14
 
                 local selectedOption = defaultOption or (options and options[1] or "")
-                
+
                 local dropdownButton = Instance.new("TextButton")
                 dropdownButton.Name = "DropdownButton"
                 dropdownButton.Parent = menuContainer
@@ -361,15 +396,15 @@ function AE:Menu(title, section, options, defaultOption)
                 dropdownButton.TextSize = 14
                 dropdownButton.TextXAlignment = Enum.TextXAlignment.Left
                 dropdownButton.TextTruncate = Enum.TextTruncate.AtEnd
-                
+
                 local dropdownPadding = Instance.new("UIPadding")
                 dropdownPadding.Parent = dropdownButton
                 dropdownPadding.PaddingLeft = UDim.new(0, 10)
-                
+
                 local buttonCorner = Instance.new("UICorner")
                 buttonCorner.CornerRadius = UDim.new(0, 4)
                 buttonCorner.Parent = dropdownButton
-                
+
                 local dropdownList = Instance.new("Frame")
                 dropdownList.Name = "DropdownList"
                 dropdownList.Parent = menuContainer
@@ -379,16 +414,16 @@ function AE:Menu(title, section, options, defaultOption)
                 dropdownList.Visible = false
                 dropdownList.ZIndex = 10
                 dropdownList.ClipsDescendants = true
-                
+
                 local listCorner = Instance.new("UICorner")
                 listCorner.CornerRadius = UDim.new(0, 4)
                 listCorner.Parent = dropdownList
-                
+
                 local listLayout = Instance.new("UIListLayout")
                 listLayout.Parent = dropdownList
                 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
                 listLayout.Padding = UDim.new(0, 0)
-                
+
                 for i, option in ipairs(options or {}) do
                     local optionButton = Instance.new("TextButton")
                     optionButton.Name = option.."Option"
@@ -400,11 +435,11 @@ function AE:Menu(title, section, options, defaultOption)
                     optionButton.TextXAlignment = Enum.TextXAlignment.Left
                     optionButton.LayoutOrder = i
                     optionButton.ZIndex = 10
-                    
+
                     local optionPadding = Instance.new("UIPadding")
                     optionPadding.Parent = optionButton
                     optionPadding.PaddingLeft = UDim.new(0, 10)
-                    
+
                     if option == selectedOption then
                         optionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                         optionButton.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -423,7 +458,7 @@ function AE:Menu(title, section, options, defaultOption)
 
                         optionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                         optionButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-                        
+
                         dropdownButton.Text = option
                         menuData.selected = option
                         dropdownList.Visible = false
@@ -433,11 +468,39 @@ function AE:Menu(title, section, options, defaultOption)
                         end
                     end)
                 end
+
+                local function closeDropdown()
+                    dropdownList.Visible = false
+                end
                 
                 dropdownButton.MouseButton1Click:Connect(function()
-                    dropdownList.Visible = not dropdownList.Visible
+                    if dropdownList.Visible then
+                        dropdownList.Visible = false
+                    else
+                        dropdownList.Visible = true
+                        local connection
+                        connection = game:GetService("UserInputService").InputBegan:Connect(function(input)
+                            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                                local position = input.Position
+                                local guiObjects = game.Players.LocalPlayer:GetGuiObjectsAtPosition(position.X, position.Y)
+                                local clickedOnMenu = false
+                                
+                                for _, obj in ipairs(guiObjects) do
+                                    if obj == dropdownButton or obj:IsDescendantOf(dropdownList) then
+                                        clickedOnMenu = true
+                                        break
+                                    end
+                                end
+                                
+                                if not clickedOnMenu then
+                                    closeDropdown()
+                                    connection:Disconnect()
+                                end
+                            end
+                        end)
+                    end
                 end)
-                
+
                 return menuContainer
             end,
             setCallback = function(callback)
@@ -530,7 +593,7 @@ function AE:Input(title, section, defaultValue, placeholder, callback)
             end,
             setValue = function(newValue)
                 inputData.value = newValue
-                
+
                 if internal.currentSection == section.Name then
                     local inputContainer = internal.RightContent:FindFirstChild(title.."Input")
                     if inputContainer then
@@ -650,17 +713,17 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
                     local trackPos = sliderTrack.AbsolutePosition.X
                     local trackWidth = sliderTrack.AbsoluteSize.X
                     local mousePos = input.Position.X
-                    
+
                     local relativePos = math.clamp((mousePos - trackPos) / trackWidth, 0, 1)
                     local newValue = min + (relativePos * (max - min))
-                    newValue = math.floor(newValue + 0.5) -- Round to nearest integer
-                    
+                    newValue = math.floor(newValue + 0.5)
+
                     sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
                     sliderThumb.Position = UDim2.new(relativePos, 0, 0.5, 0)
                     valueLabel.Text = tostring(newValue)
-                    
+
                     sliderData.value = newValue
-                    
+
                     if callback then
                         callback(newValue)
                     end
@@ -696,7 +759,7 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
             setValue = function(newValue)
                 newValue = math.clamp(newValue, min, max)
                 sliderData.value = newValue
-                
+
                 if internal.currentSection == section.Name then
                     local sliderContainer = internal.RightContent:FindFirstChild(title.."Slider")
                     if sliderContainer then
@@ -704,21 +767,21 @@ function AE:Slider(title, section, min, max, defaultValue, callback)
                         local sliderTrack = sliderContainer:FindFirstChild("SliderTrack")
                         local sliderFill = sliderTrack and sliderTrack:FindFirstChild("SliderFill")
                         local sliderThumb = sliderTrack and sliderTrack:FindFirstChild("SliderThumb")
-                        
+
                         if valueLabel then
                             valueLabel.Text = tostring(newValue)
                         end
-                        
+
                         if sliderFill then
                             sliderFill.Size = UDim2.new((newValue - min) / (max - min), 0, 1, 0)
                         end
-                        
+
                         if sliderThumb then
                             sliderThumb.Position = UDim2.new((newValue - min) / (max - min), 0, 0.5, 0)
                         end
                     end
                 end
-                
+
                 if callback then
                     callback(newValue)
                 end
@@ -815,7 +878,7 @@ function AE:Toggle(title, section, defaultValue, callback)
                         0.2,
                         true
                     )
-                    
+
                     if callback then
                         callback(toggleData.value)
                     end
@@ -831,17 +894,17 @@ function AE:Toggle(title, section, defaultValue, callback)
             end,
             setValue = function(newValue)
                 toggleData.value = newValue
-                
+
                 if internal.currentSection == section.Name then
                     local toggleContainer = internal.RightContent:FindFirstChild(title.."Toggle")
                     if toggleContainer then
                         local toggleButton = toggleContainer:FindFirstChild("ToggleButton")
                         local toggleIndicator = toggleButton and toggleButton:FindFirstChild("ToggleIndicator")
-                        
+
                         if toggleButton then
                             toggleButton.BackgroundColor3 = toggleData.value and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(40, 40, 40)
                         end
-                        
+
                         if toggleIndicator then
                             toggleIndicator:TweenPosition(
                                 toggleData.value and UDim2.new(0.7, 0, 0.5, 0) or UDim2.new(0.3, 0, 0.5, 0),
@@ -853,7 +916,7 @@ function AE:Toggle(title, section, defaultValue, callback)
                         end
                     end
                 end
-                
+
                 if callback then
                     callback(toggleData.value)
                 end
@@ -890,21 +953,21 @@ function AE:Label(text, section)
                 label.TextColor3 = Color3.fromRGB(200, 200, 200)
                 label.Font = Enum.Font.Gotham
                 label.TextSize = 14
-                
+
                 local labelCorner = Instance.new("UICorner")
                 labelCorner.CornerRadius = UDim.new(0, 4)
                 labelCorner.Parent = label
-                
+
                 local labelStroke = Instance.new("UIStroke")
                 labelStroke.Color = Color3.fromRGB(40, 40, 40)
                 labelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                 labelStroke.Parent = label
-                
+
                 return label
             end,
             setText = function(newText)
                 labelData.text = newText
-                
+
                 if internal.currentSection == section.Name then
                     local label = internal.RightContent:FindFirstChild("Label")
                     if label then
@@ -937,11 +1000,11 @@ function AE:Separator(section)
                 separator.Size = UDim2.new(0.95, 0, 0, 2)
                 separator.Position = UDim2.new(0.025, 0, 0, 0)
                 separator.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                
+
                 local separatorCorner = Instance.new("UICorner")
                 separatorCorner.CornerRadius = UDim.new(0, 1)
                 separatorCorner.Parent = separator
-                
+
                 return separator
             end
         }
@@ -955,10 +1018,10 @@ function AE:Separator(section)
     end
 end
 
--- Al final del archivo, iniciamos la primera sección por defecto
 game.Players.LocalPlayer:WaitForChild("PlayerGui").ChildAdded:Connect(function(child)
-    if child.Name == internal.ScreenGui and internal.firstSection then
-        wait(0.1) -- Pequeña espera para asegurar que todos los elementos estén cargados
+    if child == internal.ScreenGui and internal.firstSection and not initialized then
+        wait(0.1)
+        initialized = true
         internal.selectSection(internal.firstSection)
     end
 end)

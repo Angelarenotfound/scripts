@@ -323,13 +323,24 @@ function internal.selectSection(s)
     internal.sections[s].frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
     internal.sections[s].frame:FindFirstChild("SectionTitle").TextColor3 = Color3.fromRGB(220,220,220)
     internal.sections[s].indicator.Visible = true
-    for _,c in ipairs(internal.RightContent:GetChildren()) do
-        if c:IsA("GuiObject") and not c:IsA("UIListLayout") then c:Destroy() end
+    
+    -- Primero limpiamos el contenido actual
+    if internal.RightContent:IsA("ScrollingFrame") then
+        for _,c in ipairs(internal.RightContent:GetChildren()) do
+            if c:IsA("GuiObject") and not c:IsA("UIListLayout") then c:Destroy() end
+        end
+    else
+        for _,c in ipairs(internal.RightContent:GetChildren()) do
+            if c:IsA("GuiObject") then c:Destroy() end
+        end
     end
+    
+    -- Después agregamos los nuevos elementos
     for _,e in ipairs(internal.sections[s].elements) do
         local el = e.create()
         el.Parent = internal.RightContent
     end
+    
     internal.currentSection = s
 end
 
@@ -645,12 +656,12 @@ function AE:Menu(t,s,o,d)
                 dll.Parent = dl
                 dll.SortOrder = Enum.SortOrder.LayoutOrder
                 dll.Padding = UDim.new(0,0)
-                for i,op in ipairs(o) do
+                for i,opt in ipairs(o) do
                     local ob = Instance.new("TextButton")
-                    ob.Name = op.."Option"
+                    ob.Name = opt.."Option"
                     ob.Parent = dl
                     ob.Size = UDim2.new(1,0,0,30)
-                    ob.Text = op
+                    ob.Text = opt
                     ob.Font = Enum.Font.Gotham
                     ob.TextSize = 14
                     ob.TextXAlignment = Enum.TextXAlignment.Left
@@ -659,7 +670,7 @@ function AE:Menu(t,s,o,d)
                     local op = Instance.new("UIPadding")
                     op.Parent = ob
                     op.PaddingLeft = UDim.new(0,10)
-                    if op == so then
+                    if opt == so then
                         ob.BackgroundColor3 = Color3.fromRGB(50,50,50)
                         ob.TextColor3 = Color3.fromRGB(255,0,0)
                     else
@@ -675,10 +686,10 @@ function AE:Menu(t,s,o,d)
                         end
                         ob.BackgroundColor3 = Color3.fromRGB(50,50,50)
                         ob.TextColor3 = Color3.fromRGB(255,0,0)
-                        db.Text = op
-                        md.selected = op
+                        db.Text = opt
+                        md.selected = opt
                         dl.Visible = false
-                        if md.callback then md.callback(op) end
+                        if md.callback then md.callback(opt) end
                     end)
                 end
                 local function cd() dl.Visible = false end

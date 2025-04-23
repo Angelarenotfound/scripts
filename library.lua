@@ -26,8 +26,28 @@ local function createContainer(m,p)
     if p.notificationPosition=="topleft"then pos,ali=UDim2.new(0,20,0,20),Enum.VerticalAlignment.Top
     elseif p.notificationPosition=="bottomright"then pos,ali=UDim2.new(1,-20,1,-20),Enum.VerticalAlignment.Bottom
     elseif p.notificationPosition=="bottomleft"then pos,ali=UDim2.new(0,20,1,-20),Enum.VerticalAlignment.Bottom end
-    m.NotificationsContainer=createElement({Name="NotificationsContainer",Size=UDim2.new(0,isMobile()and 250 or 300,1,-40),Position=pos,BackgroundTransparency=1,Parent=m},"Frame")
-    createElement({SortOrder=Enum.SortOrder.LayoutOrder,Padding=UDim.new(0,10),HorizontalAlignment=Enum.HorizontalAlignment.Right,VerticalAlignment=ali,Parent=m.NotificationsContainer},"UIListLayout")
+    
+    if m:FindFirstChild("NotificationsContainer") then
+        m.NotificationsContainer:Destroy()
+    end
+    
+    local notificationsContainer = createElement({
+        Name="NotificationsContainer",
+        Size=UDim2.new(0,isMobile()and 250 or 300,1,-40),
+        Position=pos,
+        BackgroundTransparency=1,
+        Parent=m
+    },"Frame")
+    
+    createElement({
+        SortOrder=Enum.SortOrder.LayoutOrder,
+        Padding=UDim.new(0,10),
+        HorizontalAlignment=Enum.HorizontalAlignment.Right,
+        VerticalAlignment=ali,
+        Parent=notificationsContainer
+    },"UIListLayout")
+    
+    return notificationsContainer
 end
 
 local function processQueue()
@@ -175,7 +195,7 @@ end
 function AE:Menu(t,s,o,d)
     if not internal.sections[s.Name]then return end
     o,d=o or{},d or(o[1]or"")
-    local md={type="menu",title=t,options=o,selected=d,create=function()
+    local md={type="menu",title=t,options=o,selected=d,callback=nil,create=function()
         local mc=createElement({Name=t.."Menu",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
         createElement({CornerRadius=UDim.new(0,4),Parent=mc},"UICorner")
         createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=mc},"UIStroke")
@@ -230,6 +250,7 @@ function AE:Input(t,s,d,p,c)
     if internal.currentSection==s.Name then id.create()end
     return{setCallback=id.setCallback,getValue=id.getValue,setValue=id.setValue}
 end
+
 
 function AE:Slider(t,s,mi,ma,d,c)
     if not internal.sections[s.Name]then return end
@@ -329,7 +350,11 @@ end
 
 function AE:Notify(t,d,nt,o)
     local m=game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("MainFrame")
-    if not m.NotificationsContainer then createContainer(m,AE.config)end
+    
+    if not m:FindFirstChild("NotificationsContainer") then
+        createContainer(m,AE.config)
+    end
+    
     return AE_Notify(m,t,d,nt,o)
 end
 

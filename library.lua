@@ -119,8 +119,8 @@ local function AE_Notify(m,t,d,nt,o)
 end
 
 function internal.selectSection(s)
-    if not internal.sections[s]then return end
-    for n,se in pairs(internal.sections)do
+    if not internal.sections[s] then return end
+    for n,se in pairs(internal.sections) do
         se.frame.BackgroundColor3=Color3.fromRGB(45,45,45)
         se.frame:FindFirstChild("SectionTitle").TextColor3=Color3.fromRGB(180,180,180)
         se.indicator.Visible=false
@@ -128,8 +128,15 @@ function internal.selectSection(s)
     internal.sections[s].frame.BackgroundColor3=Color3.fromRGB(20,20,20)
     internal.sections[s].frame:FindFirstChild("SectionTitle").TextColor3=Color3.fromRGB(220,220,220)
     internal.sections[s].indicator.Visible=true
-    for _,c in ipairs(internal.RightContent:GetChildren())do if c:IsA("GuiObject")and not c:IsA("UIListLayout")then c:Destroy()end end
-    for _,e in ipairs(internal.sections[s].elements)do e.create().Parent=internal.RightContent end
+    for _,c in ipairs(internal.RightContent:GetChildren()) do if c:IsA("GuiObject") and not c:IsA("UIListLayout") then c:Destroy() end end
+    for _,e in ipairs(internal.sections[s].elements) do 
+        if e and type(e.create) == "function" then
+            local element = e.create()
+            if element then
+                element.Parent = internal.RightContent
+            end
+        end
+    end
     internal.currentSection=s
 end
 
@@ -193,7 +200,7 @@ function AE:button(b,s,c)
 end
 
 function AE:Menu(t,s,o,d)
-    if not internal.sections[s.Name]then return end
+    if not internal.sections[s.Name] then return end
     o,d=o or{},d or(o[1]or"")
     local md={type="menu",title=t,options=o,selected=d,callback=nil,create=function()
         local mc=createElement({Name=t.."Menu",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")

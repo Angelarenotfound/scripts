@@ -26,11 +26,11 @@ local function createContainer(m,p)
     if p.notificationPosition=="topleft"then pos,ali=UDim2.new(0,20,0,20),Enum.VerticalAlignment.Top
     elseif p.notificationPosition=="bottomright"then pos,ali=UDim2.new(1,-20,1,-20),Enum.VerticalAlignment.Bottom
     elseif p.notificationPosition=="bottomleft"then pos,ali=UDim2.new(0,20,1,-20),Enum.VerticalAlignment.Bottom end
-    
+
     if m:FindFirstChild("NotificationsContainer") then
         m.NotificationsContainer:Destroy()
     end
-    
+
     local notificationsContainer = createElement({
         Name="NotificationsContainer",
         Size=UDim2.new(0,isMobile()and 250 or 300,1,-40),
@@ -38,7 +38,7 @@ local function createContainer(m,p)
         BackgroundTransparency=1,
         Parent=m
     },"Frame")
-    
+
     createElement({
         SortOrder=Enum.SortOrder.LayoutOrder,
         Padding=UDim.new(0,10),
@@ -46,7 +46,7 @@ local function createContainer(m,p)
         VerticalAlignment=ali,
         Parent=notificationsContainer
     },"UIListLayout")
-    
+
     return notificationsContainer
 end
 
@@ -349,13 +349,23 @@ function AE:Label(t,s)
 end
 
 function AE:Notify(t,d,nt,o)
-    local m=game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("MainFrame")
+    local m=game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui")
     
-    if not m:FindFirstChild("NotificationsContainer") then
-        createContainer(m,AE.config)
+    if not m then
+        return
     end
     
-    return AE_Notify(m,t,d,nt,o)
+    local mainFrame = m:FindFirstChild("MainFrame")
+    
+    if not mainFrame then
+        return
+    end
+    
+    if not mainFrame:FindFirstChild("NotificationsContainer") then
+        createContainer(mainFrame, AE.config)
+    end
+
+    return AE_Notify(mainFrame, t, d, nt, o)
 end
 
 function AE:Separator(s)

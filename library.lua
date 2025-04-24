@@ -31,13 +31,12 @@ local function createContainer(m,p)
         m.NotificationsContainer:Destroy()
     end
 
-    -- Fix: Create the notifications container outside the main GUI
     local notificationsContainer = createElement({
         Name="NotificationsContainer",
         Size=UDim2.new(0,isMobile()and 250 or 300,1,-40),
         Position=pos,
         BackgroundTransparency=1,
-        Parent=m.Parent -- Changed from m to m.Parent to place it outside
+        Parent=m.Parent -- Changed from m to m.Parent to make notifications appear outside the GUI
     },"Frame")
 
     createElement({
@@ -474,191 +473,121 @@ function AE:Input(t, s, d, p, c)
     }
 end
 
-function AE:Slider(t, s, mi, ma, d, c)
-    if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return 0 end, setValue = function() end} end
-    
-    mi, ma, d = mi or 0, ma or 100, math.clamp(d or mi, mi, ma)
-    
-    local sd = {
-        type = "slider",
-        title = t,
-        min = mi,
-        max = ma,
-        value = d,
-        callback = c,
-        create = function()
-            local sc = createElement({
-                Name = t.."Slider",
-                Size = UDim2.new(0.95, 0, 0, 70),
-                Position = UDim2.new(0.025, 0, 0, 0),
-                BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-                Parent = internal.RightContent
-            }, "Frame")
-            
-            createElement({CornerRadius = UDim.new(0, 4), Parent = sc}, "UICorner")
-            createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = sc}, "UIStroke")
-            
-            createElement({
-                Name = "SliderTitle",
-                Parent = sc,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0.7, 0, 0, 25),
-                Font = Enum.Font.GothamMedium,
-                Text = t,
-                TextColor3 = Color3.fromRGB(200, 200, 200),
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Position = UDim2.new(0.05, 0, 0, 0)
-            }, "TextLabel")
-            
-            local vl = createElement({
-                Name = "ValueLabel",
-                Parent = sc,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0.2, 0, 0, 25),
-                Position = UDim2.new(0.75, 0, 0, 0),
-                Font = Enum.Font.GothamMedium,
-                Text = tostring(sd.value),
-                TextColor3 = Color3.fromRGB(200, 200, 200),
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Right
-            }, "TextLabel")
-            
-            local st = createElement({
-                Name = "SliderTrack",
-                Parent = sc,
-                Position = UDim2.new(0.05, 0, 0.6, 0),
-                Size = UDim2.new(0.9, 0, 0, 6),
-                BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            }, "Frame")
-            
-            createElement({CornerRadius = UDim.new(0, 3), Parent = st}, "UICorner")
-            
-            local sf = createElement({
-                Name = "SliderFill",
-                Parent = st,
-                Size = UDim2.new((sd.value - mi) / (ma - mi), 0, 1, 0),
-                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            }, "Frame")
-            
-            createElement({CornerRadius = UDim.new(0, 3), Parent = sf}, "UICorner")
-            
-            local sth = createElement({
-                Name = "SliderThumb",
-                Parent = st,
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new((sd.value - mi) / (ma - mi), 0, 0.5, 0),
-                Size = UDim2.new(0, 12, 0, 12),
-                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            }, "Frame")
-            
-            createElement({CornerRadius = UDim.new(1, 0), Parent = sth}, "UICorner")
-            
-            local dr = false
-            
+
+function AE:Slider(t,s,mi,ma,d,c)
+    if not internal.sections[s.Name]then return {setCallback = function() end, getValue = function() return 0 end, setValue = function() end} end
+    mi,ma,d=mi or 0,ma or 100,math.clamp(d or mi,mi,ma)
+    local sd={
+        type="slider",
+        title=t,
+        min=mi,
+        max=ma,
+        value=d,
+        callback=c,
+        create=function()
+            local sc=createElement({Name=t.."Slider",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
+            createElement({CornerRadius=UDim.new(0,4),Parent=sc},"UICorner")
+            createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=sc},"UIStroke")
+            createElement({Name="SliderTitle",Parent=sc,BackgroundTransparency=1,Size=UDim2.new(0.7,0,0,25),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,Position=UDim2.new(0.05,0,0,0)},"TextLabel")
+            local vl=createElement({Name="ValueLabel",Parent=sc,BackgroundTransparency=1,Size=UDim2.new(0.2,0,0,25),Position=UDim2.new(0.75,0,0,0),Font=Enum.Font.GothamMedium,Text=tostring(sd.value),TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Right},"TextLabel")
+            local st=createElement({Name="SliderTrack",Parent=sc,Position=UDim2.new(0.05,0,0.6,0),Size=UDim2.new(0.9,0,0,6),BackgroundColor3=Color3.fromRGB(40,40,40)},"Frame")
+            createElement({CornerRadius=UDim.new(0,3),Parent=st},"UICorner")
+            local sf=createElement({Name="SliderFill",Parent=st,Size=UDim2.new((sd.value-mi)/(ma-mi),0,1,0),BackgroundColor3=Color3.fromRGB(255,0,0)},"Frame")
+            createElement({CornerRadius=UDim.new(0,3),Parent=sf},"UICorner")
+            local sth=createElement({Name="SliderThumb",Parent=st,AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.new((sd.value-mi)/(ma-mi),0,0.5,0),Size=UDim2.new(0,12,0,12),BackgroundColor3=Color3.fromRGB(255,0,0)},"Frame")
+            createElement({CornerRadius=UDim.new(1,0),Parent=sth},"UICorner")
+            local dr=false
             local function us(i)
-                local tp, tw, mp = st.AbsolutePosition.X, st.AbsoluteSize.X, i.Position.X
-                local rp = math.clamp((mp - tp) / tw, 0, 1)
-                local nv = math.floor(mi + (rp * (ma - mi)) + 0.5)
-                sf.Size = UDim2.new(rp, 0, 1, 0)
-                sth.Position = UDim2.new(rp, 0, 0.5, 0)
-                vl.Text = tostring(nv)
-                sd.value = nv
-                
-                if sd.callback then
-                    sd.callback(nv)
-                end
+                local tp,tw,mp=st.AbsolutePosition.X,st.AbsoluteSize.X,i.Position.X
+                local rp=math.clamp((mp-tp)/tw,0,1)
+                local nv=math.floor(mi+(rp*(ma-mi))+0.5)
+                sf.Size,sth.Position,vl.Text,sd.value=UDim2.new(rp,0,1,0),UDim2.new(rp,0,0.5,0),tostring(nv),nv
+                if sd.callback then sd.callback(nv)end
             end
-            
-            st.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    dr = true
-                    us(i)
-                end
-            end)
-            
-            st.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    dr = false
-                end
-            end)
-            
-            st.InputChanged:Connect(function(i)
-                if dr and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-                    us(i)
-                end
-            end)
-            
+            st.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=true us(i)end end)
+            st.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=false end end)
+            st.InputChanged:Connect(function(i)if dr and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then us(i)end end)
             return sc
         end,
-        
-        setCallback = function(nc)
-            sd.callback = nc
+        setCallback=function(nc)
+            if type(nc) == "function" then
+                sd.callback = nc
+            else
+                warn("El callback proporcionado no es una función")
+            end
         end,
-        
-        getValue = function()
+        getValue=function()
             return sd.value
         end,
-        
-        setValue = function(nv)
-            nv = math.clamp(nv, mi, ma)
-            sd.value = nv
-            
-            local sc = internal.RightContent:FindFirstChild(t.."Slider")
+        setValue=function(nv)
+            nv=math.clamp(nv,mi,ma)
+            sd.value=nv
+            local sc=internal.RightContent:FindFirstChild(t.."Slider")
             if sc then
-                local vl, st = sc:FindFirstChild("ValueLabel"), sc:FindFirstChild("SliderTrack")
-                if vl then vl.Text = tostring(nv) end
+                local vl,st=sc:FindFirstChild("ValueLabel"),sc:FindFirstChild("SliderTrack")
+                if vl then vl.Text=tostring(nv)end
                 if st then
-                    local sf, sth = st:FindFirstChild("SliderFill"), st:FindFirstChild("SliderThumb")
-                    if sf then sf.Size = UDim2.new((nv - mi) / (ma - mi), 0, 1, 0) end
-                    if sth then sth.Position = UDim2.new((nv - mi) / (ma - mi), 0, 0.5, 0) end
+                    local sf,sth=st:FindFirstChild("SliderFill"),st:FindFirstChild("SliderThumb")
+                    if sf then sf.Size=UDim2.new((nv-mi)/(ma-mi),0,1,0)end
+                    if sth then sth.Position=UDim2.new((nv-mi)/(ma-mi),0,0.5,0)end
                 end
             end
-            
-            if sd.callback then
-                sd.callback(nv)
-            end
+            if sd.callback then sd.callback(nv)end
         end
     }
-    
-    table.insert(internal.sections[s.Name].elements, sd)
-    if internal.currentSection == s.Name then sd.create() end
-    
-    return {
-        setCallback = sd.setCallback,
-        getValue = sd.getValue,
-        setValue = sd.setValue
-    }
+    table.insert(internal.sections[s.Name].elements,sd)
+    if internal.currentSection==s.Name then sd.create()end
+    return{setCallback=sd.setCallback,getValue=sd.getValue,setValue=sd.setValue}
 end
 
 function AE:Toggle(t,s,d,c)
-    if not internal.sections[s.Name]then return end
-    local td={type="toggle",title=t,value=d or false,create=function()
-        local tc=createElement({Name=t.."Toggle",Size=UDim2.new(0.95,0,0,40),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
-        createElement({CornerRadius=UDim.new(0,4),Parent=tc},"UICorner")
-        createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=tc},"UIStroke")
-        createElement({Name="ToggleTitle",Parent=tc,BackgroundTransparency=1,Size=UDim2.new(0.8,0,1,0),Position=UDim2.new(0.05,0,0,0),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left},"TextLabel")
-        local tb=createElement({Name="ToggleButton",Parent=tc,AnchorPoint=Vector2.new(0,0.5),Position=UDim2.new(0.85,0,0.5,0),Size=UDim2.new(0,36,0,20),BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)},"Frame")
-        createElement({CornerRadius=UDim.new(1,0),Parent=tb},"UICorner")
-        local ti=createElement({Name="ToggleIndicator",Parent=tb,AnchorPoint=Vector2.new(0.5,0.5),Position=td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Size=UDim2.new(0,16,0,16),BackgroundColor3=Color3.fromRGB(200,200,200)},"Frame")
-        createElement({CornerRadius=UDim.new(1,0),Parent=ti},"UICorner")
-        createElement({Name="ClickArea",Parent=tc,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Text=""},"TextButton").MouseButton1Click:Connect(function()
-            td.value=not td.value
-            tb.BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)
-            ti:TweenPosition(td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,0.2,true)
-            if c then c(td.value)end
-        end)
-        return tc
-    end,setCallback=function(nc)c=nc end,getValue=function()return td.value end,setValue=function(nv)
-        td.value=nv
-        local tc=internal.RightContent:FindFirstChild(t.."Toggle")
-        if tc then
-            local tb,ti=tc:FindFirstChild("ToggleButton"),tc:FindFirstChild("ToggleIndicator")
-            if tb then tb.BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)end
-            if ti then ti:TweenPosition(td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,0.2,true)end
+    if not internal.sections[s.Name]then return {setCallback = function() end, getValue = function() return false end, setValue = function() end} end
+    local td={
+        type="toggle",
+        title=t,
+        value=d or false,
+        callback=c,
+        create=function()
+            local tc=createElement({Name=t.."Toggle",Size=UDim2.new(0.95,0,0,40),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
+            createElement({CornerRadius=UDim.new(0,4),Parent=tc},"UICorner")
+            createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=tc},"UIStroke")
+            createElement({Name="ToggleTitle",Parent=tc,BackgroundTransparency=1,Size=UDim2.new(0.8,0,1,0),Position=UDim2.new(0.05,0,0,0),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left},"TextLabel")
+            local tb=createElement({Name="ToggleButton",Parent=tc,AnchorPoint=Vector2.new(0,0.5),Position=UDim2.new(0.85,0,0.5,0),Size=UDim2.new(0,36,0,20),BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)},"Frame")
+            createElement({CornerRadius=UDim.new(1,0),Parent=tb},"UICorner")
+            local ti=createElement({Name="ToggleIndicator",Parent=tb,AnchorPoint=Vector2.new(0.5,0.5),Position=td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Size=UDim2.new(0,16,0,16),BackgroundColor3=Color3.fromRGB(200,200,200)},"Frame")
+            createElement({CornerRadius=UDim.new(1,0),Parent=ti},"UICorner")
+            createElement({Name="ClickArea",Parent=tc,BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Text=""},"TextButton").MouseButton1Click:Connect(function()
+                td.value=not td.value
+                tb.BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)
+                ti:TweenPosition(td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,0.2,true)
+                if td.callback then td.callback(td.value) end
+            end)
+            return tc
+        end,
+        setCallback=function(nc)
+            if type(nc) == "function" then
+                td.callback = nc
+            else
+                warn("El callback proporcionado no es una función")
+            end
+        end,
+        getValue=function()
+            return td.value
+        end,
+        setValue=function(nv)
+            td.value=nv
+            local tc=internal.RightContent:FindFirstChild(t.."Toggle")
+            if tc then
+                local tb=tc:FindFirstChild("ToggleButton")
+                if tb then 
+                    tb.BackgroundColor3=td.value and Color3.fromRGB(255,0,0)or Color3.fromRGB(40,40,40)
+                    local ti=tb:FindFirstChild("ToggleIndicator")
+                    if ti then ti:TweenPosition(td.value and UDim2.new(0.7,0,0.5,0)or UDim2.new(0.3,0,0.5,0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,0.2,true) end
+                end
+            end
+            if td.callback then td.callback(td.value) end
         end
-        if c then c(td.value)end
-    end}
+    }
     table.insert(internal.sections[s.Name].elements,td)
     if internal.currentSection==s.Name then td.create()end
     return{setCallback=td.setCallback,getValue=td.getValue,setValue=td.setValue}

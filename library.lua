@@ -199,63 +199,278 @@ function AE:button(b,s,c)
     if internal.currentSection==s.Name then bd.create()end
 end
 
-function AE:Menu(t,s,o,d)
-    if not internal.sections[s.Name]then return end
-    o,d=o or{},d or(o[1]or"")
-    local md={type="menu",title=t,options=o,selected=d,callback=nil,create=function()
-        local mc=createElement({Name=t.."Menu",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
-        createElement({CornerRadius=UDim.new(0,4),Parent=mc},"UICorner")
-        createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=mc},"UIStroke")
-        createElement({Name="MenuTitle",Parent=mc,BackgroundTransparency=1,Size=UDim2.new(1,0,0,25),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14},"TextLabel")
-        local db=createElement({Name="DropdownButton",Parent=mc,BackgroundColor3=Color3.fromRGB(0,0,0),Position=UDim2.new(0.05,0,0.45,0),Size=UDim2.new(0.9,0,0,30),Font=Enum.Font.Gotham,Text=d,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,TextTruncate=Enum.TextTruncate.AtEnd},"TextButton")
-        createElement({PaddingLeft=UDim.new(0,10),Parent=db},"UIPadding")
-        createElement({CornerRadius=UDim.new(0,4),Parent=db},"UICorner")
-        local dl=createElement({Name="DropdownList",Parent=mc,BackgroundColor3=Color3.fromRGB(0,0,0),Position=UDim2.new(0.05,0,0.9,0),Size=UDim2.new(0.9,0,0,#o*30),Visible=false,ZIndex=10,ClipsDescendants=true},"Frame")
-        createElement({CornerRadius=UDim.new(0,4),Parent=dl},"UICorner")
-        createElement({SortOrder=Enum.SortOrder.LayoutOrder,Padding=UDim.new(0,0),Parent=dl},"UIListLayout")
-        for i,opt in ipairs(o)do
-            local ob=createElement({Name=opt.."Option",Parent=dl,Size=UDim2.new(1,0,0,30),Text=opt,Font=Enum.Font.Gotham,TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=i,ZIndex=10},"TextButton")
-            createElement({PaddingLeft=UDim.new(0,10),Parent=ob},"UIPadding")
-            ob.BackgroundColor3,ob.TextColor3=opt==d and Color3.fromRGB(50,50,50)or Color3.fromRGB(15,15,15),opt==d and Color3.fromRGB(255,0,0)or Color3.fromRGB(180,180,180)
-            ob.MouseButton1Click:Connect(function()
-                for _,c in ipairs(dl:GetChildren())do if c:IsA("TextButton")then c.BackgroundColor3,c.TextColor3=Color3.fromRGB(15,15,15),Color3.fromRGB(180,180,180)end end
-                ob.BackgroundColor3,ob.TextColor3,db.Text,md.selected=Color3.fromRGB(50,50,50),Color3.fromRGB(255,0,0),opt,opt dl.Visible=false 
-                if md.callback then md.callback(opt)end
-            end)
-        end
-        db.MouseButton1Click:Connect(function()
-            dl.Visible=not dl.Visible
-            if dl.Visible then
-                local co=game:GetService("UserInputService").InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 then local p=i.Position local g=game.Players.LocalPlayer:GetGuiObjectsAtPosition(p.X,p.Y)local cm=false for _,o in ipairs(g)do if o==db or o:IsDescendantOf(dl)then cm=true break end end if not cm then dl.Visible=false co:Disconnect()end end end)
+function AE:Menu(t, s, o, d)
+    if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return "" end, setValue = function() end} end
+    
+    o = o or {}
+    d = d or (o[1] or "")
+    
+    local md = {
+        type = "menu",
+        title = t,
+        options = o,
+        selected = d,
+        callback = nil,
+        create = function()
+            local mc = createElement({
+                Name = t.."Menu",
+                Size = UDim2.new(0.95, 0, 0, 70),
+                Position = UDim2.new(0.025, 0, 0, 0),
+                BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+                Parent = internal.RightContent
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 4), Parent = mc}, "UICorner")
+            createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = mc}, "UIStroke")
+            
+            createElement({
+                Name = "MenuTitle",
+                Parent = mc,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 25),
+                Font = Enum.Font.GothamMedium,
+                Text = t,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14
+            }, "TextLabel")
+            
+            local db = createElement({
+                Name = "DropdownButton",
+                Parent = mc,
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                Position = UDim2.new(0.05, 0, 0.45, 0),
+                Size = UDim2.new(0.9, 0, 0, 30),
+                Font = Enum.Font.Gotham,
+                Text = md.selected,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd
+            }, "TextButton")
+            
+            createElement({PaddingLeft = UDim.new(0, 10), Parent = db}, "UIPadding")
+            createElement({CornerRadius = UDim.new(0, 4), Parent = db}, "UICorner")
+            
+            local dl = createElement({
+                Name = "DropdownList",
+                Parent = mc,
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                Position = UDim2.new(0.05, 0, 0.9, 0),
+                Size = UDim2.new(0.9, 0, 0, #o * 30),
+                Visible = false,
+                ZIndex = 10,
+                ClipsDescendants = true
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 4), Parent = dl}, "UICorner")
+            createElement({SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 0), Parent = dl}, "UIListLayout")
+            
+            for i, opt in ipairs(o) do
+                local ob = createElement({
+                    Name = opt.."Option",
+                    Parent = dl,
+                    Size = UDim2.new(1, 0, 0, 30),
+                    Text = opt,
+                    Font = Enum.Font.Gotham,
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    LayoutOrder = i,
+                    ZIndex = 10
+                }, "TextButton")
+                
+                createElement({PaddingLeft = UDim.new(0, 10), Parent = ob}, "UIPadding")
+                ob.BackgroundColor3 = opt == md.selected and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(15, 15, 15)
+                ob.TextColor3 = opt == md.selected and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(180, 180, 180)
+                
+                ob.MouseButton1Click:Connect(function()
+                    for _, c in ipairs(dl:GetChildren()) do
+                        if c:IsA("TextButton") then
+                            c.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+                            c.TextColor3 = Color3.fromRGB(180, 180, 180)
+                        end
+                    end
+                    
+                    ob.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                    ob.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    db.Text = opt
+                    md.selected = opt
+                    dl.Visible = false
+                    
+                    if md.callback then
+                        md.callback(opt)
+                    end
+                end)
             end
-        end)
-        return mc
-    end,setCallback=function(c)if c then md.callback=c end end}
-    table.insert(internal.sections[s.Name].elements,md)
-    if internal.currentSection==s.Name then md.create()end
-    return{setCallback=md.setCallback}
+            
+            db.MouseButton1Click:Connect(function()
+                dl.Visible = not dl.Visible
+                if dl.Visible then
+                    local co = game:GetService("UserInputService").InputBegan:Connect(function(i)
+                        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                            local p = i.Position
+                            local g = game.Players.LocalPlayer:GetGuiObjectsAtPosition(p.X, p.Y)
+                            local cm = false
+                            
+                            for _, o in ipairs(g) do
+                                if o == db or o:IsDescendantOf(dl) then
+                                    cm = true
+                                    break
+                                end
+                            end
+                            
+                            if not cm then
+                                dl.Visible = false
+                                co:Disconnect()
+                            end
+                        end
+                    end)
+                end
+            end)
+            
+            return mc
+        end,
+        setCallback = function(c)
+            if type(c) == "function" then
+                md.callback = c
+            else
+                warn("El callback proporcionado no es una función")
+            end
+        end,
+        getValue = function()
+            return md.selected or d or ""
+        end,
+        setValue = function(nv)
+            if table.find(o, nv) then
+                md.selected = nv
+                local mc = internal.RightContent:FindFirstChild(t.."Menu")
+                if mc then
+                    local db = mc:FindFirstChild("DropdownButton")
+                    if db then db.Text = nv end
+                    
+                    local dl = mc:FindFirstChild("DropdownList")
+                    if dl then
+                        for _, child in ipairs(dl:GetChildren()) do
+                            if child:IsA("TextButton") then
+                                child.BackgroundColor3 = child.Text == nv and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(15, 15, 15)
+                                child.TextColor3 = child.Text == nv and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(180, 180, 180)
+                            end
+                        end
+                    end
+                end
+                
+                if md.callback then
+                    md.callback(nv)
+                end
+            else
+                warn("Valor no válido para el menú: "..tostring(nv))
+            end
+        end
+    }
+    
+    table.insert(internal.sections[s.Name].elements, md)
+    if internal.currentSection == s.Name then md.create() end
+    
+    return {
+        setCallback = md.setCallback,
+        getValue = md.getValue,
+        setValue = md.setValue
+    }
 end
 
-function AE:Input(t,s,d,p,c)
-    if not internal.sections[s.Name]then return end
-    local id={type="input",title=t,value=d or"",create=function()
-        local ic=createElement({Name=t.."Input",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
-        createElement({CornerRadius=UDim.new(0,4),Parent=ic},"UICorner")
-        createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=ic},"UIStroke")
-        createElement({Name="InputTitle",Parent=ic,BackgroundTransparency=1,Size=UDim2.new(1,0,0,25),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14},"TextLabel")
-        local ib=createElement({Name="InputBox",Parent=ic,Position=UDim2.new(0.05,0,0.45,0),Size=UDim2.new(0.9,0,0,30),BackgroundColor3=Color3.fromRGB(0,0,0),Text=d or"",PlaceholderText=p or"Enter text...",Font=Enum.Font.Gotham,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,ClipsDescendants=true,ClearTextOnFocus=false},"TextBox")
-        createElement({CornerRadius=UDim.new(0,4),Parent=ib},"UICorner")
-        createElement({PaddingLeft=UDim.new(0,10),Parent=ib},"UIPadding")
-        ib.FocusLost:Connect(function(e)id.value=ib.Text if c then c(ib.Text,e)end end)
-        return ic
-    end,setCallback=function(nc)if nc then c=nc end end,getValue=function()return id.value end,setValue=function(nv)
-        id.value=nv or id.value
-        local ic=internal.RightContent:FindFirstChild(t.."Input")
-        if ic then local ib=ic:FindFirstChild("InputBox")if ib then ib.Text=nv or id.value end end
-    end}
-    table.insert(internal.sections[s.Name].elements,id)
-    if internal.currentSection==s.Name then id.create()end
-    return{setCallback=id.setCallback,getValue=id.getValue,setValue=id.setValue}
+function AE:Input(t, s, d, p, c)
+    if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return "" end, setValue = function() end} end
+    
+    local id = {
+        type = "input",
+        title = t,
+        value = d or "",
+        callback = nil,
+        create = function()
+            local ic = createElement({
+                Name = t.."Input",
+                Size = UDim2.new(0.95, 0, 0, 70),
+                Position = UDim2.new(0.025, 0, 0, 0),
+                BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+                Parent = internal.RightContent
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 4), Parent = ic}, "UICorner")
+            createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = ic}, "UIStroke")
+            
+            createElement({
+                Name = "InputTitle",
+                Parent = ic,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 25),
+                Font = Enum.Font.GothamMedium,
+                Text = t,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14
+            }, "TextLabel")
+            
+            local ib = createElement({
+                Name = "InputBox",
+                Parent = ic,
+                Position = UDim2.new(0.05, 0, 0.45, 0),
+                Size = UDim2.new(0.9, 0, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                Text = id.value,
+                PlaceholderText = p or "Enter text...",
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ClipsDescendants = true,
+                ClearTextOnFocus = false
+            }, "TextBox")
+            
+            createElement({CornerRadius = UDim.new(0, 4), Parent = ib}, "UICorner")
+            createElement({PaddingLeft = UDim.new(0, 10), Parent = ib}, "UIPadding")
+            
+            ib.FocusLost:Connect(function(enterPressed)
+                id.value = ib.Text or ""
+                if id.callback then
+                    id.callback(id.value, enterPressed)
+                end
+            end)
+            
+            return ic
+        end,
+        setCallback = function(nc)
+            if type(nc) == "function" then
+                id.callback = nc
+            else
+                warn("El callback proporcionado no es una función")
+            end
+        end,
+        getValue = function()
+            return id.value or ""
+        end,
+        setValue = function(nv)
+            id.value = nv or id.value or ""
+            local ic = internal.RightContent:FindFirstChild(t.."Input")
+            if ic then
+                local ib = ic:FindFirstChild("InputBox")
+                if ib then
+                    ib.Text = id.value
+                end
+            end
+        end
+    }
+    
+    -- Configurar el callback inicial si se proporcionó
+    if c and type(c) == "function" then
+        id.callback = c
+    end
+    
+    table.insert(internal.sections[s.Name].elements, id)
+    if internal.currentSection == s.Name then id.create() end
+    
+    return {
+        setCallback = id.setCallback,
+        getValue = id.getValue,
+        setValue = id.setValue
+    }
 end
 
 

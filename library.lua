@@ -186,7 +186,7 @@ function AE:Section(s)
     return{Name=s,Frame=sf}
 end
 
-function AE:button(b,s,c)
+function AE:Button(b,s,c)
     if not internal.sections[s.Name]then return end
     local bd={type="button",text=b,callback=c or function()end,create=function()
         local bt=createElement({Name=b.."Button",Text=b,Size=UDim2.new(0.95,0,0,35),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),TextColor3=Color3.fromRGB(200,200,200),Font=Enum.Font.Gotham,TextSize=14,AutoButtonColor=true,Parent=internal.RightContent},"TextButton")

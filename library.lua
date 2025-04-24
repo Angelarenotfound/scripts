@@ -199,8 +199,8 @@ function AE:Button(b,s,c)
     if internal.currentSection==s.Name then bd.create()end
 end
 
-function AE:Menu(t, s, o, d)
-    if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return "" end, setValue = function() end} end
+function AE:Menu(t, s, o, d, c)  -- Añadido 'c' como parámetro de callback
+    if not internal.sections[s.Name] then return { getValue = function() return "" end } end
 
     o = o or {}
     d = d or (o[1] or "")
@@ -210,7 +210,7 @@ function AE:Menu(t, s, o, d)
         title = t,
         options = o,
         selected = d,
-        callback = nil,
+        callback = c,  -- Asignamos directamente el callback aquí
         create = function()
             local mc = createElement({
                 Name = t.."Menu",
@@ -297,7 +297,7 @@ function AE:Menu(t, s, o, d)
                     dl.Visible = false
 
                     if md.callback then
-                        md.callback(opt)
+                        md.callback(opt)  -- Llamamos al callback directamente
                     end
                 end)
             end
@@ -329,41 +329,8 @@ function AE:Menu(t, s, o, d)
 
             return mc
         end,
-        setCallback = function(c)
-            if type(c) == "function" then
-                md.callback = c
-            else
-                warn("El callback proporcionado no es una función")
-            end
-        end,
         getValue = function()
             return md.selected or d or ""
-        end,
-        setValue = function(nv)
-            if table.find(o, nv) then
-                md.selected = nv
-                local mc = internal.RightContent:FindFirstChild(t.."Menu")
-                if mc then
-                    local db = mc:FindFirstChild("DropdownButton")
-                    if db then db.Text = nv end
-
-                    local dl = mc:FindFirstChild("DropdownList")
-                    if dl then
-                        for _, child in ipairs(dl:GetChildren()) do
-                            if child:IsA("TextButton") then
-                                child.BackgroundColor3 = child.Text == nv and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(15, 15, 15)
-                                child.TextColor3 = child.Text == nv and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(180, 180, 180)
-                            end
-                        end
-                    end
-                end
-
-                if md.callback then
-                    md.callback(nv)
-                end
-            else
-                warn("Valor no válido para el menú: "..tostring(nv))
-            end
         end
     }
 
@@ -371,9 +338,7 @@ function AE:Menu(t, s, o, d)
     if internal.currentSection == s.Name then md.create() end
 
     return {
-        setCallback = md.setCallback,
-        getValue = md.getValue,
-        setValue = md.setValue
+        getValue = md.getValue
     }
 end
 

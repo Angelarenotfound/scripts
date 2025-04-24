@@ -31,12 +31,13 @@ local function createContainer(m,p)
         m.NotificationsContainer:Destroy()
     end
 
+    -- Fix: Create the notifications container outside the main GUI
     local notificationsContainer = createElement({
         Name="NotificationsContainer",
         Size=UDim2.new(0,isMobile()and 250 or 300,1,-40),
         Position=pos,
         BackgroundTransparency=1,
-        Parent=m
+        Parent=m.Parent -- Changed from m to m.Parent to place it outside
     },"Frame")
 
     createElement({
@@ -201,10 +202,10 @@ end
 
 function AE:Menu(t, s, o, d)
     if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return "" end, setValue = function() end} end
-    
+
     o = o or {}
     d = d or (o[1] or "")
-    
+
     local md = {
         type = "menu",
         title = t,
@@ -219,10 +220,10 @@ function AE:Menu(t, s, o, d)
                 BackgroundColor3 = Color3.fromRGB(20, 20, 20),
                 Parent = internal.RightContent
             }, "Frame")
-            
+
             createElement({CornerRadius = UDim.new(0, 4), Parent = mc}, "UICorner")
             createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = mc}, "UIStroke")
-            
+
             createElement({
                 Name = "MenuTitle",
                 Parent = mc,
@@ -233,7 +234,7 @@ function AE:Menu(t, s, o, d)
                 TextColor3 = Color3.fromRGB(200, 200, 200),
                 TextSize = 14
             }, "TextLabel")
-            
+
             local db = createElement({
                 Name = "DropdownButton",
                 Parent = mc,
@@ -247,10 +248,10 @@ function AE:Menu(t, s, o, d)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextTruncate = Enum.TextTruncate.AtEnd
             }, "TextButton")
-            
+
             createElement({PaddingLeft = UDim.new(0, 10), Parent = db}, "UIPadding")
             createElement({CornerRadius = UDim.new(0, 4), Parent = db}, "UICorner")
-            
+
             local dl = createElement({
                 Name = "DropdownList",
                 Parent = mc,
@@ -261,10 +262,10 @@ function AE:Menu(t, s, o, d)
                 ZIndex = 10,
                 ClipsDescendants = true
             }, "Frame")
-            
+
             createElement({CornerRadius = UDim.new(0, 4), Parent = dl}, "UICorner")
             createElement({SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 0), Parent = dl}, "UIListLayout")
-            
+
             for i, opt in ipairs(o) do
                 local ob = createElement({
                     Name = opt.."Option",
@@ -277,11 +278,11 @@ function AE:Menu(t, s, o, d)
                     LayoutOrder = i,
                     ZIndex = 10
                 }, "TextButton")
-                
+
                 createElement({PaddingLeft = UDim.new(0, 10), Parent = ob}, "UIPadding")
                 ob.BackgroundColor3 = opt == md.selected and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(15, 15, 15)
                 ob.TextColor3 = opt == md.selected and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(180, 180, 180)
-                
+
                 ob.MouseButton1Click:Connect(function()
                     for _, c in ipairs(dl:GetChildren()) do
                         if c:IsA("TextButton") then
@@ -289,19 +290,19 @@ function AE:Menu(t, s, o, d)
                             c.TextColor3 = Color3.fromRGB(180, 180, 180)
                         end
                     end
-                    
+
                     ob.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                     ob.TextColor3 = Color3.fromRGB(255, 0, 0)
                     db.Text = opt
                     md.selected = opt
                     dl.Visible = false
-                    
+
                     if md.callback then
                         md.callback(opt)
                     end
                 end)
             end
-            
+
             db.MouseButton1Click:Connect(function()
                 dl.Visible = not dl.Visible
                 if dl.Visible then
@@ -310,14 +311,14 @@ function AE:Menu(t, s, o, d)
                             local p = i.Position
                             local g = game.Players.LocalPlayer:GetGuiObjectsAtPosition(p.X, p.Y)
                             local cm = false
-                            
+
                             for _, o in ipairs(g) do
                                 if o == db or o:IsDescendantOf(dl) then
                                     cm = true
                                     break
                                 end
                             end
-                            
+
                             if not cm then
                                 dl.Visible = false
                                 co:Disconnect()
@@ -326,7 +327,7 @@ function AE:Menu(t, s, o, d)
                     end)
                 end
             end)
-            
+
             return mc
         end,
         setCallback = function(c)
@@ -346,7 +347,7 @@ function AE:Menu(t, s, o, d)
                 if mc then
                     local db = mc:FindFirstChild("DropdownButton")
                     if db then db.Text = nv end
-                    
+
                     local dl = mc:FindFirstChild("DropdownList")
                     if dl then
                         for _, child in ipairs(dl:GetChildren()) do
@@ -357,7 +358,7 @@ function AE:Menu(t, s, o, d)
                         end
                     end
                 end
-                
+
                 if md.callback then
                     md.callback(nv)
                 end
@@ -366,10 +367,10 @@ function AE:Menu(t, s, o, d)
             end
         end
     }
-    
+
     table.insert(internal.sections[s.Name].elements, md)
     if internal.currentSection == s.Name then md.create() end
-    
+
     return {
         setCallback = md.setCallback,
         getValue = md.getValue,
@@ -379,7 +380,7 @@ end
 
 function AE:Input(t, s, d, p, c)
     if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return "" end, setValue = function() end} end
-    
+
     local id = {
         type = "input",
         title = t,
@@ -393,10 +394,10 @@ function AE:Input(t, s, d, p, c)
                 BackgroundColor3 = Color3.fromRGB(20, 20, 20),
                 Parent = internal.RightContent
             }, "Frame")
-            
+
             createElement({CornerRadius = UDim.new(0, 4), Parent = ic}, "UICorner")
             createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = ic}, "UIStroke")
-            
+
             createElement({
                 Name = "InputTitle",
                 Parent = ic,
@@ -407,7 +408,7 @@ function AE:Input(t, s, d, p, c)
                 TextColor3 = Color3.fromRGB(200, 200, 200),
                 TextSize = 14
             }, "TextLabel")
-            
+
             local ib = createElement({
                 Name = "InputBox",
                 Parent = ic,
@@ -423,17 +424,17 @@ function AE:Input(t, s, d, p, c)
                 ClipsDescendants = true,
                 ClearTextOnFocus = false
             }, "TextBox")
-            
+
             createElement({CornerRadius = UDim.new(0, 4), Parent = ib}, "UICorner")
             createElement({PaddingLeft = UDim.new(0, 10), Parent = ib}, "UIPadding")
-            
+
             ib.FocusLost:Connect(function(enterPressed)
                 id.value = ib.Text or ""
                 if id.callback then
                     id.callback(id.value, enterPressed)
                 end
             end)
-            
+
             return ic
         end,
         setCallback = function(nc)
@@ -457,15 +458,15 @@ function AE:Input(t, s, d, p, c)
             end
         end
     }
-    
+
     -- Configurar el callback inicial si se proporcionó
     if c and type(c) == "function" then
         id.callback = c
     end
-    
+
     table.insert(internal.sections[s.Name].elements, id)
     if internal.currentSection == s.Name then id.create() end
-    
+
     return {
         setCallback = id.setCallback,
         getValue = id.getValue,
@@ -473,51 +474,161 @@ function AE:Input(t, s, d, p, c)
     }
 end
 
-
-function AE:Slider(t,s,mi,ma,d,c)
-    if not internal.sections[s.Name]then return end
-    mi,ma,d=mi or 0,ma or 100,math.clamp(d or mi,mi,ma)
-    local sd={type="slider",title=t,min=mi,max=ma,value=d,create=function()
-        local sc=createElement({Name=t.."Slider",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
-        createElement({CornerRadius=UDim.new(0,4),Parent=sc},"UICorner")
-        createElement({Color=Color3.fromRGB(40,40,40),ApplyStrokeMode=Enum.ApplyStrokeMode.Border,Parent=sc},"UIStroke")
-        createElement({Name="SliderTitle",Parent=sc,BackgroundTransparency=1,Size=UDim2.new(0.7,0,0,25),Font=Enum.Font.GothamMedium,Text=t,TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,Position=UDim2.new(0.05,0,0,0)},"TextLabel")
-        local vl=createElement({Name="ValueLabel",Parent=sc,BackgroundTransparency=1,Size=UDim2.new(0.2,0,0,25),Position=UDim2.new(0.75,0,0,0),Font=Enum.Font.GothamMedium,Text=tostring(sd.value),TextColor3=Color3.fromRGB(200,200,200),TextSize=14,TextXAlignment=Enum.TextXAlignment.Right},"TextLabel")
-        local st=createElement({Name="SliderTrack",Parent=sc,Position=UDim2.new(0.05,0,0.6,0),Size=UDim2.new(0.9,0,0,6),BackgroundColor3=Color3.fromRGB(40,40,40)},"Frame")
-        createElement({CornerRadius=UDim.new(0,3),Parent=st},"UICorner")
-        local sf=createElement({Name="SliderFill",Parent=st,Size=UDim2.new((sd.value-mi)/(ma-mi),0,1,0),BackgroundColor3=Color3.fromRGB(255,0,0)},"Frame")
-        createElement({CornerRadius=UDim.new(0,3),Parent=sf},"UICorner")
-        local sth=createElement({Name="SliderThumb",Parent=st,AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.new((sd.value-mi)/(ma-mi),0,0.5,0),Size=UDim2.new(0,12,0,12),BackgroundColor3=Color3.fromRGB(255,0,0)},"Frame")
-        createElement({CornerRadius=UDim.new(1,0),Parent=sth},"UICorner")
-        local dr=false
-        local function us(i)
-            local tp,tw,mp=st.AbsolutePosition.X,st.AbsoluteSize.X,i.Position.X
-            local rp=math.clamp((mp-tp)/tw,0,1)
-            local nv=math.floor(mi+(rp*(ma-mi))+0.5)
-            sf.Size,sth.Position,vl.Text,sd.value=UDim2.new(rp,0,1,0),UDim2.new(rp,0,0.5,0),tostring(nv),nv
-            if sd.callback then sd.callback(nv)end
-        end
-        st.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=true us(i)end end)
-        st.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=false end end)
-        st.InputChanged:Connect(function(i)if dr and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then us(i)end end)
-        return sc
-    end,setCallback=function(nc)sd.callback=nc end,getValue=function()return sd.value end,setValue=function(nv)
-        nv=math.clamp(nv,mi,ma)sd.value=nv
-        local sc=internal.RightContent:FindFirstChild(t.."Slider")
-        if sc then
-            local vl,st=sc:FindFirstChild("ValueLabel"),sc:FindFirstChild("SliderTrack")
-            if vl then vl.Text=tostring(nv)end
-            if st then
-                local sf,sth=st:FindFirstChild("SliderFill"),st:FindFirstChild("SliderThumb")
-                if sf then sf.Size=UDim2.new((nv-mi)/(ma-mi),0,1,0)end
-                if sth then sth.Position=UDim2.new((nv-mi)/(ma-mi),0,0.5,0)end
+function AE:Slider(t, s, mi, ma, d, c)
+    if not internal.sections[s.Name] then return {setCallback = function() end, getValue = function() return 0 end, setValue = function() end} end
+    
+    mi, ma, d = mi or 0, ma or 100, math.clamp(d or mi, mi, ma)
+    
+    local sd = {
+        type = "slider",
+        title = t,
+        min = mi,
+        max = ma,
+        value = d,
+        callback = c,
+        create = function()
+            local sc = createElement({
+                Name = t.."Slider",
+                Size = UDim2.new(0.95, 0, 0, 70),
+                Position = UDim2.new(0.025, 0, 0, 0),
+                BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+                Parent = internal.RightContent
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 4), Parent = sc}, "UICorner")
+            createElement({Color = Color3.fromRGB(40, 40, 40), ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = sc}, "UIStroke")
+            
+            createElement({
+                Name = "SliderTitle",
+                Parent = sc,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0.7, 0, 0, 25),
+                Font = Enum.Font.GothamMedium,
+                Text = t,
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Position = UDim2.new(0.05, 0, 0, 0)
+            }, "TextLabel")
+            
+            local vl = createElement({
+                Name = "ValueLabel",
+                Parent = sc,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0.2, 0, 0, 25),
+                Position = UDim2.new(0.75, 0, 0, 0),
+                Font = Enum.Font.GothamMedium,
+                Text = tostring(sd.value),
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Right
+            }, "TextLabel")
+            
+            local st = createElement({
+                Name = "SliderTrack",
+                Parent = sc,
+                Position = UDim2.new(0.05, 0, 0.6, 0),
+                Size = UDim2.new(0.9, 0, 0, 6),
+                BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 3), Parent = st}, "UICorner")
+            
+            local sf = createElement({
+                Name = "SliderFill",
+                Parent = st,
+                Size = UDim2.new((sd.value - mi) / (ma - mi), 0, 1, 0),
+                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(0, 3), Parent = sf}, "UICorner")
+            
+            local sth = createElement({
+                Name = "SliderThumb",
+                Parent = st,
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new((sd.value - mi) / (ma - mi), 0, 0.5, 0),
+                Size = UDim2.new(0, 12, 0, 12),
+                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            }, "Frame")
+            
+            createElement({CornerRadius = UDim.new(1, 0), Parent = sth}, "UICorner")
+            
+            local dr = false
+            
+            local function us(i)
+                local tp, tw, mp = st.AbsolutePosition.X, st.AbsoluteSize.X, i.Position.X
+                local rp = math.clamp((mp - tp) / tw, 0, 1)
+                local nv = math.floor(mi + (rp * (ma - mi)) + 0.5)
+                sf.Size = UDim2.new(rp, 0, 1, 0)
+                sth.Position = UDim2.new(rp, 0, 0.5, 0)
+                vl.Text = tostring(nv)
+                sd.value = nv
+                
+                if sd.callback then
+                    sd.callback(nv)
+                end
+            end
+            
+            st.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    dr = true
+                    us(i)
+                end
+            end)
+            
+            st.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    dr = false
+                end
+            end)
+            
+            st.InputChanged:Connect(function(i)
+                if dr and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                    us(i)
+                end
+            end)
+            
+            return sc
+        end,
+        
+        setCallback = function(nc)
+            sd.callback = nc
+        end,
+        
+        getValue = function()
+            return sd.value
+        end,
+        
+        setValue = function(nv)
+            nv = math.clamp(nv, mi, ma)
+            sd.value = nv
+            
+            local sc = internal.RightContent:FindFirstChild(t.."Slider")
+            if sc then
+                local vl, st = sc:FindFirstChild("ValueLabel"), sc:FindFirstChild("SliderTrack")
+                if vl then vl.Text = tostring(nv) end
+                if st then
+                    local sf, sth = st:FindFirstChild("SliderFill"), st:FindFirstChild("SliderThumb")
+                    if sf then sf.Size = UDim2.new((nv - mi) / (ma - mi), 0, 1, 0) end
+                    if sth then sth.Position = UDim2.new((nv - mi) / (ma - mi), 0, 0.5, 0) end
+                end
+            end
+            
+            if sd.callback then
+                sd.callback(nv)
             end
         end
-        if sd.callback then sd.callback(nv)end
-    end}
-    table.insert(internal.sections[s.Name].elements,sd)
-    if internal.currentSection==s.Name then sd.create()end
-    return{setCallback=sd.setCallback,getValue=sd.getValue,setValue=sd.setValue}
+    }
+    
+    table.insert(internal.sections[s.Name].elements, sd)
+    if internal.currentSection == s.Name then sd.create() end
+    
+    return {
+        setCallback = sd.setCallback,
+        getValue = sd.getValue,
+        setValue = sd.setValue
+    }
 end
 
 function AE:Toggle(t,s,d,c)
@@ -572,17 +683,17 @@ end
 
 function AE:Notify(t,d,nt,o)
     local m=game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui")
-    
+
     if not m then
         return
     end
-    
+
     local mainFrame = m:FindFirstChild("MainFrame")
-    
+
     if not mainFrame then
         return
     end
-    
+
     if not mainFrame:FindFirstChild("NotificationsContainer") then
         createContainer(mainFrame, AE.config)
     end

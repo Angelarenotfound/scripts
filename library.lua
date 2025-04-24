@@ -200,7 +200,7 @@ function AE:button(b,s,c)
 end
 
 function AE:Menu(t,s,o,d)
-    if not internal.sections[s.Name] then return end
+    if not internal.sections[s.Name]then return end
     o,d=o or{},d or(o[1]or"")
     local md={type="menu",title=t,options=o,selected=d,callback=nil,create=function()
         local mc=createElement({Name=t.."Menu",Size=UDim2.new(0.95,0,0,70),Position=UDim2.new(0.025,0,0,0),BackgroundColor3=Color3.fromRGB(20,20,20),Parent=internal.RightContent},"Frame")
@@ -230,7 +230,7 @@ function AE:Menu(t,s,o,d)
             end
         end)
         return mc
-    end,setCallback=function(c)md.callback=c end}
+    end,setCallback=function(c)if c then md.callback=c end end}
     table.insert(internal.sections[s.Name].elements,md)
     if internal.currentSection==s.Name then md.create()end
     return{setCallback=md.setCallback}
@@ -248,10 +248,10 @@ function AE:Input(t,s,d,p,c)
         createElement({PaddingLeft=UDim.new(0,10),Parent=ib},"UIPadding")
         ib.FocusLost:Connect(function(e)id.value=ib.Text if c then c(ib.Text,e)end end)
         return ic
-    end,setCallback=function(nc)c=nc end,getValue=function()return id.value end,setValue=function(nv)
-        id.value=nv
+    end,setCallback=function(nc)if nc then c=nc end end,getValue=function()return id.value end,setValue=function(nv)
+        id.value=nv or id.value
         local ic=internal.RightContent:FindFirstChild(t.."Input")
-        if ic then local ib=ic:FindFirstChild("InputBox")if ib then ib.Text=nv end end
+        if ic then local ib=ic:FindFirstChild("InputBox")if ib then ib.Text=nv or id.value end end
     end}
     table.insert(internal.sections[s.Name].elements,id)
     if internal.currentSection==s.Name then id.create()end

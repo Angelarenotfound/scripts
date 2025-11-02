@@ -25,13 +25,12 @@ screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainPanel"
-mainFrame.Size = UDim2.new(0, 220, 0, 200) -- Ajustado para incluir el FOV
+mainFrame.Size = UDim2.new(0, 220, 0, 200)
 mainFrame.Position = UDim2.new(0, 10, 0, 110)
 mainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 14)
@@ -166,7 +165,7 @@ local fovCircle = Instance.new("Frame")
 fovCircle.Name = "FovCircle"
 fovCircle.Size = UDim2.new(0, 2 * FOV_DEGREES, 0, 2 * FOV_DEGREES)
 fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-fovCircle.Position = UDim2.new(0.5, 0, 0.5, 70) -- Ligeramente abajo del centro
+fovCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
 fovCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 fovCircle.BackgroundTransparency = 0.9
 fovCircle.BorderSizePixel = 2
@@ -175,7 +174,7 @@ fovCircle.Visible = fovVisible
 fovCircle.Parent = screenGui
 
 local fovCircleCorner = Instance.new("UICorner")
-fovCircleCorner.CornerRadius = UDim.new(1, 0) -- Hace que sea un círculo
+fovCircleCorner.CornerRadius = UDim.new(1, 0)
 fovCircleCorner.Parent = fovCircle
 
 modeBtn.Activated:Connect(function()
@@ -216,16 +215,20 @@ fovInput.FocusLost:Connect(function(enterPressed)
         fovInput.Text = tostring(FOV_DEGREES)
         fovCircle.Size = UDim2.new(0, 2 * FOV_DEGREES, 0, 2 * FOV_DEGREES)
     else
-        fovInput.Text = tostring(FOV_DEGREES) -- Restaura el valor anterior si no es válido
+        fovInput.Text = tostring(FOV_DEGREES)
     end
 end)
 
-toggleButton.Activated:Connect(function()
+local function toggleGui()
     guiVisible = not guiVisible
     mainFrame.Visible = guiVisible
-end)
+    toggleLabel.TextColor3 = guiVisible and Color3.fromRGB(220, 80, 80) or Color3.fromRGB(100, 100, 100)
+end
+
+toggleButton.Activated:Connect(toggleGui)
 
 mainFrame.Visible = guiVisible
+toggleLabel.TextColor3 = guiVisible and Color3.fromRGB(220, 80, 80) or Color3.fromRGB(100, 100, 100)
 
 local function getCandidates()
     local list = {}

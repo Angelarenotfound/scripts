@@ -228,8 +228,10 @@ function APTX:Config(config)
 	})
 	
 	local viewport = workspace.CurrentCamera.ViewportSize
-	local width = math.min(700, viewport.X * 0.9)
-	local height = math.min(450, viewport.Y * 0.8)
+	local basewidth = 600
+	local baseheight = 400
+	local width = math.min(basewidth * 0.85, viewport.X * 0.9)
+	local height = math.min(baseheight * 0.85, viewport.Y * 0.8)
 	
 	self.main = create("Frame", {
 		Size = UDim2.new(0, width, 0, height),
@@ -290,7 +292,7 @@ function APTX:Config(config)
 	close.MouseButton1Click:Connect(function() self:destroy() end)
 	
 	self.sidebar = create("Frame", {
-		Size = UDim2.new(0, 180, 1, -45),
+		Size = UDim2.new(0, 160, 1, -45),
 		Position = UDim2.new(0, 0, 0, 45),
 		BackgroundColor3 = colors.panel,
 		BorderSizePixel = 0,
@@ -308,14 +310,18 @@ function APTX:Config(config)
 		Parent = self.sidebar
 	})
 	
-	create("UIListLayout", {
+	local sidelayout = create("UIListLayout", {
 		Padding = UDim.new(0, 8),
 		Parent = self.sidebarscroll
 	})
 	
+	sidelayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		self.sidebarscroll.CanvasSize = UDim2.new(0, 0, 0, sidelayout.AbsoluteContentSize.Y + 10)
+	end)
+	
 	self.content = create("Frame", {
-		Size = UDim2.new(1, -180, 1, -45),
-		Position = UDim2.new(0, 180, 0, 45),
+		Size = UDim2.new(1, -160, 1, -45),
+		Position = UDim2.new(0, 160, 0, 45),
 		BackgroundColor3 = colors.bg,
 		BorderSizePixel = 0,
 		Parent = self.main
@@ -665,7 +671,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	end
 	
 	create("TextLabel", {
-		Size = UDim2.new(0, 200, 1, 0),
+		Size = UDim2.new(0, 150, 1, 0),
 		Position = UDim2.new(0, iconid and 40 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
@@ -677,8 +683,8 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	})
 	
 	local btn = create("TextButton", {
-		Size = UDim2.new(0, 200, 0, 32),
-		Position = UDim2.new(1, -210, 0.5, -16),
+		Size = UDim2.new(0, 180, 0, 32),
+		Position = UDim2.new(1, -190, 0.5, -16),
 		BackgroundColor3 = colors.bg,
 		BorderSizePixel = 0,
 		Text = "  " .. (default or placeholder or "Seleccionar"),
@@ -702,8 +708,8 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	})
 	
 	local menucontainer = create("Frame", {
-		Size = UDim2.new(0, 200, 0, 0),
-		Position = UDim2.new(1, -210, 1, 5),
+		Size = UDim2.new(0, 180, 0, 0),
+		Position = UDim2.new(1, -190, 1, 5),
 		BackgroundTransparency = 1,
 		Visible = false,
 		ZIndex = 100,
@@ -779,8 +785,8 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		menucontainer.Visible = open
 		arrow.Text = open and "▲" or "▼"
 		if open then 
-			local height = math.min(#options * 34, 200)
-			menucontainer.Size = UDim2.new(0, 200, 0, height)
+			local height = math.min(#options * 34, 180)
+			menucontainer.Size = UDim2.new(0, 180, 0, height)
 		end
 	end)
 	

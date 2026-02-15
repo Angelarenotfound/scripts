@@ -1,133 +1,175 @@
 local APTX = {}
 APTX.__index = APTX
 
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
 local uis = game:GetService("UserInputService")
 local ts = game:GetService("TweenService")
+local player = game.Players.LocalPlayer
 
-function APTX:init(titulo, drag, dev)
+local colors = {
+	bg = Color3.fromRGB(15, 15, 15),
+	topbar = Color3.fromRGB(20, 20, 20),
+	panel = Color3.fromRGB(18, 18, 18),
+	element = Color3.fromRGB(25, 25, 25),
+	hover = Color3.fromRGB(35, 35, 35),
+	active = Color3.fromRGB(45, 45, 45),
+	accent = Color3.fromRGB(70, 130, 255),
+	border = Color3.fromRGB(40, 40, 40),
+	text = Color3.fromRGB(255, 255, 255),
+	subtext = Color3.fromRGB(180, 180, 180)
+}
+
+local icons = {
+	default = {
+		home = "rbxassetid://7733955740",
+		settings = "rbxassetid://7733674079",
+		stats = "rbxassetid://7743878857",
+		info = "rbxassetid://7733920644",
+		close = "rbxassetid://7743878496"
+	}
+}
+
+local function create(class, props)
+	local obj = Instance.new(class)
+	for k, v in pairs(props) do
+		if k ~= "Parent" then
+			obj[k] = v
+		end
+	end
+	if props.Parent then
+		obj.Parent = props.Parent
+	end
+	return obj
+end
+
+local function corner(parent, radius)
+	return create("UICorner", {
+		CornerRadius = UDim.new(0, radius or 8),
+		Parent = parent
+	})
+end
+
+local function tween(obj, props, time)
+	ts:Create(obj, TweenInfo.new(time or 0.2), props):Play()
+end
+
+function APTX:Config(config)
 	local self = setmetatable({}, APTX)
 	
-	self.dev = dev or false
-	self.drag = drag or false
+	self.title = config.title or "APTX"
+	self.drag = config.draggable ~= false
+	self.dev = config.devmode or false
+	self.iconset = config.icons == "custom" and config.customicons or icons.default
+	self.hidebutton = config.hidebutton or false
 	self.sections = {}
 	self.current = nil
-	self.components = {}
+	self.visible = true
 	
-	if self.dev then
-		print("[APTX] Inicializando GUI: " .. titulo)
-	end
+	if self.dev then print("[APTX] Inicializando") end
 	
-	self.screen = Instance.new("ScreenGui")
-	self.screen.Name = "APTX"
-	self.screen.Parent = player:WaitForChild("PlayerGui")
-	self.screen.ResetOnSpawn = false
+	self.screen = create("ScreenGui", {
+		Name = "APTX",
+		ResetOnSpawn = false,
+		Parent = player:WaitForChild("PlayerGui")
+	})
 	
-	self.main = Instance.new("Frame")
-	self.main.Size = UDim2.new(0, 600, 0, 400)
-	self.main.Position = UDim2.new(0.5, -300, 0.5, -200)
-	self.main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	self.main.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	self.main.BorderSizePixel = 2
-	self.main.Parent = self.screen
+	self.main = create("Frame", {
+		Size = UDim2.new(0, 700, 0, 450),
+		Position = UDim2.new(0.5, -350, 0.5, -225),
+		BackgroundColor3 = colors.bg,
+		BorderSizePixel = 0,
+		Parent = self.screen
+	})
+	corner(self.main, 12)
 	
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 8)
-	corner.Parent = self.main
+	create("UIStroke", {
+		Color = colors.border,
+		Thickness = 1,
+		Parent = self.main
+	})
 	
-	self.topbar = Instance.new("Frame")
-	self.topbar.Size = UDim2.new(1, 0, 0, 40)
-	self.topbar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	self.topbar.BorderSizePixel = 0
-	self.topbar.Parent = self.main
+	self.topbar = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 45),
+		BackgroundColor3 = colors.topbar,
+		BorderSizePixel = 0,
+		Parent = self.main
+	})
+	corner(self.topbar, 12)
 	
-	local topcorner = Instance.new("UICorner")
-	topcorner.CornerRadius = UDim.new(0, 8)
-	topcorner.Parent = self.topbar
+	create("Frame", {
+		Size = UDim2.new(1, 0, 0, 12),
+		Position = UDim2.new(0, 0, 1, -12),
+		BackgroundColor3 = colors.topbar,
+		BorderSizePixel = 0,
+		Parent = self.topbar
+	})
 	
-	local fix = Instance.new("Frame")
-	fix.Size = UDim2.new(1, 0, 0, 8)
-	fix.Position = UDim2.new(0, 0, 1, -8)
-	fix.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	fix.BorderSizePixel = 0
-	fix.Parent = self.topbar
+	self.titlelabel = create("TextLabel", {
+		Size = UDim2.new(1, -60, 1, 0),
+		Position = UDim2.new(0, 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = self.title,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 16,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = self.topbar
+	})
 	
-	self.title = Instance.new("TextLabel")
-	self.title.Size = UDim2.new(1, -50, 1, 0)
-	self.title.Position = UDim2.new(0, 10, 0, 0)
-	self.title.BackgroundTransparency = 1
-	self.title.Text = titulo
-	self.title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	self.title.Font = Enum.Font.GothamBold
-	self.title.TextSize = 16
-	self.title.TextXAlignment = Enum.TextXAlignment.Left
-	self.title.Parent = self.topbar
+	local close = create("ImageButton", {
+		Size = UDim2.new(0, 32, 0, 32),
+		Position = UDim2.new(1, -40, 0.5, -16),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Image = self.iconset.close or icons.default.close,
+		ImageColor3 = colors.text,
+		Parent = self.topbar
+	})
+	corner(close, 8)
 	
-	local close = Instance.new("TextButton")
-	close.Size = UDim2.new(0, 30, 0, 30)
-	close.Position = UDim2.new(1, -35, 0, 5)
-	close.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	close.BorderSizePixel = 0
-	close.Text = "X"
-	close.TextColor3 = Color3.fromRGB(255, 255, 255)
-	close.Font = Enum.Font.GothamBold
-	close.TextSize = 14
-	close.Parent = self.topbar
+	close.MouseEnter:Connect(function() tween(close, {BackgroundColor3 = colors.hover}) end)
+	close.MouseLeave:Connect(function() tween(close, {BackgroundColor3 = colors.element}) end)
+	close.MouseButton1Click:Connect(function() self:destroy() end)
 	
-	local closecorner = Instance.new("UICorner")
-	closecorner.CornerRadius = UDim.new(0, 6)
-	closecorner.Parent = close
+	self.sidebar = create("Frame", {
+		Size = UDim2.new(0, 180, 1, -45),
+		Position = UDim2.new(0, 0, 0, 45),
+		BackgroundColor3 = colors.panel,
+		BorderSizePixel = 0,
+		Parent = self.main
+	})
 	
-	close.MouseButton1Click:Connect(function()
-		self:destroy()
-	end)
+	self.sidebarscroll = create("ScrollingFrame", {
+		Size = UDim2.new(1, -10, 1, -10),
+		Position = UDim2.new(0, 5, 0, 5),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = colors.border,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		Parent = self.sidebar
+	})
 	
-	self.left = Instance.new("Frame")
-	self.left.Size = UDim2.new(0.25, -1, 1, -40)
-	self.left.Position = UDim2.new(0, 0, 0, 40)
-	self.left.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	self.left.BorderSizePixel = 0
-	self.left.Parent = self.main
+	create("UIListLayout", {
+		Padding = UDim.new(0, 8),
+		Parent = self.sidebarscroll
+	})
 	
-	local leftscroll = Instance.new("ScrollingFrame")
-	leftscroll.Size = UDim2.new(1, 0, 1, 0)
-	leftscroll.BackgroundTransparency = 1
-	leftscroll.BorderSizePixel = 0
-	leftscroll.ScrollBarThickness = 4
-	leftscroll.Parent = self.left
+	self.content = create("Frame", {
+		Size = UDim2.new(1, -180, 1, -45),
+		Position = UDim2.new(0, 180, 0, 45),
+		BackgroundColor3 = colors.bg,
+		BorderSizePixel = 0,
+		Parent = self.main
+	})
 	
-	local leftlayout = Instance.new("UIListLayout")
-	leftlayout.Padding = UDim.new(0, 5)
-	leftlayout.Parent = leftscroll
-	
-	self.leftscroll = leftscroll
-	
-	self.right = Instance.new("Frame")
-	self.right.Size = UDim2.new(0.75, 0, 1, -40)
-	self.right.Position = UDim2.new(0.25, 0, 0, 40)
-	self.right.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	self.right.BorderSizePixel = 0
-	self.right.Parent = self.main
-	
-	local separator = Instance.new("Frame")
-	separator.Size = UDim2.new(0, 2, 1, -40)
-	separator.Position = UDim2.new(0.25, -1, 0, 40)
-	separator.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-	separator.BorderSizePixel = 0
-	separator.Parent = self.main
-	
-	if self.drag then
-		self:makedrag()
-	end
+	if self.drag then self:makedrag() end
+	if self.hidebutton then self:makehide() end
 	
 	return self
 end
 
 function APTX:makedrag()
-	local dragging = false
-	local dragstart = nil
-	local startpos = nil
+	local dragging, dragstart, startpos = false, nil, nil
 	
 	self.topbar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -146,80 +188,115 @@ function APTX:makedrag()
 	uis.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			local delta = input.Position - dragstart
-			self.main.Position = UDim2.new(
-				startpos.X.Scale,
-				startpos.X.Offset + delta.X,
-				startpos.Y.Scale,
-				startpos.Y.Offset + delta.Y
-			)
+			self.main.Position = UDim2.new(startpos.X.Scale, startpos.X.Offset + delta.X, startpos.Y.Scale, startpos.Y.Offset + delta.Y)
 		end
 	end)
 end
 
+function APTX:makehide()
+	local btn = create("TextButton", {
+		Size = UDim2.new(0, 120, 0, 40),
+		Position = UDim2.new(1, -130, 0, 10),
+		BackgroundColor3 = colors.topbar,
+		BorderSizePixel = 0,
+		Text = "Toggle GUI",
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		Parent = self.screen
+	})
+	corner(btn, 8)
+	
+	create("UIStroke", {
+		Color = colors.border,
+		Thickness = 1,
+		Parent = btn
+	})
+	
+	btn.MouseButton1Click:Connect(function()
+		self.visible = not self.visible
+		self.main.Visible = self.visible
+		tween(btn, {BackgroundColor3 = self.visible and colors.topbar or colors.element})
+	end)
+end
+
 function APTX:Section(texto, icon, default)
-	local section = {
-		name = texto,
-		icon = icon,
-		container = nil,
-		button = nil
-	}
+	local section = {name = texto, container = nil, button = nil}
 	
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -10, 0, 35)
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	btn.BorderSizePixel = 1
-	btn.Text = "  " .. texto
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 14
-	btn.TextXAlignment = Enum.TextXAlignment.Left
-	btn.Parent = self.leftscroll
+	local btn = create("TextButton", {
+		Size = UDim2.new(1, 0, 0, 42),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = self.sidebarscroll
+	})
+	corner(btn, 8)
 	
-	local btncorner = Instance.new("UICorner")
-	btncorner.CornerRadius = UDim.new(0, 6)
-	btncorner.Parent = btn
-	
-	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 20, 0, 20)
-		img.Position = UDim2.new(0, 5, 0.5, -10)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = btn
-		btn.Text = "     " .. texto
+	if icon or self.iconset[texto:lower()] then
+		create("ImageLabel", {
+			Size = UDim2.new(0, 20, 0, 20),
+			Position = UDim2.new(0, 10, 0.5, -10),
+			BackgroundTransparency = 1,
+			Image = icon or self.iconset[texto:lower()] or "",
+			ImageColor3 = colors.text,
+			Parent = btn
+		})
 	end
+	
+	create("TextLabel", {
+		Size = UDim2.new(1, -45, 1, 0),
+		Position = UDim2.new(0, 40, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = btn
+	})
 	
 	section.button = btn
 	
-	local container = Instance.new("ScrollingFrame")
-	container.Size = UDim2.new(1, -10, 1, -10)
-	container.Position = UDim2.new(0, 5, 0, 5)
-	container.BackgroundTransparency = 1
-	container.BorderSizePixel = 0
-	container.ScrollBarThickness = 6
-	container.Visible = false
-	container.Parent = self.right
+	local container = create("ScrollingFrame", {
+		Size = UDim2.new(1, -20, 1, -20),
+		Position = UDim2.new(0, 10, 0, 10),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = colors.border,
+		Visible = false,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		Parent = self.content
+	})
 	
-	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 10)
-	layout.Parent = container
+	local layout = create("UIListLayout", {
+		Padding = UDim.new(0, 12),
+		Parent = container
+	})
 	
-	section.container = container
-	
-	table.insert(self.sections, section)
-	
-	btn.MouseButton1Click:Connect(function()
-		self:load(section)
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 12)
 	end)
 	
-	if default or #self.sections == 1 then
-		self:load(section)
-	end
+	section.container = container
+	table.insert(self.sections, section)
 	
-	if self.dev then
-		print("[APTX] Sección creada: " .. texto)
-	end
+	btn.MouseEnter:Connect(function()
+		if self.current ~= section then
+			tween(btn, {BackgroundColor3 = colors.hover})
+		end
+	end)
+	
+	btn.MouseLeave:Connect(function()
+		if self.current ~= section then
+			tween(btn, {BackgroundColor3 = colors.element})
+		end
+	end)
+	
+	btn.MouseButton1Click:Connect(function() self:load(section) end)
+	
+	if default or #self.sections == 1 then self:load(section) end
+	if self.dev then print("[APTX] Sección: " .. texto) end
 	
 	return section
 end
@@ -227,153 +304,146 @@ end
 function APTX:load(section)
 	for _, s in ipairs(self.sections) do
 		s.container.Visible = false
-		s.button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		tween(s.button, {BackgroundColor3 = colors.element})
 	end
-	
 	section.container.Visible = true
-	section.button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	tween(section.button, {BackgroundColor3 = colors.active})
 	self.current = section
-	
-	if self.dev then
-		print("[APTX] Cargada sección: " .. section.name)
-	end
 end
 
 function APTX:Button(section, texto, icon, callback)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 40)
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	btn.BorderSizePixel = 1
-	btn.Text = "  " .. texto
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 14
-	btn.TextXAlignment = Enum.TextXAlignment.Left
-	btn.Parent = section.container
-	
-	local btncorner = Instance.new("UICorner")
-	btncorner.CornerRadius = UDim.new(0, 6)
-	btncorner.Parent = btn
+	local btn = create("TextButton", {
+		Size = UDim2.new(1, 0, 0, 45),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = section.container
+	})
+	corner(btn, 8)
 	
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 24, 0, 24)
-		img.Position = UDim2.new(0, 5, 0.5, -12)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = btn
-		btn.Text = "      " .. texto
+		create("ImageLabel", {
+			Size = UDim2.new(0, 22, 0, 22),
+			Position = UDim2.new(0, 12, 0.5, -11),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = colors.text,
+			Parent = btn
+		})
 	end
 	
+	create("TextLabel", {
+		Size = UDim2.new(1, icon and -50 or -20, 1, 0),
+		Position = UDim2.new(0, icon and 45 or 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = btn
+	})
+	
+	btn.MouseEnter:Connect(function() tween(btn, {BackgroundColor3 = colors.hover}) end)
+	btn.MouseLeave:Connect(function() tween(btn, {BackgroundColor3 = colors.element}) end)
+	
 	btn.MouseButton1Click:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		tween(btn, {BackgroundColor3 = colors.active})
 		wait(0.1)
-		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		
-		if callback then
-			callback()
-		end
-		
-		if self.dev then
-			print("[APTX] Botón presionado: " .. texto)
-		end
+		tween(btn, {BackgroundColor3 = colors.element})
+		if callback then callback() end
+		if self.dev then print("[APTX] Botón: " .. texto) end
 	end)
 	
 	return btn
 end
 
 function APTX:Slider(section, texto, icon, min, max, default, callback)
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1, 0, 0, 60)
-	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	frame.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	frame.BorderSizePixel = 1
-	frame.Parent = section.container
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 70),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8)
 	
-	local framecorner = Instance.new("UICorner")
-	framecorner.CornerRadius = UDim.new(0, 6)
-	framecorner.Parent = frame
-	
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, -10, 0, 20)
-	label.Position = UDim2.new(0, 5, 0, 5)
-	label.BackgroundTransparency = 1
-	label.Text = texto
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.Gotham
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = frame
+	local header = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		Parent = frame
+	})
 	
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 20, 0, 20)
-		img.Position = UDim2.new(0, 5, 0, 5)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = frame
-		label.Position = UDim2.new(0, 30, 0, 5)
+		create("ImageLabel", {
+			Size = UDim2.new(0, 20, 0, 20),
+			Position = UDim2.new(0, 12, 0.5, -10),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = colors.text,
+			Parent = header
+		})
 	end
 	
-	local value = Instance.new("TextLabel")
-	value.Size = UDim2.new(0, 50, 0, 20)
-	value.Position = UDim2.new(1, -55, 0, 5)
-	value.BackgroundTransparency = 1
-	value.Text = tostring(default or min)
-	value.TextColor3 = Color3.fromRGB(200, 200, 200)
-	value.Font = Enum.Font.GothamBold
-	value.TextSize = 14
-	value.TextXAlignment = Enum.TextXAlignment.Right
-	value.Parent = frame
+	create("TextLabel", {
+		Size = UDim2.new(1, -100, 1, 0),
+		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = header
+	})
 	
-	local track = Instance.new("Frame")
-	track.Size = UDim2.new(1, -20, 0, 4)
-	track.Position = UDim2.new(0, 10, 1, -20)
-	track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	track.BorderSizePixel = 0
-	track.Parent = frame
+	local valuelabel = create("TextLabel", {
+		Size = UDim2.new(0, 60, 1, 0),
+		Position = UDim2.new(1, -70, 0, 0),
+		BackgroundTransparency = 1,
+		Text = tostring(default or min),
+		TextColor3 = colors.accent,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Parent = header
+	})
 	
-	local trackcorner = Instance.new("UICorner")
-	trackcorner.CornerRadius = UDim.new(1, 0)
-	trackcorner.Parent = track
+	local track = create("Frame", {
+		Size = UDim2.new(1, -30, 0, 6),
+		Position = UDim2.new(0, 15, 1, -25),
+		BackgroundColor3 = colors.bg,
+		BorderSizePixel = 0,
+		Parent = frame
+	})
+	corner(track, 3)
 	
-	local fill = Instance.new("Frame")
-	fill.Size = UDim2.new(0, 0, 1, 0)
-	fill.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-	fill.BorderSizePixel = 0
-	fill.Parent = track
+	local fill = create("Frame", {
+		Size = UDim2.new(0, 0, 1, 0),
+		BackgroundColor3 = colors.accent,
+		BorderSizePixel = 0,
+		Parent = track
+	})
+	corner(fill, 3)
 	
-	local fillcorner = Instance.new("UICorner")
-	fillcorner.CornerRadius = UDim.new(1, 0)
-	fillcorner.Parent = fill
-	
-	local thumb = Instance.new("Frame")
-	thumb.Size = UDim2.new(0, 16, 0, 16)
-	thumb.Position = UDim2.new(0, -8, 0.5, -8)
-	thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	thumb.BorderSizePixel = 0
-	thumb.Parent = fill
-	
-	local thumbcorner = Instance.new("UICorner")
-	thumbcorner.CornerRadius = UDim.new(1, 0)
-	thumbcorner.Parent = thumb
+	local thumb = create("Frame", {
+		Size = UDim2.new(0, 18, 0, 18),
+		Position = UDim2.new(1, -9, 0.5, -9),
+		BackgroundColor3 = colors.text,
+		BorderSizePixel = 0,
+		ZIndex = 2,
+		Parent = fill
+	})
+	corner(thumb, 9)
 	
 	local dragging = false
 	local current = default or min
 	
 	local function update(input)
-		local pos = (input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
-		pos = math.clamp(pos, 0, 1)
-		
+		local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
 		current = math.floor(min + (max - min) * pos)
-		value.Text = tostring(current)
-		
+		valuelabel.Text = tostring(current)
 		fill.Size = UDim2.new(pos, 0, 1, 0)
-		
-		if callback then
-			callback(current)
-		end
+		if callback then callback(current) end
 	end
 	
 	track.InputBegan:Connect(function(input)
@@ -398,17 +468,13 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 	local initpos = ((default or min) - min) / (max - min)
 	fill.Size = UDim2.new(initpos, 0, 1, 0)
 	
-	if self.dev then
-		print("[APTX] Slider creado: " .. texto)
-	end
+	if self.dev then print("[APTX] Slider: " .. texto) end
 	
 	return {
-		get = function()
-			return current
-		end,
+		get = function() return current end,
 		set = function(val)
 			current = math.clamp(val, min, max)
-			value.Text = tostring(current)
+			valuelabel.Text = tostring(current)
 			local pos = (current - min) / (max - min)
 			fill.Size = UDim2.new(pos, 0, 1, 0)
 		end
@@ -416,279 +482,249 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 end
 
 function APTX:Dropdown(section, texto, placeholder, icon, options, default, callback)
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1, 0, 0, 40)
-	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	frame.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	frame.BorderSizePixel = 1
-	frame.Parent = section.container
-	
-	local framecorner = Instance.new("UICorner")
-	framecorner.CornerRadius = UDim.new(0, 6)
-	framecorner.Parent = frame
-	
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0, 150, 1, 0)
-	label.Position = UDim2.new(0, 5, 0, 0)
-	label.BackgroundTransparency = 1
-	label.Text = "  " .. texto
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.Gotham
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = frame
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 45),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8)
 	
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 20, 0, 20)
-		img.Position = UDim2.new(0, 5, 0.5, -10)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = frame
-		label.Text = "     " .. texto
+		create("ImageLabel", {
+			Size = UDim2.new(0, 20, 0, 20),
+			Position = UDim2.new(0, 12, 0.5, -10),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = colors.text,
+			Parent = frame
+		})
 	end
 	
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -160, 1, -10)
-	btn.Position = UDim2.new(0, 155, 0, 5)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	btn.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	btn.BorderSizePixel = 1
-	btn.Text = default or placeholder or "Seleccionar"
-	btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 13
-	btn.Parent = frame
+	create("TextLabel", {
+		Size = UDim2.new(0, 200, 1, 0),
+		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
 	
-	local btncorner = Instance.new("UICorner")
-	btncorner.CornerRadius = UDim.new(0, 4)
-	btncorner.Parent = btn
+	local btn = create("TextButton", {
+		Size = UDim2.new(0, 200, 0, 32),
+		Position = UDim2.new(1, -210, 0.5, -16),
+		BackgroundColor3 = colors.bg,
+		BorderSizePixel = 0,
+		Text = default or placeholder or "Seleccionar",
+		TextColor3 = colors.subtext,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	corner(btn, 6)
 	
-	local arrow = Instance.new("TextLabel")
-	arrow.Size = UDim2.new(0, 20, 1, 0)
-	arrow.Position = UDim2.new(1, -20, 0, 0)
-	arrow.BackgroundTransparency = 1
-	arrow.Text = "▼"
-	arrow.TextColor3 = Color3.fromRGB(200, 200, 200)
-	arrow.Font = Enum.Font.Gotham
-	arrow.TextSize = 10
-	arrow.Parent = btn
+	create("UIPadding", {
+		PaddingLeft = UDim.new(0, 10),
+		Parent = btn
+	})
 	
-	local menu = Instance.new("Frame")
-	menu.Size = UDim2.new(1, -160, 0, 0)
-	menu.Position = UDim2.new(0, 155, 1, 5)
-	menu.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	menu.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	menu.BorderSizePixel = 1
-	menu.Visible = false
-	menu.ZIndex = 10
-	menu.Parent = frame
+	create("TextLabel", {
+		Size = UDim2.new(0, 30, 1, 0),
+		Position = UDim2.new(1, -30, 0, 0),
+		BackgroundTransparency = 1,
+		Text = "▼",
+		TextColor3 = colors.subtext,
+		Font = Enum.Font.Gotham,
+		TextSize = 10,
+		Parent = btn
+	})
 	
-	local menucorner = Instance.new("UICorner")
-	menucorner.CornerRadius = UDim.new(0, 4)
-	menucorner.Parent = menu
+	local menu = create("Frame", {
+		Size = UDim2.new(0, 200, 0, 0),
+		Position = UDim2.new(1, -210, 1, 5),
+		BackgroundColor3 = colors.panel,
+		BorderSizePixel = 0,
+		Visible = false,
+		ZIndex = 10,
+		Parent = frame
+	})
+	corner(menu, 6)
 	
-	local menulist = Instance.new("UIListLayout")
-	menulist.Padding = UDim.new(0, 2)
-	menulist.Parent = menu
+	create("UIStroke", {
+		Color = colors.border,
+		Thickness = 1,
+		Parent = menu
+	})
+	
+	create("UIListLayout", {
+		Padding = UDim.new(0, 2),
+		Parent = menu
+	})
 	
 	local open = false
 	local selected = default
 	
 	for _, opt in ipairs(options) do
-		local optbtn = Instance.new("TextButton")
-		optbtn.Size = UDim2.new(1, 0, 0, 30)
-		optbtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		optbtn.BorderSizePixel = 0
-		optbtn.Text = opt
-		optbtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		optbtn.Font = Enum.Font.Gotham
-		optbtn.TextSize = 13
-		optbtn.Parent = menu
+		local optbtn = create("TextButton", {
+			Size = UDim2.new(1, 0, 0, 32),
+			BackgroundColor3 = colors.panel,
+			BorderSizePixel = 0,
+			Text = opt,
+			TextColor3 = colors.text,
+			Font = Enum.Font.Gotham,
+			TextSize = 13,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Parent = menu
+		})
+		
+		create("UIPadding", {
+			PaddingLeft = UDim.new(0, 10),
+			Parent = optbtn
+		})
+		
+		optbtn.MouseEnter:Connect(function() tween(optbtn, {BackgroundColor3 = colors.hover}) end)
+		optbtn.MouseLeave:Connect(function() tween(optbtn, {BackgroundColor3 = colors.panel}) end)
 		
 		optbtn.MouseButton1Click:Connect(function()
 			selected = opt
 			btn.Text = opt
 			menu.Visible = false
 			open = false
-			arrow.Text = "▼"
-			
-			if callback then
-				callback(opt)
-			end
-			
-			if self.dev then
-				print("[APTX] Opción seleccionada: " .. opt)
-			end
-		end)
-		
-		optbtn.MouseEnter:Connect(function()
-			optbtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-		end)
-		
-		optbtn.MouseLeave:Connect(function()
-			optbtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			if callback then callback(opt) end
+			if self.dev then print("[APTX] Selección: " .. opt) end
 		end)
 	end
 	
 	btn.MouseButton1Click:Connect(function()
 		open = not open
 		menu.Visible = open
-		arrow.Text = open and "▲" or "▼"
-		
-		if open then
-			menu.Size = UDim2.new(1, -160, 0, math.min(#options * 32, 150))
-		end
+		if open then menu.Size = UDim2.new(0, 200, 0, math.min(#options * 34, 200)) end
 	end)
 	
-	if self.dev then
-		print("[APTX] Dropdown creado: " .. texto)
-	end
+	if self.dev then print("[APTX] Dropdown: " .. texto) end
 	
 	return {
-		get = function()
-			return selected
-		end,
-		set = function(val)
-			selected = val
-			btn.Text = val
-		end
+		get = function() return selected end,
+		set = function(val) selected = val btn.Text = val end
 	}
 end
 
 function APTX:Toggle(section, texto, icon, default, callback)
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1, 0, 0, 40)
-	frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	frame.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	frame.BorderSizePixel = 1
-	frame.Parent = section.container
-	
-	local framecorner = Instance.new("UICorner")
-	framecorner.CornerRadius = UDim.new(0, 6)
-	framecorner.Parent = frame
-	
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, -60, 1, 0)
-	label.Position = UDim2.new(0, 5, 0, 0)
-	label.BackgroundTransparency = 1
-	label.Text = "  " .. texto
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.Gotham
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = frame
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 45),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8)
 	
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 20, 0, 20)
-		img.Position = UDim2.new(0, 5, 0.5, -10)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = frame
-		label.Text = "     " .. texto
+		create("ImageLabel", {
+			Size = UDim2.new(0, 20, 0, 20),
+			Position = UDim2.new(0, 12, 0.5, -10),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = colors.text,
+			Parent = frame
+		})
 	end
 	
-	local toggle = Instance.new("TextButton")
-	toggle.Size = UDim2.new(0, 44, 0, 24)
-	toggle.Position = UDim2.new(1, -50, 0.5, -12)
-	toggle.BackgroundColor3 = default and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(60, 60, 60)
-	toggle.BorderSizePixel = 0
-	toggle.Text = ""
-	toggle.Parent = frame
+	create("TextLabel", {
+		Size = UDim2.new(1, -100, 1, 0),
+		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
 	
-	local togglecorner = Instance.new("UICorner")
-	togglecorner.CornerRadius = UDim.new(1, 0)
-	togglecorner.Parent = toggle
+	local toggle = create("TextButton", {
+		Size = UDim2.new(0, 48, 0, 26),
+		Position = UDim2.new(1, -60, 0.5, -13),
+		BackgroundColor3 = default and colors.accent or colors.bg,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = frame
+	})
+	corner(toggle, 13)
 	
-	local knob = Instance.new("Frame")
-	knob.Size = UDim2.new(0, 18, 0, 18)
-	knob.Position = default and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	knob.BorderSizePixel = 0
-	knob.Parent = toggle
-	
-	local knobcorner = Instance.new("UICorner")
-	knobcorner.CornerRadius = UDim.new(1, 0)
-	knobcorner.Parent = knob
+	local knob = create("Frame", {
+		Size = UDim2.new(0, 20, 0, 20),
+		Position = default and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10),
+		BackgroundColor3 = colors.text,
+		BorderSizePixel = 0,
+		Parent = toggle
+	})
+	corner(knob, 10)
 	
 	local state = default or false
 	
 	toggle.MouseButton1Click:Connect(function()
 		state = not state
-		
-		local color = state and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(60, 60, 60)
-		local pos = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-		
-		ts:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = color}):Play()
-		ts:Create(knob, TweenInfo.new(0.2), {Position = pos}):Play()
-		
-		if callback then
-			callback(state)
-		end
-		
-		if self.dev then
-			print("[APTX] Toggle: " .. texto .. " = " .. tostring(state))
-		end
+		tween(toggle, {BackgroundColor3 = state and colors.accent or colors.bg})
+		tween(knob, {Position = state and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)})
+		if callback then callback(state) end
+		if self.dev then print("[APTX] Toggle: " .. texto .. " = " .. tostring(state)) end
 	end)
 	
-	if self.dev then
-		print("[APTX] Toggle creado: " .. texto)
-	end
+	if self.dev then print("[APTX] Toggle: " .. texto) end
 	
 	return {
-		get = function()
-			return state
-		end,
+		get = function() return state end,
 		set = function(val)
 			state = val
-			local color = state and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(60, 60, 60)
-			local pos = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-			toggle.BackgroundColor3 = color
-			knob.Position = pos
+			toggle.BackgroundColor3 = state and colors.accent or colors.bg
+			knob.Position = state and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
 		end
 	}
 end
 
 function APTX:Label(section, texto, icon)
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 0, 30)
-	label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	label.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	label.BorderSizePixel = 1
-	label.Text = "  " .. texto
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.Font = Enum.Font.Gotham
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = section.container
-	
-	local labelcorner = Instance.new("UICorner")
-	labelcorner.CornerRadius = UDim.new(0, 6)
-	labelcorner.Parent = label
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, 35),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8)
 	
 	if icon then
-		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 20, 0, 20)
-		img.Position = UDim2.new(0, 5, 0.5, -10)
-		img.BackgroundTransparency = 1
-		img.Image = icon
-		img.Parent = label
-		label.Text = "     " .. texto
+		create("ImageLabel", {
+			Size = UDim2.new(0, 20, 0, 20),
+			Position = UDim2.new(0, 12, 0.5, -10),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = colors.text,
+			Parent = frame
+		})
 	end
 	
+	local label = create("TextLabel", {
+		Size = UDim2.new(1, icon and -45 or -20, 1, 0),
+		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.Gotham,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
 	return {
-		set = function(val)
-			label.Text = icon and ("     " .. val) or ("  " .. val)
-		end
+		set = function(val) label.Text = val end
 	}
 end
 
 function APTX:destroy()
-	if self.dev then
-		print("[APTX] GUI destruida")
-	end
-	
+	if self.dev then print("[APTX] Destruido") end
 	self.screen:Destroy()
 end
 

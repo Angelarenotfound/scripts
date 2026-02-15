@@ -227,9 +227,13 @@ function APTX:Config(config)
 		Parent = player:WaitForChild("PlayerGui")
 	})
 	
+	local viewport = workspace.CurrentCamera.ViewportSize
+	local width = math.min(700, viewport.X * 0.9)
+	local height = math.min(450, viewport.Y * 0.8)
+	
 	self.main = create("Frame", {
-		Size = UDim2.new(0, 700, 0, 450),
-		Position = UDim2.new(0.5, -350, 0.5, -225),
+		Size = UDim2.new(0, width, 0, height),
+		Position = UDim2.new(0.5, -width/2, 0.5, -height/2),
 		BackgroundColor3 = colors.bg,
 		BorderSizePixel = 0,
 		Parent = self.screen
@@ -677,7 +681,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		Position = UDim2.new(1, -210, 0.5, -16),
 		BackgroundColor3 = colors.bg,
 		BorderSizePixel = 0,
-		Text = default or placeholder or "Seleccionar",
+		Text = "  " .. (default or placeholder or "Seleccionar"),
 		TextColor3 = colors.subtext,
 		Font = Enum.Font.Gotham,
 		TextSize = 13,
@@ -686,12 +690,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	})
 	corner(btn, 6)
 	
-	create("UIPadding", {
-		PaddingLeft = UDim.new(0, 10),
-		Parent = btn
-	})
-	
-	create("TextLabel", {
+	local arrow = create("TextLabel", {
 		Size = UDim2.new(0, 30, 1, 0),
 		Position = UDim2.new(1, -30, 0, 0),
 		BackgroundTransparency = 1,
@@ -702,14 +701,25 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		Parent = btn
 	})
 	
-	local menu = create("Frame", {
+	local menucontainer = create("Frame", {
 		Size = UDim2.new(0, 200, 0, 0),
 		Position = UDim2.new(1, -210, 1, 5),
+		BackgroundTransparency = 1,
+		Visible = false,
+		ZIndex = 100,
+		ClipsDescendants = false,
+		Parent = frame
+	})
+	
+	local menu = create("ScrollingFrame", {
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = colors.panel,
 		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 10,
-		Parent = frame
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = colors.border,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		ZIndex = 100,
+		Parent = menucontainer
 	})
 	corner(menu, 6)
 	
@@ -719,10 +729,14 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		Parent = menu
 	})
 	
-	create("UIListLayout", {
+	local menulist = create("UIListLayout", {
 		Padding = UDim.new(0, 2),
 		Parent = menu
 	})
+	
+	menulist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		menu.CanvasSize = UDim2.new(0, 0, 0, menulist.AbsoluteContentSize.Y)
+	end)
 	
 	local open = false
 	local selected = default
@@ -732,27 +746,29 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 			Size = UDim2.new(1, 0, 0, 32),
 			BackgroundColor3 = colors.panel,
 			BorderSizePixel = 0,
-			Text = opt,
+			Text = "  " .. opt,
 			TextColor3 = colors.text,
 			Font = Enum.Font.Gotham,
 			TextSize = 13,
 			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 100,
 			Parent = menu
 		})
 		
-		create("UIPadding", {
-			PaddingLeft = UDim.new(0, 10),
-			Parent = optbtn
-		})
+		optbtn.MouseEnter:Connect(function() 
+			tween(optbtn, {BackgroundColor3 = colors.hover}) 
+		end)
 		
-		optbtn.MouseEnter:Connect(function() tween(optbtn, {BackgroundColor3 = colors.hover}) end)
-		optbtn.MouseLeave:Connect(function() tween(optbtn, {BackgroundColor3 = colors.panel}) end)
+		optbtn.MouseLeave:Connect(function() 
+			tween(optbtn, {BackgroundColor3 = colors.panel}) 
+		end)
 		
 		optbtn.MouseButton1Click:Connect(function()
 			selected = opt
-			btn.Text = opt
-			menu.Visible = false
+			btn.Text = "  " .. opt
+			menucontainer.Visible = false
 			open = false
+			arrow.Text = "▼"
 			if callback then callback(opt) end
 			if self.dev then print("[APTX] Selección: " .. opt) end
 		end)
@@ -760,17 +776,26 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	
 	btn.MouseButton1Click:Connect(function()
 		open = not open
-		menu.Visible = open
-		if open then menu.Size = UDim2.new(0, 200, 0, math.min(#options * 34, 200)) end
+		menucontainer.Visible = open
+		arrow.Text = open and "▲" or "▼"
+		if open then 
+			local height = math.min(#options * 34, 200)
+			menucontainer.Size = UDim2.new(0, 200, 0, height)
+		end
 	end)
 	
 	if self.dev then print("[APTX] Dropdown: " .. texto) end
 	
 	return {
 		get = function() return selected end,
-		set = function(val) selected = val btn.Text = val end
+		set = function(val) 
+			selected = val 
+			btn.Text = "  " .. val 
+		end
 	}
 end
+
+APTX.Menu = APTX.Dropdown
 
 function APTX:Toggle(section, texto, icon, default, callback)
 	local frame = create("Frame", {

@@ -245,7 +245,7 @@ function APTX:Config(config)
 		BorderSizePixel = 0,
 		Parent = self.screen
 	})
-	corner(self.main, 12 * scale)
+	corner(self.main, 12 * self.scale)
 	
 	create("UIStroke", {
 		Color = colors.border,
@@ -253,7 +253,7 @@ function APTX:Config(config)
 		Parent = self.main
 	})
 	
-	local topheight = math.max(40, 50 * scale)
+	local topheight = math.max(40, 50 * self.scale)
 	
 	local topbar = create("Frame", {
 		Size = UDim2.new(1, 0, 0, topheight),
@@ -261,7 +261,7 @@ function APTX:Config(config)
 		BorderSizePixel = 0,
 		Parent = self.main
 	})
-	corner(topbar, 12 * scale)
+	corner(topbar, 12 * self.scale)
 	
 	create("Frame", {
 		Size = UDim2.new(1, 0, 0.5, 0),
@@ -278,24 +278,24 @@ function APTX:Config(config)
 		Text = self.title,
 		TextColor3 = colors.text,
 		Font = Enum.Font.GothamBold,
-		TextSize = math.max(12, 16 * scale),
+		TextSize = math.max(12, 16 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = topbar
 	})
 	
 	if not self.hidebutton then
 		local closebtn = create("TextButton", {
-			Size = UDim2.new(0, 30 * scale, 0, 30 * scale),
-			Position = UDim2.new(1, -(40 * scale), 0.5, -(15 * scale)),
+			Size = UDim2.new(0, 30 * self.scale, 0, 30 * self.scale),
+			Position = UDim2.new(1, -(40 * self.scale), 0.5, -(15 * self.scale)),
 			BackgroundColor3 = colors.element,
 			BorderSizePixel = 0,
 			Text = "×",
 			TextColor3 = colors.text,
 			Font = Enum.Font.GothamBold,
-			TextSize = math.max(16, 20 * scale),
+			TextSize = math.max(16, 20 * self.scale),
 			Parent = topbar
 		})
-		corner(closebtn, 6 * scale)
+		corner(closebtn, 6 * self.scale)
 		
 		closebtn.MouseButton1Click:Connect(function()
 			self:destroy()
@@ -335,7 +335,7 @@ function APTX:Config(config)
 		end)
 	end
 	
-	local sidebarwidth = math.max(160, 200 * scale)
+	local sidebarwidth = math.max(160, 200 * self.scale)
 	
 	local sidebar = create("Frame", {
 		Size = UDim2.new(0, sidebarwidth, 1, -topheight),
@@ -357,27 +357,27 @@ function APTX:Config(config)
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		ScrollBarThickness = math.max(3, 4 * scale),
+		ScrollBarThickness = math.max(3, 4 * self.scale),
 		ScrollBarImageColor3 = colors.border,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		Parent = sidebar
 	})
 	
 	local list = create("UIListLayout", {
-		Padding = UDim.new(0, 6 * scale),
+		Padding = UDim.new(0, 6 * self.scale),
 		Parent = scroll
 	})
 	
 	create("UIPadding", {
-		PaddingTop = UDim.new(0, 10 * scale),
-		PaddingBottom = UDim.new(0, 10 * scale),
-		PaddingLeft = UDim.new(0, 10 * scale),
-		PaddingRight = UDim.new(0, 10 * scale),
+		PaddingTop = UDim.new(0, 10 * self.scale),
+		PaddingBottom = UDim.new(0, 10 * self.scale),
+		PaddingLeft = UDim.new(0, 10 * self.scale),
+		PaddingRight = UDim.new(0, 10 * self.scale),
 		Parent = scroll
 	})
 	
 	list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		scroll.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 20 * scale)
+		scroll.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 20 * self.scale)
 	end)
 	
 	self.content = create("Frame", {
@@ -398,7 +398,7 @@ end
 function APTX:Section(name, icon)
 	if self.dev then print("[APTX] Sección: " .. name) end
 	
-	local btnheight = math.max(35, 42 * scale)
+	local btnheight = math.max(35, 42 * self.scale)
 	
 	local btn = create("TextButton", {
 		Size = UDim2.new(1, 0, 0, btnheight),

@@ -1,1046 +1,956 @@
+--[[
+	APTX GUI Library v2.0
+	Librería GUI profesional con sistema de íconos Lucide integrado
+	Uso: local gui = APTX:Config({icons = "default", hidebutton = true})
+]]
+
 local APTX = {}
 APTX.__index = APTX
 
-local uis = game:GetService("UserInputService")
-local ts = game:GetService("TweenService")
-local player = game.Players.LocalPlayer
-
-local colors = {
-	bg = Color3.fromRGB(15, 15, 15),
-	topbar = Color3.fromRGB(20, 20, 20),
-	panel = Color3.fromRGB(18, 18, 18),
-	element = Color3.fromRGB(25, 25, 25),
-	hover = Color3.fromRGB(35, 35, 35),
-	active = Color3.fromRGB(45, 45, 45),
-	accent = Color3.fromRGB(70, 130, 255),
-	border = Color3.fromRGB(40, 40, 40),
-	text = Color3.fromRGB(255, 255, 255),
-	subtext = Color3.fromRGB(180, 180, 180)
-}
-
-local icons = {
-	["home"] = "rbxassetid://10723407389",
+-- ==================== ICONOS LUCIDE ====================
+local LucideIcons = {
+	["home"] = "rbxassetid://10723434711",
 	["settings"] = "rbxassetid://10734950309",
-	["user"] = "rbxassetid://10747373176",
-	["users"] = "rbxassetid://10747373426",
-	["search"] = "rbxassetid://10734943674",
+	["user"] = "rbxassetid://10734949856",
+	["users"] = "rbxassetid://10747373176",
+	["info"] = "rbxassetid://10723407389",
+	["chevron-right"] = "rbxassetid://10709790948",
+	["chevron-left"] = "rbxassetid://10709790644",
+	["chevron-up"] = "rbxassetid://10709791437",
+	["chevron-down"] = "rbxassetid://10709790644",
+	["check"] = "rbxassetid://10709814189",
 	["x"] = "rbxassetid://10747384394",
-	["check"] = "rbxassetid://10709790644",
-	["arrow-up"] = "rbxassetid://10709768939",
-	["arrow-down"] = "rbxassetid://10709767827",
-	["arrow-left"] = "rbxassetid://10709768114",
-	["arrow-right"] = "rbxassetid://10709768347",
-	["chevron-up"] = "rbxassetid://10709791523",
-	["chevron-down"] = "rbxassetid://10709790948",
-	["chevron-left"] = "rbxassetid://10709791281",
-	["chevron-right"] = "rbxassetid://10709791437",
-	["menu"] = "rbxassetid://10734887784",
-	["plus"] = "rbxassetid://10734924532",
-	["minus"] = "rbxassetid://10734896206",
-	["edit"] = "rbxassetid://10734883598",
-	["trash"] = "rbxassetid://10747362393",
-	["save"] = "rbxassetid://10734941499",
-	["download"] = "rbxassetid://10723344270",
-	["upload"] = "rbxassetid://10747366434",
-	["file"] = "rbxassetid://10723374641",
-	["folder"] = "rbxassetid://10723387563",
-	["copy"] = "rbxassetid://10709812159",
-	["clipboard"] = "rbxassetid://10709799288",
-	["link"] = "rbxassetid://10723426722",
-	["eye"] = "rbxassetid://10723346959",
-	["eye-off"] = "rbxassetid://10723346871",
-	["lock"] = "rbxassetid://10723434711",
-	["unlock"] = "rbxassetid://10747366027",
-	["bell"] = "rbxassetid://10709775704",
-	["star"] = "rbxassetid://10734966248",
-	["heart"] = "rbxassetid://10723406885",
-	["message"] = "rbxassetid://10734888000",
-	["mail"] = "rbxassetid://10734885430",
-	["phone"] = "rbxassetid://10734921524",
-	["calendar"] = "rbxassetid://10709789505",
-	["clock"] = "rbxassetid://10709805144",
-	["map"] = "rbxassetid://10734886202",
-	["image"] = "rbxassetid://10723415040",
-	["camera"] = "rbxassetid://10709789686",
-	["video"] = "rbxassetid://10747374938",
-	["music"] = "rbxassetid://10734905958",
-	["mic"] = "rbxassetid://10734888864",
-	["volume"] = "rbxassetid://10747376008",
-	["play"] = "rbxassetid://10734923549",
-	["pause"] = "rbxassetid://10734919336",
-	["stop"] = "rbxassetid://10734972621",
-	["skip-forward"] = "rbxassetid://10734961809",
-	["skip-back"] = "rbxassetid://10734961526",
-	["repeat"] = "rbxassetid://10734933966",
-	["shuffle"] = "rbxassetid://10734953451",
-	["maximize"] = "rbxassetid://10734886735",
-	["minimize"] = "rbxassetid://10734895698",
-	["refresh"] = "rbxassetid://10734933222",
-	["rotate"] = "rbxassetid://10734940654",
-	["zoom-in"] = "rbxassetid://10747384552",
-	["zoom-out"] = "rbxassetid://10747384679",
-	["move"] = "rbxassetid://10734900011",
-	["grid"] = "rbxassetid://10723404936",
-	["layout"] = "rbxassetid://10723425376",
-	["sidebar"] = "rbxassetid://10734954301",
-	["columns"] = "rbxassetid://10709811261",
-	["rows"] = "rbxassetid://10709811261",
-	["list"] = "rbxassetid://10723433811",
-	["filter"] = "rbxassetid://10723375128",
-	["sliders"] = "rbxassetid://10734963400",
-	["toggle-left"] = "rbxassetid://10734984834",
-	["toggle-right"] = "rbxassetid://10734985040",
-	["code"] = "rbxassetid://10709810463",
-	["terminal"] = "rbxassetid://10734982144",
-	["command"] = "rbxassetid://10709811365",
-	["hash"] = "rbxassetid://10723405975",
-	["at-sign"] = "rbxassetid://10709769286",
-	["percent"] = "rbxassetid://10734919919",
-	["dollar"] = "rbxassetid://10723343958",
-	["shopping-cart"] = "rbxassetid://10734952479",
-	["shopping-bag"] = "rbxassetid://10734952273",
-	["credit-card"] = "rbxassetid://10709765398",
-	["wallet"] = "rbxassetid://10747376205",
-	["gift"] = "rbxassetid://10723396402",
-	["tag"] = "rbxassetid://10734976528",
-	["bookmark"] = "rbxassetid://10709782154",
-	["flag"] = "rbxassetid://10723375890",
-	["award"] = "rbxassetid://10709769406",
-	["trophy"] = "rbxassetid://10747363809",
-	["target"] = "rbxassetid://10734977012",
-	["zap"] = "rbxassetid://10709790202",
-	["trending-up"] = "rbxassetid://10747363465",
-	["trending-down"] = "rbxassetid://10747363205",
-	["bar-chart"] = "rbxassetid://10709773755",
-	["pie-chart"] = "rbxassetid://10734921727",
-	["activity"] = "rbxassetid://10709752035",
-	["package"] = "rbxassetid://10734909540",
-	["box"] = "rbxassetid://10709782497",
-	["archive"] = "rbxassetid://10709762233",
-	["inbox"] = "rbxassetid://10723415335",
-	["send"] = "rbxassetid://10734943902",
-	["truck"] = "rbxassetid://10747364031",
-	["plane"] = "rbxassetid://10734922971",
-	["globe"] = "rbxassetid://10723404337",
-	["wifi"] = "rbxassetid://10747382504",
-	["bluetooth"] = "rbxassetid://10709776655",
-	["battery"] = "rbxassetid://10709774640",
-	["smartphone"] = "rbxassetid://10734963940",
-	["tablet"] = "rbxassetid://10734976394",
-	["laptop"] = "rbxassetid://10723423881",
-	["monitor"] = "rbxassetid://10734896881",
-	["tv"] = "rbxassetid://10747364593",
-	["watch"] = "rbxassetid://10747376722",
-	["printer"] = "rbxassetid://10734930632",
-	["keyboard"] = "rbxassetid://10723416765",
-	["mouse"] = "rbxassetid://10734898592",
-	["headphones"] = "rbxassetid://10723406165",
-	["gamepad"] = "rbxassetid://10723395457",
-	["server"] = "rbxassetid://10734949856",
-	["database"] = "rbxassetid://10709818996",
-	["cloud"] = "rbxassetid://10709806740",
-	["hard-drive"] = "rbxassetid://10723405749",
-	["cpu"] = "rbxassetid://10709813383",
-	["power"] = "rbxassetid://10734930466",
-	["sun"] = "rbxassetid://10734974297",
-	["moon"] = "rbxassetid://10734897102",
-	["cloud-rain"] = "rbxassetid://10709806277",
-	["cloud-snow"] = "rbxassetid://10709806374",
-	["wind"] = "rbxassetid://10747382750",
-	["droplet"] = "rbxassetid://10723344432",
-	["thermometer"] = "rbxassetid://10734983134",
-	["smile"] = "rbxassetid://10734964441",
-	["frown"] = "rbxassetid://10723394681",
-	["meh"] = "rbxassetid://10734887603",
-	["thumbs-up"] = "rbxassetid://10734983629",
-	["thumbs-down"] = "rbxassetid://10734983359",
-	["help"] = "rbxassetid://10723406988",
-	["info"] = "rbxassetid://10723415903",
-	["alert-triangle"] = "rbxassetid://10709753149",
-	["alert-circle"] = "rbxassetid://10709752996",
-	["alert-octagon"] = "rbxassetid://10709753064",
-	["shield"] = "rbxassetid://10734951847",
-	["shield-check"] = "rbxassetid://10734951367",
-	["bug"] = "rbxassetid://10709782845",
-	["key"] = "rbxassetid://10723416652",
-	["tool"] = "rbxassetid://10747383470",
-	["wrench"] = "rbxassetid://10747383470",
-	["hammer"] = "rbxassetid://10723405360",
-	["paint"] = "rbxassetid://10734910187",
-	["palette"] = "rbxassetid://10734910430",
-	["pen"] = "rbxassetid://10734919503",
-	["pencil"] = "rbxassetid://10734919691",
-	["feather"] = "rbxassetid://10723354671",
-	["book"] = "rbxassetid://10709781824",
-	["book-open"] = "rbxassetid://10709781717",
-	["briefcase"] = "rbxassetid://10709782662",
-	["compass"] = "rbxassetid://10709811445",
-	["coffee"] = "rbxassetid://10709810814",
-	["pizza"] = "rbxassetid://10734922774"
+	["menu"] = "rbxassetid://10723407389",
+	["search"] = "rbxassetid://10734898355",
+	["bell"] = "rbxassetid://10709764411",
+	["star"] = "rbxassetid://10734896869",
+	["heart"] = "rbxassetid://10723434711",
+	["eye"] = "rbxassetid://10723345281",
+	["eye-off"] = "rbxassetid://10723345518",
+	["lock"] = "rbxassetid://10723407389",
+	["unlock"] = "rbxassetid://10747384394",
+	["trash"] = "rbxassetid://10734884548",
+	["edit"] = "rbxassetid://10734883566",
+	["plus"] = "rbxassetid://10734896206",
+	["minus"] = "rbxassetid://10723407389",
+	["arrow-up"] = "rbxassetid://10709776174",
+	["arrow-down"] = "rbxassetid://10709775692",
+	["arrow-left"] = "rbxassetid://10709775197",
+	["arrow-right"] = "rbxassetid://10709776511",
+	["download"] = "rbxassetid://10723346835",
+	["upload"] = "rbxassetid://10734949856",
+	["file"] = "rbxassetid://10723374238",
+	["folder"] = "rbxassetid://10723374389",
+	["image"] = "rbxassetid://10723407389",
+	["play"] = "rbxassetid://10734896206",
+	["pause"] = "rbxassetid://10734895663",
+	["stop"] = "rbxassetid://10734898769",
+	["skip-forward"] = "rbxassetid://10734898355",
+	["skip-back"] = "rbxassetid://10734898088",
+	["refresh"] = "rbxassetid://10723407389",
+	["shield"] = "rbxassetid://10734950309",
+	["database"] = "rbxassetid://10723346835",
+	["server"] = "rbxassetid://10734950309",
+	["globe"] = "rbxassetid://10723407389",
+	["wifi"] = "rbxassetid://10747384394",
+	["bluetooth"] = "rbxassetid://10709764411",
+	["battery"] = "rbxassetid://10709764197",
+	["power"] = "rbxassetid://10734896206",
+	["cpu"] = "rbxassetid://10723346835"
 }
 
-local function geticon(name)
-	return icons[name] or nil
+-- ==================== COLORES DEL TEMA ====================
+local Theme = {
+	Background = Color3.fromRGB(15, 15, 17),
+	Topbar = Color3.fromRGB(22, 22, 25),
+	Border = Color3.fromRGB(45, 45, 50),
+	SidebarBg = Color3.fromRGB(18, 18, 21),
+	ButtonNormal = Color3.fromRGB(25, 25, 28),
+	ButtonHover = Color3.fromRGB(35, 35, 40),
+	ButtonActive = Color3.fromRGB(55, 120, 220),
+	TextPrimary = Color3.fromRGB(255, 255, 255),
+	TextSecondary = Color3.fromRGB(180, 180, 185),
+	Accent = Color3.fromRGB(70, 140, 255),
+	SliderFill = Color3.fromRGB(70, 140, 255),
+	SliderThumb = Color3.fromRGB(255, 255, 255),
+	InputBg = Color3.fromRGB(22, 22, 26),
+	ToggleOn = Color3.fromRGB(70, 140, 255),
+	ToggleOff = Color3.fromRGB(40, 40, 45)
+}
+
+-- ==================== UTILIDADES ====================
+local function CreateElement(className, properties)
+	local element = Instance.new(className)
+	for prop, value in pairs(properties) do
+		element[prop] = value
+	end
+	return element
 end
 
-local function create(class, props)
-	local obj = Instance.new(class)
-	for k, v in pairs(props) do
-		if k ~= "Parent" then
-			obj[k] = v
-		end
-	end
-	if props.Parent then
-		obj.Parent = props.Parent
-	end
-	return obj
-end
-
-local function corner(parent, radius)
-	return create("UICorner", {
+local function AddCorner(parent, radius)
+	return CreateElement("UICorner", {
 		CornerRadius = UDim.new(0, radius or 8),
 		Parent = parent
 	})
 end
 
-local function tween(obj, props, time)
-	ts:Create(obj, TweenInfo.new(time or 0.2), props):Play()
+local function AddStroke(parent, color, thickness)
+	return CreateElement("UIStroke", {
+		Color = color or Theme.Border,
+		Thickness = thickness or 1,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Parent = parent
+	})
 end
 
+local function CreateIcon(iconName, size)
+	local iconId = LucideIcons[iconName] or LucideIcons["home"]
+	return CreateElement("ImageLabel", {
+		Size = UDim2.new(0, size or 18, 0, size or 18),
+		BackgroundTransparency = 1,
+		Image = iconId,
+		ImageColor3 = Theme.TextPrimary,
+		ScaleType = Enum.ScaleType.Fit
+	})
+end
+
+local function TweenProperty(instance, property, targetValue, duration)
+	local TweenService = game:GetService("TweenService")
+	local info = TweenInfo.new(duration or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local goal = {[property] = targetValue}
+	TweenService:Create(instance, info, goal):Play()
+end
+
+-- ==================== CONSTRUCTOR PRINCIPAL ====================
 function APTX:Config(config)
+	config = config or {}
 	local self = setmetatable({}, APTX)
 	
-	self.title = config.title or "APTX"
-	self.drag = config.draggable ~= false
-	self.dev = config.devmode or false
-	self.iconmode = config.icons or "default"
-	self.hidebutton = config.hidebutton or false
-	self.sections = {}
-	self.current = nil
-	self.visible = true
+	self.IconMode = config.icons or "default"
+	self.ShowHideButton = config.hidebutton ~= false
+	self.CurrentSection = nil
+	self.Sections = {}
+	self.CustomIcons = config.customIcons or {}
 	
-	if self.dev then print("[APTX] Inicializando") end
-	
-	self.screen = create("ScreenGui", {
-		Name = "APTX",
-		ResetOnSpawn = false,
-		Parent = player:WaitForChild("PlayerGui")
-	})
-	
-	local viewport = workspace.CurrentCamera.ViewportSize
-	local basewidth = 720
-	local baseheight = 440
-	local scalex = math.min(viewport.X / 1280, 1)
-	local scaley = math.min(viewport.Y / 720, 1)
-	local scale = math.min(scalex, scaley)
-	local width = math.min(basewidth * scale, viewport.X * 0.85)
-	local height = math.min(baseheight * scale, viewport.Y * 0.8)
-	
-	self.scale = scale
-	
-	self.main = create("Frame", {
-		Size = UDim2.new(0, width, 0, height),
-		Position = UDim2.new(0.5, -width/2, 0.5, -height/2),
-		BackgroundColor3 = colors.bg,
-		BorderSizePixel = 0,
-		Parent = self.screen
-	})
-	corner(self.main, 12 * self.scale)
-	
-	create("UIStroke", {
-		Color = colors.border,
-		Thickness = 1,
-		Parent = self.main
-	})
-	
-	local topheight = math.max(40, 50 * self.scale)
-	
-	local topbar = create("Frame", {
-		Size = UDim2.new(1, 0, 0, topheight),
-		BackgroundColor3 = colors.topbar,
-		BorderSizePixel = 0,
-		Parent = self.main
-	})
-	corner(topbar, 12 * self.scale)
-	
-	create("Frame", {
-		Size = UDim2.new(1, 0, 0.5, 0),
-		Position = UDim2.new(0, 0, 1, -1),
-		BackgroundColor3 = colors.topbar,
-		BorderSizePixel = 0,
-		Parent = topbar
-	})
-	
-	create("TextLabel", {
-		Size = UDim2.new(1, -100 * scale, 1, 0),
-		Position = UDim2.new(0, 15 * scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = self.title,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamBold,
-		TextSize = math.max(12, 16 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = topbar
-	})
-	
-	if not self.hidebutton then
-		local closebtn = create("TextButton", {
-			Size = UDim2.new(0, 30 * self.scale, 0, 30 * self.scale),
-			Position = UDim2.new(1, -(40 * self.scale), 0.5, -(15 * self.scale)),
-			BackgroundColor3 = colors.element,
-			BorderSizePixel = 0,
-			Text = "×",
-			TextColor3 = colors.text,
-			Font = Enum.Font.GothamBold,
-			TextSize = math.max(16, 20 * self.scale),
-			Parent = topbar
-		})
-		corner(closebtn, 6 * self.scale)
-		
-		closebtn.MouseButton1Click:Connect(function()
-			self:destroy()
-		end)
-		
-		closebtn.MouseEnter:Connect(function()
-			tween(closebtn, {BackgroundColor3 = colors.hover})
-		end)
-		
-		closebtn.MouseLeave:Connect(function()
-			tween(closebtn, {BackgroundColor3 = colors.element})
-		end)
+	-- Combinar íconos personalizados con los default
+	if self.IconMode == "custom" and self.CustomIcons then
+		for name, id in pairs(self.CustomIcons) do
+			LucideIcons[name] = id
+		end
 	end
 	
-	if self.drag then
-		local dragging = false
-		local offset
-		
-		topbar.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				dragging = true
-				offset = Vector2.new(input.Position.X, input.Position.Y) - self.main.AbsolutePosition
-			end
-		end)
-		
-		topbar.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				dragging = false
-			end
-		end)
-		
-		uis.InputChanged:Connect(function(input)
-			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-				local pos = Vector2.new(input.Position.X, input.Position.Y) - offset
-				self.main.Position = UDim2.new(0, pos.X, 0, pos.Y)
-			end
-		end)
-	end
-	
-	local sidebarwidth = math.max(160, 200 * self.scale)
-	
-	local sidebar = create("Frame", {
-		Size = UDim2.new(0, sidebarwidth, 1, -topheight),
-		Position = UDim2.new(0, 0, 0, topheight),
-		BackgroundColor3 = colors.panel,
-		BorderSizePixel = 0,
-		Parent = self.main
-	})
-	
-	create("Frame", {
-		Size = UDim2.new(0, 1, 1, 0),
-		Position = UDim2.new(1, 0, 0, 0),
-		BackgroundColor3 = colors.border,
-		BorderSizePixel = 0,
-		Parent = sidebar
-	})
-	
-	local scroll = create("ScrollingFrame", {
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		ScrollBarThickness = math.max(3, 4 * self.scale),
-		ScrollBarImageColor3 = colors.border,
-		CanvasSize = UDim2.new(0, 0, 0, 0),
-		Parent = sidebar
-	})
-	
-	local list = create("UIListLayout", {
-		Padding = UDim.new(0, 6 * self.scale),
-		Parent = scroll
-	})
-	
-	create("UIPadding", {
-		PaddingTop = UDim.new(0, 10 * self.scale),
-		PaddingBottom = UDim.new(0, 10 * self.scale),
-		PaddingLeft = UDim.new(0, 10 * self.scale),
-		PaddingRight = UDim.new(0, 10 * self.scale),
-		Parent = scroll
-	})
-	
-	list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		scroll.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 20 * self.scale)
-	end)
-	
-	self.content = create("Frame", {
-		Size = UDim2.new(1, -sidebarwidth, 1, -topheight),
-		Position = UDim2.new(0, sidebarwidth, 0, topheight),
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = self.main
-	})
-	
-	self.sidebar = scroll
-	
-	if self.dev then print("[APTX] GUI creado") end
-	
+	self:CreateMainUI()
 	return self
 end
 
-function APTX:Section(name, icon)
-	if self.dev then print("[APTX] Sección: " .. name) end
+-- ==================== CREACIÓN DE UI PRINCIPAL ====================
+function APTX:CreateMainUI()
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
 	
-	local btnheight = math.max(35, 42 * self.scale)
-	
-	local btn = create("TextButton", {
-		Size = UDim2.new(1, 0, 0, btnheight),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Text = "",
-		Parent = self.sidebar
+	-- ScreenGui principal
+	self.ScreenGui = CreateElement("ScreenGui", {
+		Name = "APTXGui",
+		Parent = playerGui,
+		ResetOnSpawn = false,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	})
-	corner(btn, 8 * self.scale)
 	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = btn
-		})
+	-- Botón de toggle externo
+	if self.ShowHideButton then
+		self:CreateToggleButton()
 	end
 	
-	create("TextLabel", {
-		Size = UDim2.new(1, -40 * self.scale, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = name,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(11, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = btn
-	})
-	
-	local page = create("ScrollingFrame", {
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
+	-- Frame principal
+	self.MainFrame = CreateElement("Frame", {
+		Name = "MainFrame",
+		Size = UDim2.new(0, 650, 0, 420),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Theme.Background,
 		BorderSizePixel = 0,
-		ScrollBarThickness = math.max(3, 4 * self.scale),
-		ScrollBarImageColor3 = colors.border,
-		CanvasSize = UDim2.new(0, 0, 0, 0),
-		Visible = false,
-		Parent = self.content
+		Parent = self.ScreenGui
 	})
 	
-	local pagelist = create("UIListLayout", {
-		Padding = UDim.new(0, 8 * self.scale),
-		Parent = page
+	AddCorner(self.MainFrame, 10)
+	AddStroke(self.MainFrame, Theme.Border, 1)
+	
+	-- Topbar
+	self:CreateTopbar()
+	
+	-- Container de contenido
+	self.ContentContainer = CreateElement("Frame", {
+		Name = "ContentContainer",
+		Size = UDim2.new(1, -20, 1, -60),
+		Position = UDim2.new(0, 10, 0, 50),
+		BackgroundTransparency = 1,
+		Parent = self.MainFrame
 	})
 	
-	create("UIPadding", {
-		PaddingTop = UDim.new(0, 15 * self.scale),
-		PaddingBottom = UDim.new(0, 15 * self.scale),
-		PaddingLeft = UDim.new(0, 15 * self.scale),
-		PaddingRight = UDim.new(0, 15 * self.scale),
-		Parent = page
-	})
+	-- Sidebar (25%)
+	self:CreateSidebar()
 	
-	pagelist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		page.CanvasSize = UDim2.new(0, 0, 0, pagelist.AbsoluteContentSize.Y + 30 * self.scale)
-	end)
+	-- Content Area (75%)
+	self:CreateContentArea()
 	
-	local section = {
-		name = name,
-		button = btn,
-		container = page
-	}
-	
-	table.insert(self.sections, section)
-	
-	btn.MouseButton1Click:Connect(function()
-		for _, s in ipairs(self.sections) do
-			s.container.Visible = false
-			s.button.BackgroundColor3 = colors.element
-		end
-		page.Visible = true
-		btn.BackgroundColor3 = colors.active
-		self.current = section
-		if self.dev then print("[APTX] Abriendo: " .. name) end
-	end)
-	
-	btn.MouseEnter:Connect(function()
-		if self.current ~= section then
-			tween(btn, {BackgroundColor3 = colors.hover})
-		end
-	end)
-	
-	btn.MouseLeave:Connect(function()
-		if self.current ~= section then
-			tween(btn, {BackgroundColor3 = colors.element})
-		end
-	end)
-	
-	if not self.current then
-		page.Visible = true
-		btn.BackgroundColor3 = colors.active
-		self.current = section
-	end
-	
-	return section
+	-- Hacer draggable
+	self:MakeDraggable()
 end
 
-function APTX:Button(section, texto, icon, callback)
-	local frameheight = math.max(35, 45 * self.scale)
-	
-	local frame = create("TextButton", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
+-- ==================== TOGGLE BUTTON ====================
+function APTX:CreateToggleButton()
+	self.ToggleButton = CreateElement("TextButton", {
+		Name = "ToggleButton",
+		Size = UDim2.new(0, 50, 0, 50),
+		Position = UDim2.new(0, 20, 0.5, -25),
+		BackgroundColor3 = Theme.Topbar,
 		BorderSizePixel = 0,
 		Text = "",
-		Parent = section.container
-	})
-	corner(frame, 8 * self.scale)
-	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
-	
-	create("TextLabel", {
-		Size = UDim2.new(1, -30 * self.scale, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
+		Parent = self.ScreenGui,
+		ZIndex = 10
 	})
 	
-	frame.MouseButton1Click:Connect(function()
-		if callback then callback() end
-		if self.dev then print("[APTX] Botón: " .. texto) end
+	AddCorner(self.ToggleButton, 10)
+	AddStroke(self.ToggleButton, Theme.Border, 1)
+	
+	local icon = CreateIcon("menu", 24)
+	icon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.Parent = self.ToggleButton
+	
+	local isVisible = true
+	self.ToggleButton.MouseButton1Click:Connect(function()
+		isVisible = not isVisible
+		self.MainFrame.Visible = isVisible
 	end)
 	
-	frame.MouseEnter:Connect(function()
-		tween(frame, {BackgroundColor3 = colors.hover})
+	-- Hover effect
+	self.ToggleButton.MouseEnter:Connect(function()
+		TweenProperty(self.ToggleButton, "BackgroundColor3", Theme.ButtonHover)
 	end)
 	
-	frame.MouseLeave:Connect(function()
-		tween(frame, {BackgroundColor3 = colors.element})
+	self.ToggleButton.MouseLeave:Connect(function()
+		TweenProperty(self.ToggleButton, "BackgroundColor3", Theme.Topbar)
 	end)
-	
-	if self.dev then print("[APTX] Botón: " .. texto) end
 end
 
-function APTX:Slider(section, texto, icon, min, max, default, callback)
-	local frameheight = math.max(45, 60 * self.scale)
-	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
+-- ==================== TOPBAR ====================
+function APTX:CreateTopbar()
+	local topbar = CreateElement("Frame", {
+		Name = "Topbar",
+		Size = UDim2.new(1, 0, 0, 40),
+		BackgroundColor3 = Theme.Topbar,
 		BorderSizePixel = 0,
-		Parent = section.container
-	})
-	corner(frame, 8 * self.scale)
-	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0, 12 * self.scale),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
-	
-	create("TextLabel", {
-		Size = UDim2.new(0.6, 0, 0, 20 * self.scale),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 10 * self.scale),
-		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
+		Parent = self.MainFrame
 	})
 	
-	local valuelabel = create("TextLabel", {
-		Size = UDim2.new(0.3, 0, 0, 20 * self.scale),
-		Position = UDim2.new(0.7, 0, 0, 10 * self.scale),
+	AddCorner(topbar, 10)
+	
+	-- Título
+	local title = CreateElement("TextLabel", {
+		Name = "Title",
+		Size = UDim2.new(0, 200, 1, 0),
+		Position = UDim2.new(0, 15, 0, 0),
 		BackgroundTransparency = 1,
-		Text = tostring(default or min),
-		TextColor3 = colors.accent,
+		Text = "APTX GUI",
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 16,
 		Font = Enum.Font.GothamBold,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Right,
-		Parent = frame
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = topbar
 	})
 	
-	local sliderheight = math.max(4, 6 * self.scale)
-	
-	local track = create("Frame", {
-		Size = UDim2.new(1, -30 * self.scale, 0, sliderheight),
-		Position = UDim2.new(0, 15 * self.scale, 1, -(15 * self.scale + sliderheight)),
-		BackgroundColor3 = colors.bg,
+	-- Botón cerrar
+	local closeBtn = CreateElement("TextButton", {
+		Name = "CloseButton",
+		Size = UDim2.new(0, 30, 0, 30),
+		Position = UDim2.new(1, -40, 0.5, -15),
+		BackgroundColor3 = Theme.ButtonNormal,
 		BorderSizePixel = 0,
-		Parent = frame
+		Text = "",
+		Parent = topbar
 	})
-	corner(track, sliderheight/2)
 	
-	local fill = create("Frame", {
-		Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-		BackgroundColor3 = colors.accent,
+	AddCorner(closeBtn, 6)
+	
+	local xIcon = CreateIcon("x", 16)
+	xIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	xIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	xIcon.Parent = closeBtn
+	
+	closeBtn.MouseButton1Click:Connect(function()
+		self.ScreenGui:Destroy()
+	end)
+	
+	closeBtn.MouseEnter:Connect(function()
+		TweenProperty(closeBtn, "BackgroundColor3", Color3.fromRGB(200, 50, 50))
+	end)
+	
+	closeBtn.MouseLeave:Connect(function()
+		TweenProperty(closeBtn, "BackgroundColor3", Theme.ButtonNormal)
+	end)
+end
+
+-- ==================== SIDEBAR ====================
+function APTX:CreateSidebar()
+	self.Sidebar = CreateElement("ScrollingFrame", {
+		Name = "Sidebar",
+		Size = UDim2.new(0.25, -5, 1, 0),
+		BackgroundColor3 = Theme.SidebarBg,
 		BorderSizePixel = 0,
-		Parent = track
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = Theme.Border,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		Parent = self.ContentContainer
 	})
-	corner(fill, sliderheight/2)
 	
-	local knobsize = math.max(12, 16 * self.scale)
+	AddCorner(self.Sidebar, 8)
 	
-	local knob = create("Frame", {
-		Size = UDim2.new(0, knobsize, 0, knobsize),
-		Position = UDim2.new((default - min) / (max - min), -knobsize/2, 0.5, -knobsize/2),
-		BackgroundColor3 = colors.text,
+	CreateElement("UIListLayout", {
+		Padding = UDim.new(0, 5),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = self.Sidebar
+	})
+	
+	CreateElement("UIPadding", {
+		PaddingTop = UDim.new(0, 8),
+		PaddingBottom = UDim.new(0, 8),
+		PaddingLeft = UDim.new(0, 8),
+		PaddingRight = UDim.new(0, 8),
+		Parent = self.Sidebar
+	})
+end
+
+-- ==================== CONTENT AREA ====================
+function APTX:CreateContentArea()
+	self.ContentArea = CreateElement("ScrollingFrame", {
+		Name = "ContentArea",
+		Size = UDim2.new(0.75, -5, 1, 0),
+		Position = UDim2.new(0.25, 5, 0, 0),
+		BackgroundColor3 = Theme.Background,
 		BorderSizePixel = 0,
-		Parent = track
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = Theme.Border,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		Parent = self.ContentContainer
 	})
-	corner(knob, knobsize/2)
 	
-	local value = default or min
-	local dragging = false
+	AddCorner(self.ContentArea, 8)
+	AddStroke(self.ContentArea, Theme.Border, 1)
+	
+	CreateElement("UIListLayout", {
+		Padding = UDim.new(0, 10),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = self.ContentArea
+	})
+	
+	CreateElement("UIPadding", {
+		PaddingTop = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 10),
+		PaddingLeft = UDim.new(0, 10),
+		PaddingRight = UDim.new(0, 10),
+		Parent = self.ContentArea
+	})
+end
+
+-- ==================== DRAGGABLE ====================
+function APTX:MakeDraggable()
+	local UserInputService = game:GetService("UserInputService")
+	local dragging, dragInput, dragStart, startPos
 	
 	local function update(input)
-		local rel = (input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
-		rel = math.clamp(rel, 0, 1)
-		value = math.floor(min + (max - min) * rel)
-		valuelabel.Text = tostring(value)
-		fill.Size = UDim2.new(rel, 0, 1, 0)
-		knob.Position = UDim2.new(rel, -knobsize/2, 0.5, -knobsize/2)
-		if callback then callback(value) end
+		local delta = input.Position - dragStart
+		self.MainFrame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
 	end
 	
-	track.InputBegan:Connect(function(input)
+	self.MainFrame.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
-			update(input)
+			dragStart = input.Position
+			startPos = self.MainFrame.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
 		end
 	end)
 	
-	track.InputEnded:Connect(function(input)
+	UserInputService.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			dragInput = input
+		end
+		
+		if dragging and dragInput then
+			update(dragInput)
+		end
+	end)
+end
+
+-- ==================== AÑADIR SECCIÓN ====================
+function APTX:AddSection(name, icon)
+	icon = icon or "folder"
+	
+	local sectionButton = CreateElement("TextButton", {
+		Name = name,
+		Size = UDim2.new(1, 0, 0, 36),
+		BackgroundColor3 = Theme.ButtonNormal,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = self.Sidebar
+	})
+	
+	AddCorner(sectionButton, 6)
+	
+	local iconImg = CreateIcon(icon, 16)
+	iconImg.Position = UDim2.new(0, 10, 0.5, 0)
+	iconImg.AnchorPoint = Vector2.new(0, 0.5)
+	iconImg.Parent = sectionButton
+	
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, -36, 1, 0),
+		Position = UDim2.new(0, 32, 0, 0),
+		BackgroundTransparency = 1,
+		Text = name,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = sectionButton
+	})
+	
+	-- Container de contenido de sección
+	local sectionContent = CreateElement("Frame", {
+		Name = name .. "Content",
+		Size = UDim2.new(1, 0, 0, 0),
+		BackgroundTransparency = 1,
+		Visible = false,
+		Parent = self.ContentArea,
+		AutomaticSize = Enum.AutomaticSize.Y
+	})
+	
+	CreateElement("UIListLayout", {
+		Padding = UDim.new(0, 8),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = sectionContent
+	})
+	
+	self.Sections[name] = {
+		Button = sectionButton,
+		Content = sectionContent,
+		Icon = iconImg
+	}
+	
+	-- Evento de click
+	sectionButton.MouseButton1Click:Connect(function()
+		self:LoadSection(name)
+	end)
+	
+	-- Hover effects
+	sectionButton.MouseEnter:Connect(function()
+		if self.CurrentSection ~= name then
+			TweenProperty(sectionButton, "BackgroundColor3", Theme.ButtonHover)
+		end
+	end)
+	
+	sectionButton.MouseLeave:Connect(function()
+		if self.CurrentSection ~= name then
+			TweenProperty(sectionButton, "BackgroundColor3", Theme.ButtonNormal)
+		end
+	end)
+	
+	-- Cargar primera sección automáticamente
+	if not self.CurrentSection then
+		self:LoadSection(name)
+	end
+	
+	return {
+		AddButton = function(_, ...) return self:AddButton(name, ...) end,
+		AddToggle = function(_, ...) return self:AddToggle(name, ...) end,
+		AddSlider = function(_, ...) return self:AddSlider(name, ...) end,
+		AddTextbox = function(_, ...) return self:AddTextbox(name, ...) end,
+		AddLabel = function(_, ...) return self:AddLabel(name, ...) end,
+		AddDropdown = function(_, ...) return self:AddDropdown(name, ...) end
+	}
+end
+
+-- ==================== CARGAR SECCIÓN ====================
+function APTX:LoadSection(name)
+	-- Ocultar todas las secciones
+	for sectionName, section in pairs(self.Sections) do
+		section.Content.Visible = false
+		TweenProperty(section.Button, "BackgroundColor3", Theme.ButtonNormal)
+	end
+	
+	-- Mostrar sección seleccionada
+	local section = self.Sections[name]
+	if section then
+		section.Content.Visible = true
+		TweenProperty(section.Button, "BackgroundColor3", Theme.ButtonActive)
+		self.CurrentSection = name
+	end
+end
+
+-- ==================== COMPONENTES ====================
+
+-- BOTÓN
+function APTX:AddButton(sectionName, text, icon, callback)
+	local section = self.Sections[sectionName]
+	if not section then return end
+	
+	local button = CreateElement("TextButton", {
+		Size = UDim2.new(1, 0, 0, 38),
+		BackgroundColor3 = Theme.ButtonNormal,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = section.Content
+	})
+	
+	AddCorner(button, 6)
+	AddStroke(button, Theme.Border, 1)
+	
+	if icon then
+		local iconImg = CreateIcon(icon, 16)
+		iconImg.Position = UDim2.new(0, 12, 0.5, 0)
+		iconImg.AnchorPoint = Vector2.new(0, 0.5)
+		iconImg.Parent = button
+	end
+	
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, icon and -40 or -20, 1, 0),
+		Position = UDim2.new(0, icon and 36 or 12, 0, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = button
+	})
+	
+	button.MouseButton1Click:Connect(function()
+		if callback then callback() end
+		TweenProperty(button, "BackgroundColor3", Theme.Accent)
+		wait(0.1)
+		TweenProperty(button, "BackgroundColor3", Theme.ButtonNormal)
+	end)
+	
+	button.MouseEnter:Connect(function()
+		TweenProperty(button, "BackgroundColor3", Theme.ButtonHover)
+	end)
+	
+	button.MouseLeave:Connect(function()
+		TweenProperty(button, "BackgroundColor3", Theme.ButtonNormal)
+	end)
+	
+	return button
+end
+
+-- TOGGLE
+function APTX:AddToggle(sectionName, text, default, callback)
+	local section = self.Sections[sectionName]
+	if not section then return end
+	
+	local isToggled = default or false
+	
+	local container = CreateElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 38),
+		BackgroundColor3 = Theme.ButtonNormal,
+		BorderSizePixel = 0,
+		Parent = section.Content
+	})
+	
+	AddCorner(container, 6)
+	AddStroke(container, Theme.Border, 1)
+	
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, -60, 1, 0),
+		Position = UDim2.new(0, 12, 0, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = container
+	})
+	
+	local toggleButton = CreateElement("TextButton", {
+		Size = UDim2.new(0, 44, 0, 24),
+		Position = UDim2.new(1, -52, 0.5, -12),
+		BackgroundColor3 = isToggled and Theme.ToggleOn or Theme.ToggleOff,
+		BorderSizePixel = 0,
+		Text = "",
+		Parent = container
+	})
+	
+	AddCorner(toggleButton, 12)
+	
+	local thumb = CreateElement("Frame", {
+		Size = UDim2.new(0, 18, 0, 18),
+		Position = isToggled and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9),
+		BackgroundColor3 = Theme.SliderThumb,
+		BorderSizePixel = 0,
+		Parent = toggleButton
+	})
+	
+	AddCorner(thumb, 9)
+	
+	toggleButton.MouseButton1Click:Connect(function()
+		isToggled = not isToggled
+		
+		TweenProperty(toggleButton, "BackgroundColor3", isToggled and Theme.ToggleOn or Theme.ToggleOff)
+		TweenProperty(thumb, "Position", isToggled and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9))
+		
+		if callback then callback(isToggled) end
+	end)
+	
+	return {
+		Set = function(value)
+			isToggled = value
+			TweenProperty(toggleButton, "BackgroundColor3", isToggled and Theme.ToggleOn or Theme.ToggleOff)
+			TweenProperty(thumb, "Position", isToggled and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9))
+		end
+	}
+end
+
+-- SLIDER
+function APTX:AddSlider(sectionName, text, min, max, default, callback)
+	local section = self.Sections[sectionName]
+	if not section then return end
+	
+	local currentValue = default or min
+	
+	local container = CreateElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 50),
+		BackgroundColor3 = Theme.ButtonNormal,
+		BorderSizePixel = 0,
+		Parent = section.Content
+	})
+	
+	AddCorner(container, 6)
+	AddStroke(container, Theme.Border, 1)
+	
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, -60, 0, 20),
+		Position = UDim2.new(0, 12, 0, 6),
+		BackgroundTransparency = 1,
+		Text = text,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = container
+	})
+	
+	local valueLabel = CreateElement("TextLabel", {
+		Size = UDim2.new(0, 50, 0, 20),
+		Position = UDim2.new(1, -58, 0, 6),
+		BackgroundTransparency = 1,
+		Text = tostring(currentValue),
+		TextColor3 = Theme.Accent,
+		TextSize = 13,
+		Font = Enum.Font.GothamBold,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Parent = container
+	})
+	
+	local sliderBg = CreateElement("Frame", {
+		Size = UDim2.new(1, -24, 0, 6),
+		Position = UDim2.new(0, 12, 1, -16),
+		BackgroundColor3 = Theme.InputBg,
+		BorderSizePixel = 0,
+		Parent = container
+	})
+	
+	AddCorner(sliderBg, 3)
+	
+	local sliderFill = CreateElement("Frame", {
+		Size = UDim2.new((currentValue - min) / (max - min), 0, 1, 0),
+		BackgroundColor3 = Theme.SliderFill,
+		BorderSizePixel = 0,
+		Parent = sliderBg
+	})
+	
+	AddCorner(sliderFill, 3)
+	
+	local thumb = CreateElement("Frame", {
+		Size = UDim2.new(0, 14, 0, 14),
+		Position = UDim2.new((currentValue - min) / (max - min), -7, 0.5, -7),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.SliderThumb,
+		BorderSizePixel = 0,
+		Parent = sliderBg,
+		ZIndex = 2
+	})
+	
+	AddCorner(thumb, 7)
+	AddStroke(thumb, Theme.Border, 2)
+	
+	local dragging = false
+	
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+		currentValue = math.floor(min + (max - min) * pos)
+		
+		valueLabel.Text = tostring(currentValue)
+		sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+		thumb.Position = UDim2.new(pos, -7, 0.5, -7)
+		
+		if callback then callback(currentValue) end
+	end
+	
+	sliderBg.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input)
+		end
+	end)
+	
+	sliderBg.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
 		end
 	end)
 	
-	uis.InputChanged:Connect(function(input)
+	game:GetService("UserInputService").InputChanged:Connect(function(input)
 		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			update(input)
+			updateSlider(input)
 		end
 	end)
 	
-	if self.dev then print("[APTX] Slider: " .. texto) end
-	
 	return {
-		get = function() return value end,
-		set = function(val)
-			value = math.clamp(val, min, max)
-			valuelabel.Text = tostring(value)
-			local rel = (value - min) / (max - min)
-			fill.Size = UDim2.new(rel, 0, 1, 0)
-			knob.Position = UDim2.new(rel, -knobsize/2, 0.5, -knobsize/2)
+		Set = function(value)
+			currentValue = math.clamp(value, min, max)
+			local pos = (currentValue - min) / (max - min)
+			valueLabel.Text = tostring(currentValue)
+			sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+			thumb.Position = UDim2.new(pos, -7, 0.5, -7)
 		end
 	}
 end
 
-function APTX:Textbox(section, texto, icon, placeholder, default, callback)
-	local frameheight = math.max(35, 45 * self.scale)
+-- TEXTBOX
+function APTX:AddTextbox(sectionName, text, placeholder, callback)
+	local section = self.Sections[sectionName]
+	if not section then return end
 	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
+	local container = CreateElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 50),
+		BackgroundColor3 = Theme.ButtonNormal,
 		BorderSizePixel = 0,
-		Parent = section.container
+		Parent = section.Content
 	})
-	corner(frame, 8 * self.scale)
 	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
+	AddCorner(container, 6)
+	AddStroke(container, Theme.Border, 1)
 	
-	create("TextLabel", {
-		Size = UDim2.new(0.3, 0, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, -20, 0, 20),
+		Position = UDim2.new(0, 12, 0, 6),
 		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	local boxwidth = math.max(180, 240 * self.scale)
-	local boxheight = math.max(26, 32 * self.scale)
-	
-	local box = create("TextBox", {
-		Size = UDim2.new(0, boxwidth, 0, boxheight),
-		Position = UDim2.new(1, -(boxwidth + 10 * self.scale), 0.5, -boxheight/2),
-		BackgroundColor3 = colors.bg,
-		BorderSizePixel = 0,
-		Text = default or "",
-		PlaceholderText = placeholder or "",
-		TextColor3 = colors.text,
-		PlaceholderColor3 = colors.subtext,
+		Text = text,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
 		Font = Enum.Font.Gotham,
-		TextSize = math.max(9, 13 * self.scale),
-		ClearTextOnFocus = false,
-		Parent = frame
-	})
-	corner(box, 6 * self.scale)
-	
-	create("UIPadding", {
-		PaddingLeft = UDim.new(0, 10 * self.scale),
-		PaddingRight = UDim.new(0, 10 * self.scale),
-		Parent = box
-	})
-	
-	box.FocusLost:Connect(function()
-		if callback then callback(box.Text) end
-		if self.dev then print("[APTX] Textbox: " .. texto .. " = " .. box.Text) end
-	end)
-	
-	if self.dev then print("[APTX] Textbox: " .. texto) end
-	
-	return {
-		get = function() return box.Text end,
-		set = function(val) box.Text = val end
-	}
-end
-
-function APTX:Dropdown(section, texto, icon, options, default, placeholder, callback)
-	local frameheight = math.max(35, 45 * self.scale)
-	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Parent = section.container
-	})
-	corner(frame, 8 * self.scale)
-	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
-	
-	create("TextLabel", {
-		Size = UDim2.new(0.3, 0, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
+		Parent = container
 	})
 	
-	local btnwidth = math.max(180, 240 * self.scale)
-	local btnheight = math.max(26, 32 * self.scale)
-	
-	local btn = create("TextButton", {
-		Size = UDim2.new(0, btnwidth, 0, btnheight),
-		Position = UDim2.new(1, -(btnwidth + 10 * self.scale), 0.5, -btnheight/2),
-		BackgroundColor3 = colors.bg,
-		BorderSizePixel = 0,
-		Text = "  " .. (default or placeholder or "Seleccionar"),
-		TextColor3 = colors.subtext,
-		Font = Enum.Font.Gotham,
-		TextSize = math.max(9, 13 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	corner(btn, 6 * self.scale)
-	
-	local arrow = create("TextLabel", {
-		Size = UDim2.new(0, 30 * self.scale, 1, 0),
-		Position = UDim2.new(1, -30 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = "▼",
-		TextColor3 = colors.subtext,
-		Font = Enum.Font.Gotham,
-		TextSize = math.max(8, 10 * self.scale),
-		Parent = btn
-	})
-	
-	local menucontainer = create("Frame", {
-		Size = UDim2.new(0, btnwidth, 0, 0),
-		Position = UDim2.new(1, -(btnwidth + 10 * self.scale), 1, 5 * self.scale),
-		BackgroundTransparency = 1,
-		Visible = false,
-		ZIndex = 10,
-		ClipsDescendants = false,
-		Parent = frame
-	})
-	
-	local menu = create("ScrollingFrame", {
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundColor3 = colors.panel,
-		BorderSizePixel = 0,
-		ScrollBarThickness = math.max(3, 4 * self.scale),
-		ScrollBarImageColor3 = colors.border,
-		CanvasSize = UDim2.new(0, 0, 0, 0),
-		ZIndex = 10,
-		Parent = menucontainer
-	})
-	corner(menu, 6 * self.scale)
-	
-	create("UIStroke", {
-		Color = colors.border,
-		Thickness = 1,
-		Parent = menu
-	})
-	
-	local menulist = create("UIListLayout", {
-		Padding = UDim.new(0, 2 * self.scale),
-		Parent = menu
-	})
-	
-	menulist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		menu.CanvasSize = UDim2.new(0, 0, 0, menulist.AbsoluteContentSize.Y)
-	end)
-	
-	local open = false
-	local selected = default
-	
-	local optheight = math.max(24, 32 * self.scale)
-	
-	for _, opt in ipairs(options) do
-		local optbtn = create("TextButton", {
-			Size = UDim2.new(1, 0, 0, optheight),
-			BackgroundColor3 = colors.panel,
-			BorderSizePixel = 0,
-			Text = "  " .. opt,
-			TextColor3 = colors.text,
-			Font = Enum.Font.Gotham,
-			TextSize = math.max(9, 13 * self.scale),
-			TextXAlignment = Enum.TextXAlignment.Left,
-			ZIndex = 10,
-			Parent = menu
-		})
-		
-		optbtn.MouseEnter:Connect(function() 
-			tween(optbtn, {BackgroundColor3 = colors.hover}) 
-		end)
-		
-		optbtn.MouseLeave:Connect(function() 
-			tween(optbtn, {BackgroundColor3 = colors.panel}) 
-		end)
-		
-		optbtn.MouseButton1Click:Connect(function()
-			selected = opt
-			btn.Text = "  " .. opt
-			menucontainer.Visible = false
-			open = false
-			arrow.Text = "▼"
-			if callback then callback(opt) end
-			if self.dev then print("[APTX] Selección: " .. opt) end
-		end)
-	end
-	
-	btn.MouseButton1Click:Connect(function()
-		open = not open
-		menucontainer.Visible = open
-		arrow.Text = open and "▲" or "▼"
-		if open then 
-			local maxheight = math.min(#options * (optheight + 2 * self.scale), 180 * self.scale)
-			menucontainer.Size = UDim2.new(0, btnwidth, 0, maxheight)
-		end
-	end)
-	
-	if self.dev then print("[APTX] Dropdown: " .. texto) end
-	
-	return {
-		get = function() return selected end,
-		set = function(val) 
-			selected = val 
-			btn.Text = "  " .. val 
-		end
-	}
-end
-
-APTX.Menu = APTX.Dropdown
-
-function APTX:Toggle(section, texto, icon, default, callback)
-	local frameheight = math.max(35, 45 * self.scale)
-	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Parent = section.container
-	})
-	corner(frame, 8 * self.scale)
-	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
-	
-	create("TextLabel", {
-		Size = UDim2.new(1, -100 * self.scale, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	local togglewidth = math.max(36, 48 * self.scale)
-	local toggleheight = math.max(20, 26 * self.scale)
-	
-	local toggle = create("TextButton", {
-		Size = UDim2.new(0, togglewidth, 0, toggleheight),
-		Position = UDim2.new(1, -(togglewidth + 12 * self.scale), 0.5, -toggleheight/2),
-		BackgroundColor3 = default and colors.accent or colors.bg,
+	local textbox = CreateElement("TextBox", {
+		Size = UDim2.new(1, -24, 0, 24),
+		Position = UDim2.new(0, 12, 1, -30),
+		BackgroundColor3 = Theme.InputBg,
 		BorderSizePixel = 0,
 		Text = "",
-		Parent = frame
+		PlaceholderText = placeholder or "Escribe aquí...",
+		PlaceholderColor3 = Theme.TextSecondary,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 12,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ClearTextOnFocus = false,
+		Parent = container
 	})
-	corner(toggle, toggleheight/2)
 	
-	local knobsize = math.max(16, 20 * self.scale)
+	AddCorner(textbox, 4)
+	AddStroke(textbox, Theme.Border, 1)
 	
-	local knob = create("Frame", {
-		Size = UDim2.new(0, knobsize, 0, knobsize),
-		Position = default and UDim2.new(1, -(knobsize + 3 * self.scale), 0.5, -knobsize/2) or UDim2.new(0, 3 * self.scale, 0.5, -knobsize/2),
-		BackgroundColor3 = colors.text,
-		BorderSizePixel = 0,
-		Parent = toggle
+	CreateElement("UIPadding", {
+		PaddingLeft = UDim.new(0, 8),
+		PaddingRight = UDim.new(0, 8),
+		Parent = textbox
 	})
-	corner(knob, knobsize/2)
 	
-	local state = default or false
-	
-	toggle.MouseButton1Click:Connect(function()
-		state = not state
-		tween(toggle, {BackgroundColor3 = state and colors.accent or colors.bg})
-		tween(knob, {Position = state and UDim2.new(1, -(knobsize + 3 * self.scale), 0.5, -knobsize/2) or UDim2.new(0, 3 * self.scale, 0.5, -knobsize/2)})
-		if callback then callback(state) end
-		if self.dev then print("[APTX] Toggle: " .. texto .. " = " .. tostring(state)) end
+	textbox.FocusLost:Connect(function(enterPressed)
+		if callback then callback(textbox.Text, enterPressed) end
 	end)
 	
-	if self.dev then print("[APTX] Toggle: " .. texto) end
-	
 	return {
-		get = function() return state end,
-		set = function(val)
-			state = val
-			toggle.BackgroundColor3 = state and colors.accent or colors.bg
-			knob.Position = state and UDim2.new(1, -(knobsize + 3 * self.scale), 0.5, -knobsize/2) or UDim2.new(0, 3 * self.scale, 0.5, -knobsize/2)
+		Set = function(value)
+			textbox.Text = value
+		end,
+		Get = function()
+			return textbox.Text
 		end
 	}
 end
 
-function APTX:Label(section, texto, icon)
-	local frameheight = math.max(28, 35 * self.scale)
+-- LABEL
+function APTX:AddLabel(sectionName, text)
+	local section = self.Sections[sectionName]
+	if not section then return end
 	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Parent = section.container
-	})
-	corner(frame, 8 * self.scale)
-	
-	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = frame
-		})
-	end
-	
-	local label = create("TextLabel", {
-		Size = UDim2.new(1, iconid and -45 * self.scale or -20 * self.scale, 1, 0),
-		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 30),
 		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
+		Text = text,
+		TextColor3 = Theme.TextSecondary,
+		TextSize = 12,
 		Font = Enum.Font.Gotham,
-		TextSize = math.max(10, 14 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
+		TextWrapped = true,
+		Parent = section.Content,
+		AutomaticSize = Enum.AutomaticSize.Y
+	})
+	
+	CreateElement("UIPadding", {
+		PaddingLeft = UDim.new(0, 8),
+		Parent = label
 	})
 	
 	return {
-		set = function(val) label.Text = val end
+		Set = function(newText)
+			label.Text = newText
+		end
 	}
 end
 
-function APTX:destroy()
-	if self.dev then print("[APTX] Destruido") end
-	self.screen:Destroy()
+-- DROPDOWN
+function APTX:AddDropdown(sectionName, text, options, callback)
+	local section = self.Sections[sectionName]
+	if not section then return end
+	
+	local isOpen = false
+	local selectedOption = options[1] or "Ninguno"
+	
+	local container = CreateElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 38),
+		BackgroundColor3 = Theme.ButtonNormal,
+		BorderSizePixel = 0,
+		Parent = section.Content,
+		ClipsDescendants = true
+	})
+	
+	AddCorner(container, 6)
+	AddStroke(container, Theme.Border, 1)
+	
+	local header = CreateElement("TextButton", {
+		Size = UDim2.new(1, 0, 0, 38),
+		BackgroundTransparency = 1,
+		Text = "",
+		Parent = container
+	})
+	
+	local label = CreateElement("TextLabel", {
+		Size = UDim2.new(0.6, 0, 1, 0),
+		Position = UDim2.new(0, 12, 0, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		TextColor3 = Theme.TextPrimary,
+		TextSize = 13,
+		Font = Enum.Font.Gotham,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = header
+	})
+	
+	local selected = CreateElement("TextLabel", {
+		Size = UDim2.new(0.4, -40, 1, 0),
+		Position = UDim2.new(0.6, 0, 0, 0),
+		BackgroundTransparency = 1,
+		Text = selectedOption,
+		TextColor3 = Theme.Accent,
+		TextSize = 12,
+		Font = Enum.Font.GothamBold,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Parent = header
+	})
+	
+	local arrow = CreateIcon("chevron-down", 14)
+	arrow.Position = UDim2.new(1, -24, 0.5, 0)
+	arrow.AnchorPoint = Vector2.new(0.5, 0.5)
+	arrow.Parent = header
+	
+	local optionsList = CreateElement("Frame", {
+		Size = UDim2.new(1, 0, 0, 0),
+		Position = UDim2.new(0, 0, 0, 38),
+		BackgroundTransparency = 1,
+		Parent = container,
+		AutomaticSize = Enum.AutomaticSize.Y
+	})
+	
+	CreateElement("UIListLayout", {
+		Padding = UDim.new(0, 2),
+		Parent = optionsList
+	})
+	
+	for _, option in ipairs(options) do
+		local optionBtn = CreateElement("TextButton", {
+			Size = UDim2.new(1, 0, 0, 32),
+			BackgroundColor3 = Theme.InputBg,
+			BorderSizePixel = 0,
+			Text = option,
+			TextColor3 = Theme.TextPrimary,
+			TextSize = 12,
+			Font = Enum.Font.Gotham,
+			Parent = optionsList
+		})
+		
+		optionBtn.MouseButton1Click:Connect(function()
+			selectedOption = option
+			selected.Text = option
+			if callback then callback(option) end
+			
+			isOpen = false
+			TweenProperty(container, "Size", UDim2.new(1, 0, 0, 38))
+			TweenProperty(arrow.Parent, "Rotation", 0)
+		end)
+		
+		optionBtn.MouseEnter:Connect(function()
+			TweenProperty(optionBtn, "BackgroundColor3", Theme.ButtonHover)
+		end)
+		
+		optionBtn.MouseLeave:Connect(function()
+			TweenProperty(optionBtn, "BackgroundColor3", Theme.InputBg)
+		end)
+	end
+	
+	header.MouseButton1Click:Connect(function()
+		isOpen = not isOpen
+		
+		if isOpen then
+			local totalHeight = 38 + (#options * 34)
+			TweenProperty(container, "Size", UDim2.new(1, 0, 0, totalHeight))
+			TweenProperty(arrow.Parent, "Rotation", 180)
+		else
+			TweenProperty(container, "Size", UDim2.new(1, 0, 0, 38))
+			TweenProperty(arrow.Parent, "Rotation", 0)
+		end
+	end)
+	
+	return {
+		Set = function(option)
+			selectedOption = option
+			selected.Text = option
+		end
+	}
 end
 
 return APTX

@@ -228,8 +228,8 @@ function APTX:Config(config)
 	})
 	
 	local viewport = workspace.CurrentCamera.ViewportSize
-	local basewidth = 600
-	local baseheight = 400
+	local basewidth = 720
+	local baseheight = 440
 	local scale = math.min(viewport.X / 800, viewport.Y / 600, 1)
 	local width = math.min(basewidth * 0.85 * scale, viewport.X * 0.9)
 	local height = math.min(baseheight * 0.85 * scale, viewport.Y * 0.8)

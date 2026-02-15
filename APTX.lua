@@ -230,9 +230,11 @@ function APTX:Config(config)
 	local viewport = workspace.CurrentCamera.ViewportSize
 	local basewidth = 720
 	local baseheight = 440
-	local scale = math.min(viewport.X / 800, viewport.Y / 600, 1)
-	local width = math.min(basewidth * 0.85 * scale, viewport.X * 0.9)
-	local height = math.min(baseheight * 0.85 * scale, viewport.Y * 0.8)
+	local scalex = math.min(viewport.X / 1280, 1)
+	local scaley = math.min(viewport.Y / 720, 1)
+	local scale = math.min(scalex, scaley)
+	local width = math.min(basewidth * scale, viewport.X * 0.85)
+	local height = math.min(baseheight * scale, viewport.Y * 0.8)
 	
 	self.scale = scale
 	
@@ -251,26 +253,26 @@ function APTX:Config(config)
 		Parent = self.main
 	})
 	
-	local topbarheight = math.max(35, 45 * scale)
+	local topheight = math.max(40, 50 * scale)
 	
-	self.topbar = create("Frame", {
-		Size = UDim2.new(1, 0, 0, topbarheight),
+	local topbar = create("Frame", {
+		Size = UDim2.new(1, 0, 0, topheight),
 		BackgroundColor3 = colors.topbar,
 		BorderSizePixel = 0,
 		Parent = self.main
 	})
-	corner(self.topbar, 12 * scale)
+	corner(topbar, 12 * scale)
 	
 	create("Frame", {
-		Size = UDim2.new(1, 0, 0, 12 * scale),
-		Position = UDim2.new(0, 0, 1, -12 * scale),
+		Size = UDim2.new(1, 0, 0.5, 0),
+		Position = UDim2.new(0, 0, 1, -1),
 		BackgroundColor3 = colors.topbar,
 		BorderSizePixel = 0,
-		Parent = self.topbar
+		Parent = topbar
 	})
 	
-	self.titlelabel = create("TextLabel", {
-		Size = UDim2.new(1, -60 * scale, 1, 0),
+	create("TextLabel", {
+		Size = UDim2.new(1, -100 * scale, 1, 0),
 		Position = UDim2.new(0, 15 * scale, 0, 0),
 		BackgroundTransparency = 1,
 		Text = self.title,
@@ -278,142 +280,141 @@ function APTX:Config(config)
 		Font = Enum.Font.GothamBold,
 		TextSize = math.max(12, 16 * scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = self.topbar
+		Parent = topbar
 	})
 	
-	local closesize = math.max(24, 32 * scale)
+	if not self.hidebutton then
+		local closebtn = create("TextButton", {
+			Size = UDim2.new(0, 30 * scale, 0, 30 * scale),
+			Position = UDim2.new(1, -(40 * scale), 0.5, -(15 * scale)),
+			BackgroundColor3 = colors.element,
+			BorderSizePixel = 0,
+			Text = "×",
+			TextColor3 = colors.text,
+			Font = Enum.Font.GothamBold,
+			TextSize = math.max(16, 20 * scale),
+			Parent = topbar
+		})
+		corner(closebtn, 6 * scale)
+		
+		closebtn.MouseButton1Click:Connect(function()
+			self:destroy()
+		end)
+		
+		closebtn.MouseEnter:Connect(function()
+			tween(closebtn, {BackgroundColor3 = colors.hover})
+		end)
+		
+		closebtn.MouseLeave:Connect(function()
+			tween(closebtn, {BackgroundColor3 = colors.element})
+		end)
+	end
 	
-	local close = create("ImageButton", {
-		Size = UDim2.new(0, closesize, 0, closesize),
-		Position = UDim2.new(1, -(closesize + 8 * scale), 0.5, -closesize/2),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Image = geticon("x") or "",
-		ImageColor3 = colors.text,
-		Parent = self.topbar
-	})
-	corner(close, 8 * scale)
+	if self.drag then
+		local dragging = false
+		local offset
+		
+		topbar.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dragging = true
+				offset = Vector2.new(input.Position.X, input.Position.Y) - self.main.AbsolutePosition
+			end
+		end)
+		
+		topbar.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dragging = false
+			end
+		end)
+		
+		uis.InputChanged:Connect(function(input)
+			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+				local pos = Vector2.new(input.Position.X, input.Position.Y) - offset
+				self.main.Position = UDim2.new(0, pos.X, 0, pos.Y)
+			end
+		end)
+	end
 	
-	close.MouseEnter:Connect(function() tween(close, {BackgroundColor3 = colors.hover}) end)
-	close.MouseLeave:Connect(function() tween(close, {BackgroundColor3 = colors.element}) end)
-	close.MouseButton1Click:Connect(function() self:destroy() end)
+	local sidebarwidth = math.max(160, 200 * scale)
 	
-	local sidebarwidth = math.max(120, 160 * scale)
-	
-	self.sidebar = create("Frame", {
-		Size = UDim2.new(0, sidebarwidth, 1, -topbarheight),
-		Position = UDim2.new(0, 0, 0, topbarheight),
+	local sidebar = create("Frame", {
+		Size = UDim2.new(0, sidebarwidth, 1, -topheight),
+		Position = UDim2.new(0, 0, 0, topheight),
 		BackgroundColor3 = colors.panel,
 		BorderSizePixel = 0,
 		Parent = self.main
 	})
 	
-	self.sidebarscroll = create("ScrollingFrame", {
-		Size = UDim2.new(1, -10 * scale, 1, -10 * scale),
-		Position = UDim2.new(0, 5 * scale, 0, 5 * scale),
+	create("Frame", {
+		Size = UDim2.new(0, 1, 1, 0),
+		Position = UDim2.new(1, 0, 0, 0),
+		BackgroundColor3 = colors.border,
+		BorderSizePixel = 0,
+		Parent = sidebar
+	})
+	
+	local scroll = create("ScrollingFrame", {
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ScrollBarThickness = math.max(3, 4 * scale),
 		ScrollBarImageColor3 = colors.border,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
-		Parent = self.sidebar
+		Parent = sidebar
 	})
 	
-	local sidelayout = create("UIListLayout", {
-		Padding = UDim.new(0, 8 * scale),
-		Parent = self.sidebarscroll
+	local list = create("UIListLayout", {
+		Padding = UDim.new(0, 6 * scale),
+		Parent = scroll
 	})
 	
-	sidelayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		self.sidebarscroll.CanvasSize = UDim2.new(0, 0, 0, sidelayout.AbsoluteContentSize.Y + 10 * scale)
+	create("UIPadding", {
+		PaddingTop = UDim.new(0, 10 * scale),
+		PaddingBottom = UDim.new(0, 10 * scale),
+		PaddingLeft = UDim.new(0, 10 * scale),
+		PaddingRight = UDim.new(0, 10 * scale),
+		Parent = scroll
+	})
+	
+	list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		scroll.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 20 * scale)
 	end)
 	
 	self.content = create("Frame", {
-		Size = UDim2.new(1, -sidebarwidth, 1, -topbarheight),
-		Position = UDim2.new(0, sidebarwidth, 0, topbarheight),
-		BackgroundColor3 = colors.bg,
+		Size = UDim2.new(1, -sidebarwidth, 1, -topheight),
+		Position = UDim2.new(0, sidebarwidth, 0, topheight),
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Parent = self.main
 	})
 	
-	if self.drag then self:makedrag() end
-	if self.hidebutton then self:makehide() end
+	self.sidebar = scroll
+	
+	if self.dev then print("[APTX] GUI creado") end
 	
 	return self
 end
 
-function APTX:makedrag()
-	local dragging, dragstart, startpos = false, nil, nil
+function APTX:Section(name, icon)
+	if self.dev then print("[APTX] Sección: " .. name) end
 	
-	self.topbar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragstart = input.Position
-			startpos = self.main.Position
-		end
-	end)
-	
-	self.topbar.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
-		end
-	end)
-	
-	uis.InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local delta = input.Position - dragstart
-			self.main.Position = UDim2.new(startpos.X.Scale, startpos.X.Offset + delta.X, startpos.Y.Scale, startpos.Y.Offset + delta.Y)
-		end
-	end)
-end
-
-function APTX:makehide()
-	local btn = create("TextButton", {
-		Size = UDim2.new(0, 120 * self.scale, 0, 40 * self.scale),
-		Position = UDim2.new(1, -130 * self.scale, 0, 10 * self.scale),
-		BackgroundColor3 = colors.topbar,
-		BorderSizePixel = 0,
-		Text = "Toggle GUI",
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamBold,
-		TextSize = math.max(10, 14 * self.scale),
-		Parent = self.screen
-	})
-	corner(btn, 8 * self.scale)
-	
-	create("UIStroke", {
-		Color = colors.border,
-		Thickness = 1,
-		Parent = btn
-	})
-	
-	btn.MouseButton1Click:Connect(function()
-		self.visible = not self.visible
-		self.main.Visible = self.visible
-		tween(btn, {BackgroundColor3 = self.visible and colors.topbar or colors.element})
-	end)
-end
-
-function APTX:Section(texto, icon, default)
-	local section = {name = texto, container = nil, button = nil}
-	
-	local btnheight = math.max(32, 42 * self.scale)
+	local btnheight = math.max(35, 42 * scale)
 	
 	local btn = create("TextButton", {
 		Size = UDim2.new(1, 0, 0, btnheight),
 		BackgroundColor3 = colors.element,
 		BorderSizePixel = 0,
 		Text = "",
-		Parent = self.sidebarscroll
+		Parent = self.sidebar
 	})
 	corner(btn, 8 * self.scale)
 	
 	local iconsize = math.max(16, 20 * self.scale)
-	local iconid = geticon(icon or texto:lower())
+	local iconid = geticon(icon)
 	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 10 * self.scale, 0.5, -iconsize/2),
+			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
 			BackgroundTransparency = 1,
 			Image = iconid,
 			ImageColor3 = colors.text,
@@ -422,42 +423,63 @@ function APTX:Section(texto, icon, default)
 	end
 	
 	create("TextLabel", {
-		Size = UDim2.new(1, -45 * self.scale, 1, 0),
-		Position = UDim2.new(0, 40 * self.scale, 0, 0),
+		Size = UDim2.new(1, -40 * self.scale, 1, 0),
+		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
 		BackgroundTransparency = 1,
-		Text = texto,
+		Text = name,
 		TextColor3 = colors.text,
 		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
+		TextSize = math.max(11, 14 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = btn
 	})
 	
-	section.button = btn
-	
-	local container = create("ScrollingFrame", {
-		Size = UDim2.new(1, -20 * self.scale, 1, -20 * self.scale),
-		Position = UDim2.new(0, 10 * self.scale, 0, 10 * self.scale),
+	local page = create("ScrollingFrame", {
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		ScrollBarThickness = math.max(4, 6 * self.scale),
+		ScrollBarThickness = math.max(3, 4 * self.scale),
 		ScrollBarImageColor3 = colors.border,
-		Visible = false,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
+		Visible = false,
 		Parent = self.content
 	})
 	
-	local layout = create("UIListLayout", {
-		Padding = UDim.new(0, 12 * self.scale),
-		Parent = container
+	local pagelist = create("UIListLayout", {
+		Padding = UDim.new(0, 8 * self.scale),
+		Parent = page
 	})
 	
-	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 12 * self.scale)
+	create("UIPadding", {
+		PaddingTop = UDim.new(0, 15 * self.scale),
+		PaddingBottom = UDim.new(0, 15 * self.scale),
+		PaddingLeft = UDim.new(0, 15 * self.scale),
+		PaddingRight = UDim.new(0, 15 * self.scale),
+		Parent = page
+	})
+	
+	pagelist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		page.CanvasSize = UDim2.new(0, 0, 0, pagelist.AbsoluteContentSize.Y + 30 * self.scale)
 	end)
 	
-	section.container = container
+	local section = {
+		name = name,
+		button = btn,
+		container = page
+	}
+	
 	table.insert(self.sections, section)
+	
+	btn.MouseButton1Click:Connect(function()
+		for _, s in ipairs(self.sections) do
+			s.container.Visible = false
+			s.button.BackgroundColor3 = colors.element
+		end
+		page.Visible = true
+		btn.BackgroundColor3 = colors.active
+		self.current = section
+		if self.dev then print("[APTX] Abriendo: " .. name) end
+	end)
 	
 	btn.MouseEnter:Connect(function()
 		if self.current ~= section then
@@ -471,93 +493,26 @@ function APTX:Section(texto, icon, default)
 		end
 	end)
 	
-	btn.MouseButton1Click:Connect(function() self:load(section) end)
-	
-	if default or #self.sections == 1 then self:load(section) end
-	if self.dev then print("[APTX] Sección: " .. texto) end
+	if not self.current then
+		page.Visible = true
+		btn.BackgroundColor3 = colors.active
+		self.current = section
+	end
 	
 	return section
 end
 
-function APTX:load(section)
-	for _, s in ipairs(self.sections) do
-		s.container.Visible = false
-		tween(s.button, {BackgroundColor3 = colors.element})
-	end
-	section.container.Visible = true
-	tween(section.button, {BackgroundColor3 = colors.active})
-	self.current = section
-end
-
 function APTX:Button(section, texto, icon, callback)
-	local btnheight = math.max(35, 45 * self.scale)
+	local frameheight = math.max(35, 45 * self.scale)
 	
-	local btn = create("TextButton", {
-		Size = UDim2.new(1, 0, 0, btnheight),
+	local frame = create("TextButton", {
+		Size = UDim2.new(1, 0, 0, frameheight),
 		BackgroundColor3 = colors.element,
 		BorderSizePixel = 0,
 		Text = "",
 		Parent = section.container
 	})
-	corner(btn, 8 * self.scale)
-	
-	local iconsize = math.max(18, 22 * self.scale)
-	local iconid = geticon(icon)
-	if iconid then
-		create("ImageLabel", {
-			Size = UDim2.new(0, iconsize, 0, iconsize),
-			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
-			BackgroundTransparency = 1,
-			Image = iconid,
-			ImageColor3 = colors.text,
-			Parent = btn
-		})
-	end
-	
-	create("TextLabel", {
-		Size = UDim2.new(1, iconid and -50 * self.scale or -20 * self.scale, 1, 0),
-		Position = UDim2.new(0, iconid and 45 * self.scale or 15 * self.scale, 0, 0),
-		BackgroundTransparency = 1,
-		Text = texto,
-		TextColor3 = colors.text,
-		Font = Enum.Font.GothamMedium,
-		TextSize = math.max(10, 14 * self.scale),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = btn
-	})
-	
-	btn.MouseEnter:Connect(function() tween(btn, {BackgroundColor3 = colors.hover}) end)
-	btn.MouseLeave:Connect(function() tween(btn, {BackgroundColor3 = colors.element}) end)
-	
-	btn.MouseButton1Click:Connect(function()
-		tween(btn, {BackgroundColor3 = colors.active})
-		wait(0.1)
-		tween(btn, {BackgroundColor3 = colors.element})
-		if callback then callback() end
-		if self.dev then print("[APTX] Botón: " .. texto) end
-	end)
-	
-	return btn
-end
-
-function APTX:Slider(section, texto, icon, min, max, default, callback)
-	local frameheight = math.max(55, 70 * self.scale)
-	
-	local frame = create("Frame", {
-		Size = UDim2.new(1, 0, 0, frameheight),
-		BackgroundColor3 = colors.element,
-		BorderSizePixel = 0,
-		Parent = section.container
-	})
 	corner(frame, 8 * self.scale)
-	
-	local headerheight = math.max(22, 30 * self.scale)
-	
-	local header = create("Frame", {
-		Size = UDim2.new(1, 0, 0, headerheight),
-		BackgroundTransparency = 1,
-		Parent = frame
-	})
 	
 	local iconsize = math.max(16, 20 * self.scale)
 	local iconid = geticon(icon)
@@ -568,12 +523,12 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 			BackgroundTransparency = 1,
 			Image = iconid,
 			ImageColor3 = colors.text,
-			Parent = header
+			Parent = frame
 		})
 	end
 	
 	create("TextLabel", {
-		Size = UDim2.new(1, -100 * self.scale, 1, 0),
+		Size = UDim2.new(1, -30 * self.scale, 1, 0),
 		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
@@ -581,99 +536,150 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 		Font = Enum.Font.GothamMedium,
 		TextSize = math.max(10, 14 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = header
+		Parent = frame
+	})
+	
+	frame.MouseButton1Click:Connect(function()
+		if callback then callback() end
+		if self.dev then print("[APTX] Botón: " .. texto) end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		tween(frame, {BackgroundColor3 = colors.hover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		tween(frame, {BackgroundColor3 = colors.element})
+	end)
+	
+	if self.dev then print("[APTX] Botón: " .. texto) end
+end
+
+function APTX:Slider(section, texto, icon, min, max, default, callback)
+	local frameheight = math.max(45, 60 * self.scale)
+	
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, frameheight),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8 * self.scale)
+	
+	local iconsize = math.max(16, 20 * self.scale)
+	local iconid = geticon(icon)
+	if iconid then
+		create("ImageLabel", {
+			Size = UDim2.new(0, iconsize, 0, iconsize),
+			Position = UDim2.new(0, 12 * self.scale, 0, 12 * self.scale),
+			BackgroundTransparency = 1,
+			Image = iconid,
+			ImageColor3 = colors.text,
+			Parent = frame
+		})
+	end
+	
+	create("TextLabel", {
+		Size = UDim2.new(0.6, 0, 0, 20 * self.scale),
+		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 10 * self.scale),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = math.max(10, 14 * self.scale),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
 	})
 	
 	local valuelabel = create("TextLabel", {
-		Size = UDim2.new(0, 60 * self.scale, 1, 0),
-		Position = UDim2.new(1, -70 * self.scale, 0, 0),
+		Size = UDim2.new(0.3, 0, 0, 20 * self.scale),
+		Position = UDim2.new(0.7, 0, 0, 10 * self.scale),
 		BackgroundTransparency = 1,
 		Text = tostring(default or min),
 		TextColor3 = colors.accent,
 		Font = Enum.Font.GothamBold,
 		TextSize = math.max(10, 14 * self.scale),
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Parent = header
+		Parent = frame
 	})
 	
-	local trackheight = math.max(4, 6 * self.scale)
+	local sliderheight = math.max(4, 6 * self.scale)
 	
 	local track = create("Frame", {
-		Size = UDim2.new(1, -30 * self.scale, 0, trackheight),
-		Position = UDim2.new(0, 15 * self.scale, 1, -20 * self.scale),
+		Size = UDim2.new(1, -30 * self.scale, 0, sliderheight),
+		Position = UDim2.new(0, 15 * self.scale, 1, -(15 * self.scale + sliderheight)),
 		BackgroundColor3 = colors.bg,
 		BorderSizePixel = 0,
 		Parent = frame
 	})
-	corner(track, 3 * self.scale)
+	corner(track, sliderheight/2)
 	
 	local fill = create("Frame", {
-		Size = UDim2.new(0, 0, 1, 0),
+		Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
 		BackgroundColor3 = colors.accent,
 		BorderSizePixel = 0,
 		Parent = track
 	})
-	corner(fill, 3 * self.scale)
+	corner(fill, sliderheight/2)
 	
-	local thumbsize = math.max(14, 18 * self.scale)
+	local knobsize = math.max(12, 16 * self.scale)
 	
-	local thumb = create("Frame", {
-		Size = UDim2.new(0, thumbsize, 0, thumbsize),
-		Position = UDim2.new(1, -thumbsize/2, 0.5, -thumbsize/2),
+	local knob = create("Frame", {
+		Size = UDim2.new(0, knobsize, 0, knobsize),
+		Position = UDim2.new((default - min) / (max - min), -knobsize/2, 0.5, -knobsize/2),
 		BackgroundColor3 = colors.text,
 		BorderSizePixel = 0,
-		ZIndex = 2,
-		Parent = fill
+		Parent = track
 	})
-	corner(thumb, thumbsize/2)
+	corner(knob, knobsize/2)
 	
+	local value = default or min
 	local dragging = false
-	local current = default or min
 	
 	local function update(input)
-		local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-		current = math.floor(min + (max - min) * pos)
-		valuelabel.Text = tostring(current)
-		fill.Size = UDim2.new(pos, 0, 1, 0)
-		if callback then callback(current) end
+		local rel = (input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
+		rel = math.clamp(rel, 0, 1)
+		value = math.floor(min + (max - min) * rel)
+		valuelabel.Text = tostring(value)
+		fill.Size = UDim2.new(rel, 0, 1, 0)
+		knob.Position = UDim2.new(rel, -knobsize/2, 0.5, -knobsize/2)
+		if callback then callback(value) end
 	end
 	
 	track.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			update(input)
 		end
 	end)
 	
 	track.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = false
 		end
 	end)
 	
 	uis.InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 			update(input)
 		end
 	end)
 	
-	local initpos = ((default or min) - min) / (max - min)
-	fill.Size = UDim2.new(initpos, 0, 1, 0)
-	
 	if self.dev then print("[APTX] Slider: " .. texto) end
 	
 	return {
-		get = function() return current end,
+		get = function() return value end,
 		set = function(val)
-			current = math.clamp(val, min, max)
-			valuelabel.Text = tostring(current)
-			local pos = (current - min) / (max - min)
-			fill.Size = UDim2.new(pos, 0, 1, 0)
+			value = math.clamp(val, min, max)
+			valuelabel.Text = tostring(value)
+			local rel = (value - min) / (max - min)
+			fill.Size = UDim2.new(rel, 0, 1, 0)
+			knob.Position = UDim2.new(rel, -knobsize/2, 0.5, -knobsize/2)
 		end
 	}
 end
 
-function APTX:Dropdown(section, texto, placeholder, icon, options, default, callback)
+function APTX:Textbox(section, texto, icon, placeholder, default, callback)
 	local frameheight = math.max(35, 45 * self.scale)
 	
 	local frame = create("Frame", {
@@ -698,7 +704,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	end
 	
 	create("TextLabel", {
-		Size = UDim2.new(0, 150 * self.scale, 1, 0),
+		Size = UDim2.new(0.3, 0, 1, 0),
 		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
@@ -709,8 +715,82 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		Parent = frame
 	})
 	
-	local btnwidth = math.max(120, 180 * self.scale)
-	local btnheight = math.max(24, 32 * self.scale)
+	local boxwidth = math.max(180, 240 * self.scale)
+	local boxheight = math.max(26, 32 * self.scale)
+	
+	local box = create("TextBox", {
+		Size = UDim2.new(0, boxwidth, 0, boxheight),
+		Position = UDim2.new(1, -(boxwidth + 10 * self.scale), 0.5, -boxheight/2),
+		BackgroundColor3 = colors.bg,
+		BorderSizePixel = 0,
+		Text = default or "",
+		PlaceholderText = placeholder or "",
+		TextColor3 = colors.text,
+		PlaceholderColor3 = colors.subtext,
+		Font = Enum.Font.Gotham,
+		TextSize = math.max(9, 13 * self.scale),
+		ClearTextOnFocus = false,
+		Parent = frame
+	})
+	corner(box, 6 * self.scale)
+	
+	create("UIPadding", {
+		PaddingLeft = UDim.new(0, 10 * self.scale),
+		PaddingRight = UDim.new(0, 10 * self.scale),
+		Parent = box
+	})
+	
+	box.FocusLost:Connect(function()
+		if callback then callback(box.Text) end
+		if self.dev then print("[APTX] Textbox: " .. texto .. " = " .. box.Text) end
+	end)
+	
+	if self.dev then print("[APTX] Textbox: " .. texto) end
+	
+	return {
+		get = function() return box.Text end,
+		set = function(val) box.Text = val end
+	}
+end
+
+function APTX:Dropdown(section, texto, icon, options, default, placeholder, callback)
+	local frameheight = math.max(35, 45 * self.scale)
+	
+	local frame = create("Frame", {
+		Size = UDim2.new(1, 0, 0, frameheight),
+		BackgroundColor3 = colors.element,
+		BorderSizePixel = 0,
+		Parent = section.container
+	})
+	corner(frame, 8 * self.scale)
+	
+	local iconsize = math.max(16, 20 * self.scale)
+	local iconid = geticon(icon)
+	if iconid then
+		create("ImageLabel", {
+			Size = UDim2.new(0, iconsize, 0, iconsize),
+			Position = UDim2.new(0, 12 * self.scale, 0.5, -iconsize/2),
+			BackgroundTransparency = 1,
+			Image = iconid,
+			ImageColor3 = colors.text,
+			Parent = frame
+		})
+	end
+	
+	create("TextLabel", {
+		Size = UDim2.new(0.3, 0, 1, 0),
+		Position = UDim2.new(0, iconid and 40 * self.scale or 15 * self.scale, 0, 0),
+		BackgroundTransparency = 1,
+		Text = texto,
+		TextColor3 = colors.text,
+		Font = Enum.Font.GothamMedium,
+		TextSize = math.max(10, 14 * self.scale),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	local btnwidth = math.max(180, 240 * self.scale)
+	local btnheight = math.max(26, 32 * self.scale)
 	
 	local btn = create("TextButton", {
 		Size = UDim2.new(0, btnwidth, 0, btnheight),
@@ -742,7 +822,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		Position = UDim2.new(1, -(btnwidth + 10 * self.scale), 1, 5 * self.scale),
 		BackgroundTransparency = 1,
 		Visible = false,
-		ZIndex = 100,
+		ZIndex = 10,
 		ClipsDescendants = false,
 		Parent = frame
 	})
@@ -754,7 +834,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 		ScrollBarThickness = math.max(3, 4 * self.scale),
 		ScrollBarImageColor3 = colors.border,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
-		ZIndex = 100,
+		ZIndex = 10,
 		Parent = menucontainer
 	})
 	corner(menu, 6 * self.scale)
@@ -789,7 +869,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 			Font = Enum.Font.Gotham,
 			TextSize = math.max(9, 13 * self.scale),
 			TextXAlignment = Enum.TextXAlignment.Left,
-			ZIndex = 100,
+			ZIndex = 10,
 			Parent = menu
 		})
 		

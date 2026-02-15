@@ -19,14 +19,169 @@ local colors = {
 }
 
 local icons = {
-	default = {
-		home = "rbxassetid://7733955740",
-		settings = "rbxassetid://7733674079",
-		stats = "rbxassetid://7743878857",
-		info = "rbxassetid://7733920644",
-		close = "rbxassetid://7743878496"
-	}
+	["home"] = "rbxassetid://10723407389",
+	["settings"] = "rbxassetid://10734950309",
+	["user"] = "rbxassetid://10747373176",
+	["users"] = "rbxassetid://10747373426",
+	["search"] = "rbxassetid://10734943674",
+	["x"] = "rbxassetid://10747384394",
+	["check"] = "rbxassetid://10709790644",
+	["arrow-up"] = "rbxassetid://10709768939",
+	["arrow-down"] = "rbxassetid://10709767827",
+	["arrow-left"] = "rbxassetid://10709768114",
+	["arrow-right"] = "rbxassetid://10709768347",
+	["chevron-up"] = "rbxassetid://10709791523",
+	["chevron-down"] = "rbxassetid://10709790948",
+	["chevron-left"] = "rbxassetid://10709791281",
+	["chevron-right"] = "rbxassetid://10709791437",
+	["menu"] = "rbxassetid://10734887784",
+	["plus"] = "rbxassetid://10734924532",
+	["minus"] = "rbxassetid://10734896206",
+	["edit"] = "rbxassetid://10734883598",
+	["trash"] = "rbxassetid://10747362393",
+	["save"] = "rbxassetid://10734941499",
+	["download"] = "rbxassetid://10723344270",
+	["upload"] = "rbxassetid://10747366434",
+	["file"] = "rbxassetid://10723374641",
+	["folder"] = "rbxassetid://10723387563",
+	["copy"] = "rbxassetid://10709812159",
+	["clipboard"] = "rbxassetid://10709799288",
+	["link"] = "rbxassetid://10723426722",
+	["eye"] = "rbxassetid://10723346959",
+	["eye-off"] = "rbxassetid://10723346871",
+	["lock"] = "rbxassetid://10723434711",
+	["unlock"] = "rbxassetid://10747366027",
+	["bell"] = "rbxassetid://10709775704",
+	["star"] = "rbxassetid://10734966248",
+	["heart"] = "rbxassetid://10723406885",
+	["message"] = "rbxassetid://10734888000",
+	["mail"] = "rbxassetid://10734885430",
+	["phone"] = "rbxassetid://10734921524",
+	["calendar"] = "rbxassetid://10709789505",
+	["clock"] = "rbxassetid://10709805144",
+	["map"] = "rbxassetid://10734886202",
+	["image"] = "rbxassetid://10723415040",
+	["camera"] = "rbxassetid://10709789686",
+	["video"] = "rbxassetid://10747374938",
+	["music"] = "rbxassetid://10734905958",
+	["mic"] = "rbxassetid://10734888864",
+	["volume"] = "rbxassetid://10747376008",
+	["play"] = "rbxassetid://10734923549",
+	["pause"] = "rbxassetid://10734919336",
+	["stop"] = "rbxassetid://10734972621",
+	["skip-forward"] = "rbxassetid://10734961809",
+	["skip-back"] = "rbxassetid://10734961526",
+	["repeat"] = "rbxassetid://10734933966",
+	["shuffle"] = "rbxassetid://10734953451",
+	["maximize"] = "rbxassetid://10734886735",
+	["minimize"] = "rbxassetid://10734895698",
+	["refresh"] = "rbxassetid://10734933222",
+	["rotate"] = "rbxassetid://10734940654",
+	["zoom-in"] = "rbxassetid://10747384552",
+	["zoom-out"] = "rbxassetid://10747384679",
+	["move"] = "rbxassetid://10734900011",
+	["grid"] = "rbxassetid://10723404936",
+	["layout"] = "rbxassetid://10723425376",
+	["sidebar"] = "rbxassetid://10734954301",
+	["columns"] = "rbxassetid://10709811261",
+	["rows"] = "rbxassetid://10709811261",
+	["list"] = "rbxassetid://10723433811",
+	["filter"] = "rbxassetid://10723375128",
+	["sliders"] = "rbxassetid://10734963400",
+	["toggle-left"] = "rbxassetid://10734984834",
+	["toggle-right"] = "rbxassetid://10734985040",
+	["code"] = "rbxassetid://10709810463",
+	["terminal"] = "rbxassetid://10734982144",
+	["command"] = "rbxassetid://10709811365",
+	["hash"] = "rbxassetid://10723405975",
+	["at-sign"] = "rbxassetid://10709769286",
+	["percent"] = "rbxassetid://10734919919",
+	["dollar"] = "rbxassetid://10723343958",
+	["shopping-cart"] = "rbxassetid://10734952479",
+	["shopping-bag"] = "rbxassetid://10734952273",
+	["credit-card"] = "rbxassetid://10709765398",
+	["wallet"] = "rbxassetid://10747376205",
+	["gift"] = "rbxassetid://10723396402",
+	["tag"] = "rbxassetid://10734976528",
+	["bookmark"] = "rbxassetid://10709782154",
+	["flag"] = "rbxassetid://10723375890",
+	["award"] = "rbxassetid://10709769406",
+	["trophy"] = "rbxassetid://10747363809",
+	["target"] = "rbxassetid://10734977012",
+	["zap"] = "rbxassetid://10709790202",
+	["trending-up"] = "rbxassetid://10747363465",
+	["trending-down"] = "rbxassetid://10747363205",
+	["bar-chart"] = "rbxassetid://10709773755",
+	["pie-chart"] = "rbxassetid://10734921727",
+	["activity"] = "rbxassetid://10709752035",
+	["package"] = "rbxassetid://10734909540",
+	["box"] = "rbxassetid://10709782497",
+	["archive"] = "rbxassetid://10709762233",
+	["inbox"] = "rbxassetid://10723415335",
+	["send"] = "rbxassetid://10734943902",
+	["truck"] = "rbxassetid://10747364031",
+	["plane"] = "rbxassetid://10734922971",
+	["globe"] = "rbxassetid://10723404337",
+	["wifi"] = "rbxassetid://10747382504",
+	["bluetooth"] = "rbxassetid://10709776655",
+	["battery"] = "rbxassetid://10709774640",
+	["smartphone"] = "rbxassetid://10734963940",
+	["tablet"] = "rbxassetid://10734976394",
+	["laptop"] = "rbxassetid://10723423881",
+	["monitor"] = "rbxassetid://10734896881",
+	["tv"] = "rbxassetid://10747364593",
+	["watch"] = "rbxassetid://10747376722",
+	["printer"] = "rbxassetid://10734930632",
+	["keyboard"] = "rbxassetid://10723416765",
+	["mouse"] = "rbxassetid://10734898592",
+	["headphones"] = "rbxassetid://10723406165",
+	["gamepad"] = "rbxassetid://10723395457",
+	["server"] = "rbxassetid://10734949856",
+	["database"] = "rbxassetid://10709818996",
+	["cloud"] = "rbxassetid://10709806740",
+	["hard-drive"] = "rbxassetid://10723405749",
+	["cpu"] = "rbxassetid://10709813383",
+	["power"] = "rbxassetid://10734930466",
+	["sun"] = "rbxassetid://10734974297",
+	["moon"] = "rbxassetid://10734897102",
+	["cloud-rain"] = "rbxassetid://10709806277",
+	["cloud-snow"] = "rbxassetid://10709806374",
+	["wind"] = "rbxassetid://10747382750",
+	["droplet"] = "rbxassetid://10723344432",
+	["thermometer"] = "rbxassetid://10734983134",
+	["smile"] = "rbxassetid://10734964441",
+	["frown"] = "rbxassetid://10723394681",
+	["meh"] = "rbxassetid://10734887603",
+	["thumbs-up"] = "rbxassetid://10734983629",
+	["thumbs-down"] = "rbxassetid://10734983359",
+	["help"] = "rbxassetid://10723406988",
+	["info"] = "rbxassetid://10723415903",
+	["alert-triangle"] = "rbxassetid://10709753149",
+	["alert-circle"] = "rbxassetid://10709752996",
+	["alert-octagon"] = "rbxassetid://10709753064",
+	["shield"] = "rbxassetid://10734951847",
+	["shield-check"] = "rbxassetid://10734951367",
+	["bug"] = "rbxassetid://10709782845",
+	["key"] = "rbxassetid://10723416652",
+	["tool"] = "rbxassetid://10747383470",
+	["wrench"] = "rbxassetid://10747383470",
+	["hammer"] = "rbxassetid://10723405360",
+	["paint"] = "rbxassetid://10734910187",
+	["palette"] = "rbxassetid://10734910430",
+	["pen"] = "rbxassetid://10734919503",
+	["pencil"] = "rbxassetid://10734919691",
+	["feather"] = "rbxassetid://10723354671",
+	["book"] = "rbxassetid://10709781824",
+	["book-open"] = "rbxassetid://10709781717",
+	["briefcase"] = "rbxassetid://10709782662",
+	["compass"] = "rbxassetid://10709811445",
+	["coffee"] = "rbxassetid://10709810814",
+	["pizza"] = "rbxassetid://10734922774"
 }
+
+local function geticon(name)
+	return icons[name] or nil
+end
 
 local function create(class, props)
 	local obj = Instance.new(class)
@@ -58,7 +213,7 @@ function APTX:Config(config)
 	self.title = config.title or "APTX"
 	self.drag = config.draggable ~= false
 	self.dev = config.devmode or false
-	self.iconset = config.icons == "custom" and config.customicons or icons.default
+	self.iconmode = config.icons or "default"
 	self.hidebutton = config.hidebutton or false
 	self.sections = {}
 	self.current = nil
@@ -120,7 +275,7 @@ function APTX:Config(config)
 		Position = UDim2.new(1, -40, 0.5, -16),
 		BackgroundColor3 = colors.element,
 		BorderSizePixel = 0,
-		Image = self.iconset.close or icons.default.close,
+		Image = geticon("x") or "",
 		ImageColor3 = colors.text,
 		Parent = self.topbar
 	})
@@ -232,12 +387,13 @@ function APTX:Section(texto, icon, default)
 	})
 	corner(btn, 8)
 	
-	if icon or self.iconset[texto:lower()] then
+	local iconid = geticon(icon or texto:lower())
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 10, 0.5, -10),
 			BackgroundTransparency = 1,
-			Image = icon or self.iconset[texto:lower()] or "",
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = btn
 		})
@@ -321,20 +477,21 @@ function APTX:Button(section, texto, icon, callback)
 	})
 	corner(btn, 8)
 	
-	if icon then
+	local iconid = geticon(icon)
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 22, 0, 22),
 			Position = UDim2.new(0, 12, 0.5, -11),
 			BackgroundTransparency = 1,
-			Image = icon,
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = btn
 		})
 	end
 	
 	create("TextLabel", {
-		Size = UDim2.new(1, icon and -50 or -20, 1, 0),
-		Position = UDim2.new(0, icon and 45 or 15, 0, 0),
+		Size = UDim2.new(1, iconid and -50 or -20, 1, 0),
+		Position = UDim2.new(0, iconid and 45 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
 		TextColor3 = colors.text,
@@ -373,12 +530,13 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 		Parent = frame
 	})
 	
-	if icon then
+	local iconid = geticon(icon)
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 12, 0.5, -10),
 			BackgroundTransparency = 1,
-			Image = icon,
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = header
 		})
@@ -386,7 +544,7 @@ function APTX:Slider(section, texto, icon, min, max, default, callback)
 	
 	create("TextLabel", {
 		Size = UDim2.new(1, -100, 1, 0),
-		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		Position = UDim2.new(0, iconid and 40 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
 		TextColor3 = colors.text,
@@ -490,12 +648,13 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	})
 	corner(frame, 8)
 	
-	if icon then
+	local iconid = geticon(icon)
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 12, 0.5, -10),
 			BackgroundTransparency = 1,
-			Image = icon,
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = frame
 		})
@@ -503,7 +662,7 @@ function APTX:Dropdown(section, texto, placeholder, icon, options, default, call
 	
 	create("TextLabel", {
 		Size = UDim2.new(0, 200, 1, 0),
-		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		Position = UDim2.new(0, iconid and 40 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
 		TextColor3 = colors.text,
@@ -622,12 +781,13 @@ function APTX:Toggle(section, texto, icon, default, callback)
 	})
 	corner(frame, 8)
 	
-	if icon then
+	local iconid = geticon(icon)
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 12, 0.5, -10),
 			BackgroundTransparency = 1,
-			Image = icon,
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = frame
 		})
@@ -635,7 +795,7 @@ function APTX:Toggle(section, texto, icon, default, callback)
 	
 	create("TextLabel", {
 		Size = UDim2.new(1, -100, 1, 0),
-		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		Position = UDim2.new(0, iconid and 40 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
 		TextColor3 = colors.text,
@@ -695,20 +855,21 @@ function APTX:Label(section, texto, icon)
 	})
 	corner(frame, 8)
 	
-	if icon then
+	local iconid = geticon(icon)
+	if iconid then
 		create("ImageLabel", {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 12, 0.5, -10),
 			BackgroundTransparency = 1,
-			Image = icon,
+			Image = iconid,
 			ImageColor3 = colors.text,
 			Parent = frame
 		})
 	end
 	
 	local label = create("TextLabel", {
-		Size = UDim2.new(1, icon and -45 or -20, 1, 0),
-		Position = UDim2.new(0, icon and 40 or 15, 0, 0),
+		Size = UDim2.new(1, iconid and -45 or -20, 1, 0),
+		Position = UDim2.new(0, iconid and 40 or 15, 0, 0),
 		BackgroundTransparency = 1,
 		Text = texto,
 		TextColor3 = colors.text,
